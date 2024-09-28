@@ -2,31 +2,40 @@ import { ChatGroq } from "@langchain/groq";
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
+  PromptTemplate,
 } from "@langchain/core/prompts";
+import { Document } from "langchain/document";
 
 export const llm = new ChatGroq({
-  model: "llama-3.2-11b-text-preview",
+  model: "llama-3.1-8b-instant",
   temperature: 1,
 });
 
-export const conversationTemplate = ChatPromptTemplate.fromMessages([
-  ["system", "You are assistant"],
-  ["human", "{input}"],
-]);
+export const standaloneQuestionPrompt = PromptTemplate.fromTemplate(
+  `Given the question. Convert it to a standalone simple question 
+  Question : {question}`
+);
 
 export const promptWithChatHistory = ChatPromptTemplate.fromMessages([
   [
     "system",
-    "You are a friendly chat assistant. You chat with users and answer their question from your knowledge or provided chat history.",
+    "You are a friendly chat assistant. You chat with users and answer their questions from your knowledge, provided context and provided chat history.",
   ],
   new MessagesPlaceholder("chat_history"),
+  ["system", "{context}"],
   ["user", "{input}"],
 ]);
 
 export const poolConfig = {
-  host: process.env.DB_HOST,
+  host: process.env.PG_HOST,
   port: 5432,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  user: process.env.PG_USER,
+  password: process.env.PG_PASSWORD,
   database: "postgres",
 };
+
+export function getMatchingDoc(documents: Document[]): string {
+  if (documents.length > 0) {
+    return `${documents[0].pageContent} }`;
+  } else return "";
+}

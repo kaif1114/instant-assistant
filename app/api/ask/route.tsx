@@ -1,11 +1,30 @@
 import { PostgresChatMessageHistory } from "@langchain/community/stores/message/postgres";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { RunnableWithMessageHistory } from "@langchain/core/runnables";
+import {
+  RunnablePassthrough,
+  RunnableSequence,
+  RunnableWithMessageHistory,
+} from "@langchain/core/runnables";
 import { NextRequest, NextResponse } from "next/server";
 import pg from "pg";
-import { llm, poolConfig, promptWithChatHistory } from "./utils";
+import {
+  getMatchingDoc,
+  llm,
+  poolConfig,
+  promptWithChatHistory,
+  standaloneQuestionPrompt,
+} from "./utils";
+import { embeddings, pineconeIndex } from "@/app/pinecone-config";
+import { PineconeStore } from "@langchain/pinecone";
+import { AskRequestSchema } from "@/app/schemas";
 
 const pool = new pg.Pool(poolConfig);
+
+const standaloneQuestionChain = RunnableSequence.from([
+  standaloneQuestionPrompt,
+  llm,
+  new StringOutputParser(),
+]);
 
 const chain = promptWithChatHistory.pipe(llm).pipe(new StringOutputParser());
 
@@ -24,20 +43,56 @@ const chainWithHistory = new RunnableWithMessageHistory({
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  // const mainChain = conversationTemplate
-  //   .pipe(llm)
-  //   .pipe(new StringOutputParser());
+  const validation = AskRequestSchema.safeParse(body);
 
-  if (body.question) {
-    try {
-      const response = await chainWithHistory.invoke(
-        { input: body.question },
-        { configurable: { sessionId: 123 } }
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
+  }
+
+  const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+    pineconeIndex,
+    namespace: body.assistantId,
+    maxConcurrency: 5,
+  });
+
+  const retriever = vectorStore.asRetriever({
+    k: 1,
+  });
+
+  const retrieverChain = RunnableSequence.from([
+    (prevResult) => prevResult.standalone_question,
+    retriever,
+    getMatchingDoc,
+  ]);
+
+  const mainChain = RunnableSequence.from([
+    {
+      standalone_question: standaloneQuestionChain,
+      original_inputs: new RunnablePassthrough(),
+    },
+    {
+      context: retrieverChain,
+      input: ({ original_inputs }) => original_inputs.question,
+    },
+
+    (values) => {
+      console.log(values);
+      return chainWithHistory.invoke(
+        { input: values.input, context: values.context },
+        { configurable: { sessionId: body.sessionId } }
       );
+    },
+  ]);
 
-      return NextResponse.json({ response }, { status: 200 });
-    } catch (error) {
-      return NextResponse.json({ error }, { status: 500 });
-    }
+  try {
+    const response = await mainChain.invoke({ question: body.question });
+    console.log("response: ", response);
+    return NextResponse.json({ response }, { status: 200 });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ error }, { status: 500 });
   }
 }

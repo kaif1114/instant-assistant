@@ -12,9 +12,13 @@ const DocumentsSchema = z.object({
   metadata: MetadataSchema,
 });
 
-const RequestBodySchema = z.object({
-  userId: z.string(),
+export const RequestBodySchema = z.object({
+  assistantId: z.string(),
   documents: z.array(DocumentsSchema),
 });
 
-export default RequestBodySchema;
+export const AskRequestSchema = z.object({
+  sessionId: z.string(),
+  assistantId: z.string(),
+  question: z.string(),
+});
