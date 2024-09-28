@@ -79,7 +79,6 @@ export async function POST(request: NextRequest) {
     },
 
     (values) => {
-      console.log(values);
       return chainWithHistory.invoke(
         { input: values.input, context: values.context },
         { configurable: { sessionId: body.sessionId } }
@@ -89,7 +88,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const response = await mainChain.invoke({ question: body.question });
-    console.log("response: ", response);
     return NextResponse.json({ response }, { status: 200 });
   } catch (error) {
     console.log(error);
