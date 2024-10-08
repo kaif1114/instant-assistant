@@ -1,3 +1,4 @@
+import prisma from "@/prisma/client";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -34,7 +35,71 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  console.log(event);
+  if (event.type === "user.created") {
+    try {
+      const user = await prisma.user.create({
+        data: {
+          email: event.data.email_addresses[0].email_address,
+          firstName: event.data.first_name!,
+          lastName: event.data.last_name!,
+          emailVerification:
+            event.data.email_addresses[0].verification?.status!,
+          imageUrl: event.data.image_url,
+          clerkId: event.data.id,
+        },
+      });
+      return NextResponse.json(
+        { message: `User created with id ${user.clerkId}` },
+        { status: 201 }
+      );
+    } catch (error) {
+      console.log(error);
+      return NextResponse.json(
+        { Error: "Failed to add user to database" },
+        { status: 500 }
+      );
+    }
+  } else if (event.type === "user.updated") {
+    try {
+      const user = await prisma.user.update({
+        where: { clerkId: event.data.id },
+        data: {
+          email: event.data.email_addresses[0].email_address,
+          firstName: event.data.first_name!,
+          lastName: event.data.last_name!,
+          emailVerification:
+            event.data.email_addresses[0].verification?.status!,
+          imageUrl: event.data.image_url,
+          clerkId: event.data.id,
+        },
+      });
+      return NextResponse.json(
+        { message: `User with id ${user.clerkId} updated` },
+        { status: 200 }
+      );
+    } catch (error) {
+      console.log(error);
+      return NextResponse.json(
+        { Error: "Failed to update user in database" },
+        { status: 500 }
+      );
+    }
+  } else if (event.type === "user.deleted") {
+    try {
+      const user = await prisma.user.delete({
+        where: { clerkId: event.data.id },
+      });
+      return NextResponse.json(
+        { message: `User with id ${user.clerkId} deleted` },
+        { status: 202 }
+      );
+    } catch (error) {
+      return NextResponse.json(
+        { error: "failed to delete user" },
+        { status: 500 }
+      );
+    }
+  }
 
   return NextResponse.json({ message: "Success" }, { status: 200 });
 }
