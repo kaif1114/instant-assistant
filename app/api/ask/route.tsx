@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const response = await mainChain.invoke({ question: body.question });
-    return NextResponse.json({ response }, { status: 200 });
+    return NextResponse.json({ message: response }, { status: 200 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ error }, { status: 500 });

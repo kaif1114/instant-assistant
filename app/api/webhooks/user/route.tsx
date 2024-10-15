@@ -45,11 +45,11 @@ export async function POST(request: NextRequest) {
           emailVerification:
             event.data.email_addresses[0].verification?.status!,
           imageUrl: event.data.image_url,
-          clerkId: event.data.id,
+          userId: event.data.id,
         },
       });
       return NextResponse.json(
-        { message: `User created with id ${user.clerkId}` },
+        { message: `User created with id ${user.userId}` },
         { status: 201 }
       );
     } catch (error) {
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
   } else if (event.type === "user.updated") {
     try {
       const user = await prisma.user.update({
-        where: { clerkId: event.data.id },
+        where: { userId: event.data.id },
         data: {
           email: event.data.email_addresses[0].email_address,
           firstName: event.data.first_name!,
@@ -70,11 +70,11 @@ export async function POST(request: NextRequest) {
           emailVerification:
             event.data.email_addresses[0].verification?.status!,
           imageUrl: event.data.image_url,
-          clerkId: event.data.id,
+          userId: event.data.id,
         },
       });
       return NextResponse.json(
-        { message: `User with id ${user.clerkId} updated` },
+        { message: `User with id ${user.userId} updated` },
         { status: 200 }
       );
     } catch (error) {
@@ -87,10 +87,10 @@ export async function POST(request: NextRequest) {
   } else if (event.type === "user.deleted") {
     try {
       const user = await prisma.user.delete({
-        where: { clerkId: event.data.id },
+        where: { userId: event.data.id },
       });
       return NextResponse.json(
-        { message: `User with id ${user.clerkId} deleted` },
+        { message: `User with id ${user.userId} deleted` },
         { status: 202 }
       );
     } catch (error) {

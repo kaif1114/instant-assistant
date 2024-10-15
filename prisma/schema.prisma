@@ -9,13 +9,23 @@ datasource db {
 }
 
 model User {
-  id                Int     @id @default(autoincrement())
-  email             String  @unique
+  id                Int          @id @default(autoincrement())
+  email             String       @unique
   firstName         String
   lastName          String
   emailVerification String
   imageUrl          String?
-  clerkId           String  @unique
+  userId            String       @unique
+  assistants        Assistants[]
+}
+
+model Assistants {
+  id          Int    @id @default(autoincrement())
+  assistantId String @unique
+  name        String
+  description String
+  userId      String
+  user        User   @relation(fields: [userId], references: [userId])
 }
 
 model langchain_chat_histories {

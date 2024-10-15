@@ -22,3 +22,10 @@ export const AskRequestSchema = z.object({
   assistantId: z.string(),
   question: z.string(),
 });
+
+export const CreateAssistantRequestSchema = z.object({
+  assistantId: z.string(),
+  name: z.string(),
+  description: z.string(),
+  userId: z.string(),
+});
