@@ -24,6 +24,8 @@ model Assistants {
   assistantId String @unique
   name        String
   description String
+  Type        String @default("support")
+  Status      String @default("active")
   userId      String
   user        User   @relation(fields: [userId], references: [userId])
 }

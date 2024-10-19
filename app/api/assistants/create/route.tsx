@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
         userId: body.userId,
         assistantId: body.assistantId,
         name: body.name,
+        Type: body.assistantType,
         description: body.description,
       },
     });
