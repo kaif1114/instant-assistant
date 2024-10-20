@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
         assistantId: body.assistantId,
         name: body.name,
         Type: body.assistantType,
+        functionality: body.functionality,
         description: body.description,
       },
     });

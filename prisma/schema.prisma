@@ -20,14 +20,15 @@ model User {
 }
 
 model Assistants {
-  id          Int    @id @default(autoincrement())
-  assistantId String @unique
-  name        String
-  description String
-  Type        String @default("support")
-  Status      String @default("active")
-  userId      String
-  user        User   @relation(fields: [userId], references: [userId])
+  id            Int    @id @default(autoincrement())
+  assistantId   String @unique
+  name          String
+  description   String
+  Type          String @default("support")
+  Status        String @default("active")
+  userId        String
+  functionality String
+  user          User   @relation(fields: [userId], references: [userId])
 }
 
 model langchain_chat_histories {

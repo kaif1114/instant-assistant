@@ -1,6 +1,13 @@
-import { Bot, MoreHorizontal, Plus, Power, PowerOff } from "lucide-react";
+import { Bot, Plus } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,35 +17,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@radix-ui/react-dropdown-menu";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/prisma/client";
+import { auth } from "@clerk/nextjs/server";
+import { Separator } from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
+import AssistantsList from "./AssistantsList";
 
 // Sample data for assistants
 // const assistants = [
@@ -96,66 +80,7 @@ export default async function Page() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assistants.map((assistant) => (
-                  <TableRow key={assistant.id}>
-                    <TableCell className="font-medium">
-                      {assistant.name}
-                    </TableCell>
-                    <TableCell>{assistant.Type}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          assistant.Status === "active"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {assistant.Status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem>View Analytics</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>
-                            {assistant.Status === "active" ? (
-                              <>
-                                <PowerOff className="mr-2 h-4 w-4" />
-                                <span>Deactivate</span>
-                              </>
-                            ) : (
-                              <>
-                                <Power className="mr-2 h-4 w-4" />
-                                <span>Activate</span>
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <AssistantsList assistants={assistants} />
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button variant="outline">Export Data</Button>

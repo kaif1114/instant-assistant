@@ -27,6 +27,7 @@ export const CreateAssistantRequestSchema = z.object({
   assistantId: z.string(),
   name: z.string(),
   assistantType: z.string(),
+  functionality: z.string(),
   description: z.string(),
   userId: z.string(),
 });

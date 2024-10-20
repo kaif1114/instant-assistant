@@ -78,6 +78,7 @@ export default function AssistantTrainingPage() {
         description,
         assistantType,
         userId: user?.id,
+        functionality,
       });
       await axios.post("/api/savecontext", {
         assistantId,

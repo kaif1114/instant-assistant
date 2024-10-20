@@ -11,12 +11,16 @@ import {
   getMatchingDoc,
   llm,
   poolConfig,
-  promptWithChatHistory,
   standaloneQuestionPrompt,
 } from "./utils";
 import { embeddings, pineconeIndex } from "@/app/pinecone-config";
 import { PineconeStore } from "@langchain/pinecone";
 import { AskRequestSchema } from "@/app/schemas";
+import prisma from "@/prisma/client";
+import {
+  ChatPromptTemplate,
+  MessagesPlaceholder,
+} from "@langchain/core/prompts";
 
 const pool = new pg.Pool(poolConfig);
 
@@ -25,21 +29,6 @@ const standaloneQuestionChain = RunnableSequence.from([
   llm,
   new StringOutputParser(),
 ]);
-
-const chain = promptWithChatHistory.pipe(llm).pipe(new StringOutputParser());
-
-const chainWithHistory = new RunnableWithMessageHistory({
-  runnable: chain,
-  inputMessagesKey: "input",
-  historyMessagesKey: "chat_history",
-  getMessageHistory: async (sessionId) => {
-    const chatHistory = new PostgresChatMessageHistory({
-      sessionId,
-      pool,
-    });
-    return chatHistory;
-  },
-});
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -51,6 +40,38 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+
+  const assistant = await prisma.assistants.findUnique({
+    where: { assistantId: body.assistantId },
+  });
+
+  const promptWithChatHistory = ChatPromptTemplate.fromMessages([
+    [
+      "system",
+      `You are a friendly chat assistant. You chat with users and answer their questions from your knowledge, provided context and provided chat history, whatever is relevant to the question asked. Your details are provided below.
+      Name: ${assistant?.name}
+      Description: ${assistant?.description}
+      Functionality: ${assistant?.functionality}
+      Type: ${assistant?.Type}
+      `,
+    ],
+    new MessagesPlaceholder("chat_history"),
+    ["system", "{context}"],
+    ["user", "{input}"],
+  ]);
+  const chain = promptWithChatHistory.pipe(llm).pipe(new StringOutputParser());
+  const chainWithHistory = new RunnableWithMessageHistory({
+    runnable: chain,
+    inputMessagesKey: "input",
+    historyMessagesKey: "chat_history",
+    getMessageHistory: async (sessionId) => {
+      const chatHistory = new PostgresChatMessageHistory({
+        sessionId,
+        pool,
+      });
+      return chatHistory;
+    },
+  });
 
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
     pineconeIndex,

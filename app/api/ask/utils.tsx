@@ -16,16 +16,6 @@ export const standaloneQuestionPrompt = PromptTemplate.fromTemplate(
   Question : {question}`
 );
 
-export const promptWithChatHistory = ChatPromptTemplate.fromMessages([
-  [
-    "system",
-    "You are a friendly chat assistant. You chat with users and answer their questions from your knowledge, provided context and provided chat history.",
-  ],
-  new MessagesPlaceholder("chat_history"),
-  ["system", "{context}"],
-  ["user", "{input}"],
-]);
-
 export const poolConfig = {
   host: process.env.PG_HOST,
   port: 5432,
