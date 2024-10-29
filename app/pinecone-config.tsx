@@ -8,7 +8,7 @@ export const embeddings = new OpenAIEmbeddings({
   model: "text-embedding-3-small",
 });
 
-const pinecone = new PineconeClient();
+export const pinecone = new PineconeClient();
 
 export const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!);
 const asd = pineconeIndex.namespace("123");

@@ -39,7 +39,7 @@ import AssistantsList from "./AssistantsList";
 // ];
 
 export default async function Page() {
-  const { userId } = auth();
+  const { userId } = await auth();
   const assistants = await prisma.assistants.findMany({
     where: { userId: userId! },
   });

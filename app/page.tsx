@@ -1,8 +1,8 @@
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 
-const page = () => {
-  const {} = auth();
+const page = async () => {
+  const {} = await auth();
   return (
     <>
       <SignedOut>
