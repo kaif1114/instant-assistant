@@ -3,12 +3,12 @@ import prisma from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 interface Props {
-  params: { assistantId: string };
+  params: Promise<{ assistantId: string }>;
 }
 
 export async function GET(request: NextRequest, { params }: Props) {
-  const assistantId = params.assistantId;
-  console.log(assistantId);
+  const { assistantId } = await params;
+
   try {
     const assistant = await prisma.assistants.findUnique({
       where: { assistantId },
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: Props) {
   }
 }
 export async function DELETE(request: NextRequest, { params }: Props) {
-  const assistantId = params.assistantId;
+  const { assistantId } = await params;
 
   try {
     await prisma.assistants.delete({

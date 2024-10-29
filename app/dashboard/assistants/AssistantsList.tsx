@@ -1,7 +1,15 @@
 "use client";
-import { MoreHorizontal, Power, PowerOff } from "lucide-react";
-
-import Alert from "@/components/Alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,23 +29,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Assistants } from "@prisma/client";
+import axios from "axios";
+import { MoreHorizontal, Power, PowerOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { RotatingLines } from "react-loader-spinner";
 interface Props {
   assistants: Assistants[];
 }
 
-const AssistantsList = ({ assistants }: Props) => {
+const AssistantsList = ({ assistants: initialAssistants }: Props) => {
+  const [loadingId, setLoading] = useState<String | null>(null);
+  const [assistants, setAssistants] = useState(initialAssistants);
+
   return (
     <>
       <Table>
@@ -52,7 +56,19 @@ const AssistantsList = ({ assistants }: Props) => {
         <TableBody>
           {assistants.map((assistant) => (
             <TableRow key={assistant.id}>
-              <TableCell className="font-medium">{assistant.name}</TableCell>
+              <TableCell className="font-medium flex items-center gap-4">
+                {loadingId == assistant.assistantId && (
+                  <RotatingLines
+                    visible={true}
+                    width="20"
+                    strokeColor="black"
+                    strokeWidth="5"
+                    animationDuration="0.75"
+                    ariaLabel="rotating-lines-loading"
+                  />
+                )}
+                {assistant.name}
+              </TableCell>
               <TableCell>{assistant.Type}</TableCell>
               <TableCell>
                 <Badge
@@ -88,7 +104,23 @@ const AssistantsList = ({ assistants }: Props) => {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction>Continue</AlertDialogAction>
+                          <AlertDialogAction
+                            onClick={async () => {
+                              setLoading(assistant.assistantId);
+                              await axios.delete(
+                                `/api/assistants/${assistant.assistantId}`
+                              );
+                              setAssistants((prev) =>
+                                prev.filter(
+                                  (obj) =>
+                                    obj.assistantId != assistant.assistantId
+                                )
+                              );
+                              setLoading(null);
+                            }}
+                          >
+                            Delete
+                          </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                       <DropdownMenuItem
