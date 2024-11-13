@@ -36,6 +36,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  CldUploadButton,
+  CldUploadWidget,
+  getCldImageUrl,
+} from "next-cloudinary";
 
 interface DataFieldEntry {
   pageContent: string;
@@ -419,20 +424,22 @@ export default function AssistantTrainingPage() {
                         </SelectItem>
                       </SelectContent>
                     </Select>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setAvatarUrl(reader.result as string);
-                          };
-                          reader.readAsDataURL(file);
+                    <CldUploadWidget
+                      uploadPreset="ml_default"
+                      onSuccess={(result) => {
+                        console.log(result);
+                        if (result.info && typeof result.info !== "string") {
+                          const url = getCldImageUrl({
+                            src: result.info.public_id,
+                          });
+                          setAvatarUrl(url);
                         }
                       }}
-                    />
+                    >
+                      {({ open }) => {
+                        return <p onClick={() => open()}>Upload Avatar</p>;
+                      }}
+                    </CldUploadWidget>
                   </div>
                 </div>
               </div>
@@ -635,19 +642,9 @@ export default function AssistantTrainingPage() {
                 </Button>
               )}
             </div>
-            <div className="flex justify-center space-x-2">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className={`w-2 h-2 rounded-full ${
-                    i === step ? "bg-primary" : "bg-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
           </form>
         </div>
-        <div className="w-full lg:w-[40%] lg:sticky lg:top-6 h-[700px]">
+        <div className="w-full lg:w-[30%] lg:sticky lg:top-6 h-[550px]">
           <ChatPreview
             name={name}
             description={description}
@@ -657,6 +654,16 @@ export default function AssistantTrainingPage() {
             secondaryColor={secondaryColor}
           />
         </div>
+      </div>
+      <div className="flex justify-center space-x-2 ">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className={`w-2 h-2 rounded-full ${
+              i === step ? "bg-primary" : "bg-gray-300"
+            }`}
+          />
+        ))}
       </div>
     </div>
   );

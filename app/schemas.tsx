@@ -30,4 +30,7 @@ export const CreateAssistantRequestSchema = z.object({
   functionality: z.string(),
   description: z.string(),
   userId: z.string(),
+  primaryColor: z.string(),
+  secondaryColor: z.string(),
+  avatarUrl: z.string(),
 });

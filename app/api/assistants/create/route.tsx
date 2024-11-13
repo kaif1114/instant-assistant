@@ -21,6 +21,9 @@ export async function POST(request: NextRequest) {
         Type: body.assistantType,
         functionality: body.functionality,
         description: body.description,
+        primaryColor: body.primaryColor,
+        secondaryColor: body.secondaryColor,
+        avatarUrl: body.avatarUrl,
       },
     });
     return NextResponse.json({ response }, { status: 201 });
