@@ -1,9 +1,18 @@
 "use client";
+
+import React, { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
+import { PlusCircle, X, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -12,11 +21,14 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { useUser } from "@clerk/nextjs";
-import axios from "axios";
-import { PlusCircle, X } from "lucide-react";
-import React, { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface DataFieldEntry {
   pageContent: string;
@@ -28,7 +40,24 @@ interface DataFieldEntry {
 
 type AssistantType = "Support" | "Sales" | "Technical" | "General" | "Custom";
 
+const stepVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+};
+
 export default function AssistantTrainingPage() {
+  const [step, setStep] = useState(1);
+  const [direction, setDirection] = useState(0);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [functionality, setFunctionality] = useState("");
@@ -37,9 +66,21 @@ export default function AssistantTrainingPage() {
   const [dataFields, setDataFields] = useState<DataFieldEntry[]>([
     { pageContent: "", metadata: { title: "", description: "" } },
   ]);
+  const [primaryColor, setPrimaryColor] = useState("#478ACD");
+  const [secondaryColor, setSecondaryColor] = useState("#0A0A15");
+  const [startingMessage, setStartingMessage] = useState(
+    "Hey! How can I help you today?"
+  );
+  const [avatarUrl, setAvatarUrl] = useState("/placeholder.svg");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const { user } = useUser();
   const assistantId = uuidv4();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
 
   const addDataField = () => {
     setDataFields([
@@ -69,40 +110,40 @@ export default function AssistantTrainingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ name, description, functionality, dataFields });
-    console.log(assistantId, user?.id);
+    if (step <= 3) {
+      nextStep();
+      return;
+    }
+    setIsLoading(true);
     try {
       await axios.post("/api/assistants/create", {
         assistantId,
         name,
         description,
-        assistantType,
+        assistantType: assistantType === "Custom" ? customType : assistantType,
         userId: user?.id,
         functionality,
+        primaryColor,
+        secondaryColor,
+        startingMessage,
+        avatarUrl,
       });
       await axios.post("/api/savecontext", {
         assistantId,
         documents: dataFields,
       });
-
-      console.log("Success");
+      setIsSuccess(true);
     } catch (error) {
-      console.log(error);
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  return (
-    <ScrollArea className="h-full">
-      <div className="container py-6 space-y-6 px-6">
-        <div className="space-y-0.5">
-          <h2 className="text-2xl font-bold tracking-tight">
-            Create Your AI Assistant
-          </h2>
-          <p className="text-muted-foreground">
-            Create and customize your own chatbot assistant
-          </p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
           <Card>
             <CardHeader>
               <CardTitle>Assistant Details</CardTitle>
@@ -183,7 +224,106 @@ export default function AssistantTrainingPage() {
               </div>
             </CardContent>
           </Card>
-
+        );
+      case 2:
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Appearance</CardTitle>
+              <CardDescription>
+                Customize how your assistant's chat interface looks
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="primaryColor">Primary Color</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    id="primaryColor"
+                    type="color"
+                    value={primaryColor}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    className="w-12 h-12 p-1"
+                  />
+                  <Input
+                    value={primaryColor}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    placeholder="#478ACD"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="secondaryColor">Secondary Color</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    id="secondaryColor"
+                    type="color"
+                    value={secondaryColor}
+                    onChange={(e) => setSecondaryColor(e.target.value)}
+                    className="w-12 h-12 p-1"
+                  />
+                  <Input
+                    value={secondaryColor}
+                    onChange={(e) => setSecondaryColor(e.target.value)}
+                    placeholder="#0A0A15"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="startingMessage">Starting Message</Label>
+                <Input
+                  id="startingMessage"
+                  value={startingMessage}
+                  onChange={(e) => setStartingMessage(e.target.value)}
+                  placeholder="Enter starting message"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="avatar">Avatar</Label>
+                <div className="flex items-center space-x-4">
+                  <Avatar className="w-20 h-20">
+                    <AvatarImage src={avatarUrl} alt="Assistant Avatar" />
+                    <AvatarFallback>AI</AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-2">
+                    <Select onValueChange={(value) => setAvatarUrl(value)}>
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select avatar" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="/avatars/avatar1.png">
+                          Avatar 1
+                        </SelectItem>
+                        <SelectItem value="/avatars/avatar2.png">
+                          Avatar 2
+                        </SelectItem>
+                        <SelectItem value="/avatars/avatar3.png">
+                          Avatar 3
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setAvatarUrl(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      case 3:
+        return (
           <Card>
             <CardHeader>
               <CardTitle>Training Data</CardTitle>
@@ -266,10 +406,122 @@ export default function AssistantTrainingPage() {
               </Button>
             </CardContent>
           </Card>
+        );
+      default:
+        return null;
+    }
+  };
 
-          <Button type="submit" className="w-full">
-            Create Assistant
+  const nextStep = () => {
+    setDirection(1);
+    setStep((prevStep) => Math.min(prevStep + 1, 3));
+  };
+
+  const prevStep = () => {
+    setDirection(-1);
+    setStep((prevStep) => Math.max(prevStep - 1, 1));
+  };
+
+  if (isSuccess) {
+    return (
+      <Card className="w-full max-w-md mx-auto mt-8">
+        <CardHeader>
+          <CardTitle>Success!</CardTitle>
+          <CardDescription>
+            Your assistant has been created successfully.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center">
+            <Check className="w-16 h-16 text-green-500" />
+          </div>
+          <p className="text-center mt-4">
+            Your AI assistant is now functional and ready to use.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Button
+            className="w-full"
+            onClick={() => {
+              // Reset form and go back to step 1
+              setStep(1);
+              setName("");
+              setDescription("");
+              setFunctionality("");
+              setAssistantType("Support");
+              setCustomType("");
+              setDataFields([
+                { pageContent: "", metadata: { title: "", description: "" } },
+              ]);
+              setPrimaryColor("#478ACD");
+              setSecondaryColor("#0A0A15");
+              setStartingMessage("Hey! How can I help you today?");
+              setAvatarUrl("/placeholder.svg");
+              setIsSuccess(false);
+            }}
+          >
+            Create Another Assistant
           </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  return (
+    <ScrollArea className="h-full">
+      <div className="container py-6 space-y-6 px-6">
+        <div className="space-y-0.5">
+          <h2 className="text-2xl font-bold tracking-tight">
+            Create Your AI Assistant
+          </h2>
+          <p className="text-muted-foreground">
+            Create and customize your own chatbot assistant
+          </p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
+            <motion.div
+              key={step}
+              custom={direction}
+              variants={stepVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+              className="w-full"
+            >
+              {renderStep()}
+            </motion.div>
+          </AnimatePresence>
+          <div className="flex justify-between items-center">
+            <Button type="button" onClick={prevStep} disabled={step === 1}>
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Previous
+            </Button>
+            {step < 3 ? (
+              <Button type="button" onClick={nextStep}>
+                Next
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Creating..." : "Create Assistant"}
+              </Button>
+            )}
+          </div>
+          <div className="flex justify-center space-x-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={`w-2 h-2 rounded-full ${
+                  i === step ? "bg-primary" : "bg-gray-300"
+                }`}
+              />
+            ))}
+          </div>
         </form>
       </div>
     </ScrollArea>
