@@ -4,7 +4,14 @@ import React, { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { PlusCircle, X, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import {
+  PlusCircle,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  Send,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
@@ -55,6 +62,115 @@ const stepVariants = {
   }),
 };
 
+function ChatPreview({
+  name,
+  description,
+  startingMessage,
+  avatarUrl,
+  primaryColor,
+  secondaryColor,
+}: {
+  name: string;
+  description: string;
+  startingMessage: string;
+  avatarUrl: string;
+  primaryColor: string | undefined;
+  secondaryColor: string | undefined;
+}) {
+  const [message, setMessage] = useState("");
+  const [chatHistory, setChatHistory] = useState([
+    {
+      sender: "assistant",
+      text: startingMessage || "Hey! How can I help you today?",
+    },
+  ]);
+
+  useEffect(() => {
+    setChatHistory([
+      {
+        sender: "assistant",
+        text: startingMessage || "Hey! How can I help you today?",
+      },
+    ]);
+  }, [startingMessage]);
+
+  const sendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (message.trim()) {
+      setChatHistory([...chatHistory, { sender: "user", text: message }]);
+      setMessage("");
+    }
+  };
+
+  return (
+    <Card className="w-full h-full rounded-xl overflow-hidden shadow-lg flex flex-col">
+      <CardHeader className="p-4" style={{ backgroundColor: primaryColor }}>
+        <div className="flex items-center space-x-4">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={avatarUrl} alt="Assistant Avatar" />
+            <AvatarFallback>AI</AvatarFallback>
+          </Avatar>
+          <div>
+            <h2 className="text-xl font-bold text-white">
+              {name || "AI Assistant"}
+            </h2>
+            <p className="text-sm text-white opacity-80">
+              {description || "Your personal AI assistant"}
+            </p>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0 flex-1 flex flex-col">
+        <ScrollArea className="flex-1">
+          <div className="space-y-4 p-4">
+            {chatHistory.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex ${
+                  msg.sender === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`max-w-[75%] p-3 rounded-lg ${
+                    msg.sender === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground"
+                  }`}
+                  style={{
+                    backgroundColor:
+                      msg.sender === "user" ? primaryColor : secondaryColor,
+                    color: msg.sender === "user" ? "white" : "black",
+                  }}
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </CardContent>
+      <CardFooter className="p-4 border-t mt-auto">
+        <form
+          onSubmit={sendMessage}
+          className="flex items-center space-x-2 w-full"
+        >
+          <Input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type your message..."
+            className="flex-grow"
+          />
+          <Button type="submit" size="icon">
+            <Send className="h-4 w-4" />
+            <span className="sr-only">Send message</span>
+          </Button>
+        </form>
+      </CardFooter>
+    </Card>
+  );
+}
+
 export default function AssistantTrainingPage() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
@@ -66,8 +182,8 @@ export default function AssistantTrainingPage() {
   const [dataFields, setDataFields] = useState<DataFieldEntry[]>([
     { pageContent: "", metadata: { title: "", description: "" } },
   ]);
-  const [primaryColor, setPrimaryColor] = useState("#478ACD");
-  const [secondaryColor, setSecondaryColor] = useState("#0A0A15");
+  const [primaryColor, setPrimaryColor] = useState("#000000");
+  const [secondaryColor, setSecondaryColor] = useState("#ffffff");
   const [startingMessage, setStartingMessage] = useState(
     "Hey! How can I help you today?"
   );
@@ -135,6 +251,7 @@ export default function AssistantTrainingPage() {
       setIsSuccess(true);
     } catch (error) {
       console.error(error);
+      // Handle error (show error message to user)
     } finally {
       setIsLoading(false);
     }
@@ -468,62 +585,79 @@ export default function AssistantTrainingPage() {
   }
 
   return (
-    <ScrollArea className="h-full">
-      <div className="container py-6 space-y-6 px-6">
-        <div className="space-y-0.5">
-          <h2 className="text-2xl font-bold tracking-tight">
-            Create Your AI Assistant
-          </h2>
-          <p className="text-muted-foreground">
-            Create and customize your own chatbot assistant
-          </p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <AnimatePresence mode="wait" custom={direction} initial={false}>
-            <motion.div
-              key={step}
-              custom={direction}
-              variants={stepVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 },
-              }}
-              className="w-full"
-            >
-              {renderStep()}
-            </motion.div>
-          </AnimatePresence>
-          <div className="flex justify-between items-center">
-            <Button type="button" onClick={prevStep} disabled={step === 1}>
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Previous
-            </Button>
-            {step < 3 ? (
-              <Button type="button" onClick={nextStep}>
-                Next
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Assistant"}
-              </Button>
-            )}
-          </div>
-          <div className="flex justify-center space-x-2">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className={`w-2 h-2 rounded-full ${
-                  i === step ? "bg-primary" : "bg-gray-300"
-                }`}
-              />
-            ))}
-          </div>
-        </form>
+    <div className="container py-6 px-6">
+      <div className="space-y-0.5 mb-6">
+        <h2 className="text-2xl font-bold tracking-tight">
+          Create Your AI Assistant
+        </h2>
+        <p className="text-muted-foreground">
+          Create and customize your own chatbot assistant
+        </p>
       </div>
-    </ScrollArea>
+      <div className="flex flex-col lg:flex-row lg:justify-around gap-6 min-h-[800px]">
+        <div className="w-full lg:w-1/2">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6 h-[700px] flex flex-col"
+          >
+            <ScrollArea className="flex-grow">
+              <AnimatePresence mode="wait" custom={direction} initial={false}>
+                <motion.div
+                  key={step}
+                  custom={direction}
+                  variants={stepVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{
+                    x: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 },
+                  }}
+                  className="w-full"
+                >
+                  {renderStep()}
+                </motion.div>
+              </AnimatePresence>
+            </ScrollArea>
+            <div className="flex justify-between items-center">
+              <Button type="button" onClick={prevStep} disabled={step === 1}>
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Previous
+              </Button>
+              {step < 3 ? (
+                <Button type="button" onClick={nextStep}>
+                  Next
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Creating..." : "Create Assistant"}
+                </Button>
+              )}
+            </div>
+            <div className="flex justify-center space-x-2">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className={`w-2 h-2 rounded-full ${
+                    i === step ? "bg-primary" : "bg-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
+          </form>
+        </div>
+        <div className="w-full lg:w-[40%] lg:sticky lg:top-6 h-[700px]">
+          <ChatPreview
+            name={name}
+            description={description}
+            startingMessage={startingMessage}
+            avatarUrl={avatarUrl}
+            primaryColor={primaryColor}
+            secondaryColor={secondaryColor}
+          />
+        </div>
+      </div>
+    </div>
   );
 }
