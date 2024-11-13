@@ -229,9 +229,8 @@ export default function AssistantTrainingPage() {
     setDataFields(newDataFields);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (step <= 3) {
+  const handleSubmit = async () => {
+    if (step < 3) {
       nextStep();
       return;
     }
@@ -538,7 +537,8 @@ export default function AssistantTrainingPage() {
 
   const nextStep = () => {
     setDirection(1);
-    setStep((prevStep) => Math.min(prevStep + 1, 3));
+    setStep((prevStep) => Math.min(prevStep + 1, 4));
+    console.log(step);
   };
 
   const prevStep = () => {
@@ -603,10 +603,7 @@ export default function AssistantTrainingPage() {
       </div>
       <div className="flex flex-col lg:flex-row lg:justify-around gap-6 min-h-[800px]">
         <div className="w-full lg:w-1/2">
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6 h-[700px] flex flex-col"
-          >
+          <form className="space-y-6 h-[700px] flex flex-col">
             <ScrollArea className="flex-grow">
               <AnimatePresence mode="wait" custom={direction} initial={false}>
                 <motion.div
@@ -637,7 +634,11 @@ export default function AssistantTrainingPage() {
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
-                <Button type="submit" disabled={isLoading}>
+                <Button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                >
                   {isLoading ? "Creating..." : "Create Assistant"}
                 </Button>
               )}
