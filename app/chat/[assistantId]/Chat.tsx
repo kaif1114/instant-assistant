@@ -70,13 +70,13 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
   return (
     <div className="flex justify-center items-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-2xl rounded-xl overflow-hidden shadow-md">
-        <CardHeader className="bg-primary text-primary-foreground p-4">
+        <CardHeader
+          className="p-4"
+          style={{ backgroundColor: assistant.primaryColor }}
+        >
           <div className="flex items-center space-x-4">
             <Avatar className="h-10 w-10">
-              <AvatarImage
-                src="/placeholder.svg?height=40&width=40"
-                alt="Assistant Avatar"
-              />
+              <AvatarImage src={assistant.avatarUrl} alt="Assistant Avatar" />
               <AvatarFallback>AI</AvatarFallback>
             </Avatar>
             <div>
@@ -101,6 +101,13 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
                         ? "bg-primary text-primary-foreground"
                         : "bg-secondary text-secondary-foreground"
                     }`}
+                    style={{
+                      backgroundColor:
+                        msg.sender === "user"
+                          ? assistant.primaryColor
+                          : assistant.secondaryColor,
+                      color: msg.sender === "user" ? "white" : "black",
+                    }}
                   >
                     {msg.text}
                   </div>
