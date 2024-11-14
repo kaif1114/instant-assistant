@@ -36,12 +36,16 @@ const Step2 = () => {
               id="primaryColor"
               type="color"
               value={data.primaryColor}
-              onChange={(e) => setData({ ...data, name: e.target.value })}
+              onChange={(e) =>
+                setData({ ...data, primaryColor: e.target.value })
+              }
               className="w-12 h-12 p-1"
             />
             <Input
               value={data.primaryColor}
-              onChange={(e) => setData({ ...data, name: e.target.value })}
+              onChange={(e) =>
+                setData({ ...data, primaryColor: e.target.value })
+              }
               placeholder="#478ACD"
             />
           </div>
