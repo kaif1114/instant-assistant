@@ -55,6 +55,7 @@ const stepVariants = {
 
 export default function AssistantTrainingPage() {
   const { data, setData } = useNewAssistantStore();
+
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -75,12 +76,19 @@ export default function AssistantTrainingPage() {
     setIsLoading(true);
     try {
       await axios.post("/api/assistants/create", {
-        ...data,
+        assistantId,
+        name: data.name,
+        description: data.description,
         assistantType:
           data.assistantType === "Custom"
             ? data.customType
             : data.assistantType,
         userId: user?.id,
+        functionality: data.functionality,
+        primaryColor: data.primaryColor,
+        secondaryColor: data.secondaryColor,
+        startingMessage: data.secondaryColor,
+        avatarUrl: data.avatarUrl,
       });
       await axios.post("/api/savecontext", {
         assistantId,
