@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  AssistantType,
+  DataFieldEntry,
+} from "./dashboard/assistants/create/AssistantTraining";
 
 const MetadataSchema = z
   .object({
@@ -34,3 +38,16 @@ export const CreateAssistantRequestSchema = z.object({
   secondaryColor: z.string(),
   avatarUrl: z.string(),
 });
+
+export interface NewAssistantData {
+  name: string;
+  description: string;
+  functionality: string;
+  assistantType: AssistantType;
+  customType: string;
+  dataFields: DataFieldEntry[];
+  startingMessage: string;
+  primaryColor: string;
+  secondaryColor: string;
+  avatarUrl: string;
+}
