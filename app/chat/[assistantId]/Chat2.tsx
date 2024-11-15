@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import axios from "axios";
 import { Assistants } from "@prisma/client";
 
@@ -108,32 +108,35 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
   return (
     <div className="flex justify-center items-center min-h-screen bg-background p-4 ">
       <div className="relative w-full max-w-2xl ">
-        <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-          <Card className="w-full max-w-md h-[600px] sm:h-[700px] flex flex-col rounded-[20px] overflow-hidden shadow-md">
+        <div
+          className={`${
+            !userDetails ? "blur-[2px]" : ""
+          } transition-all duration-200 `}
+        >
+          <Card
+            className={`rounded-[20px] overflow-hidden shadow-md text-white`}
+          >
             <CardHeader
-              className="flex flex-row items-center gap-4 p-4 "
+              className="p-4"
               style={{ backgroundColor: assistant.primaryColor }}
             >
-              <Button variant="ghost" size="icon" className="text-white ">
-                <ArrowLeft className="h-6 w-6" />
-              </Button>
-              <h2 className="text-xl font-bold text-white  text-center w-full pr-10">
-                {assistant.name}
-              </h2>
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-10 w-10 bg-white text-black">
+                  <AvatarImage
+                    src={assistant.avatarUrl}
+                    alt="Assistant Avatar"
+                  />
+                  <AvatarFallback>AI</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="text-xl font-bold">{assistant?.name}</h2>
+                  <p className="text-sm opacity-80">{assistant?.description}</p>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="flex-grow p-0 overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="p-4 space-y-4">
-                  <div className="flex flex-col items-center text-center mb-6">
-                    <Avatar className="w-16 h-16 bg-[#4051b5] rounded-full flex items-center justify-center mb-4">
-                      <AvatarImage src={assistant.avatarUrl} alt="Assistant" />
-                      <AvatarFallback>AI</AvatarFallback>
-                    </Avatar>
-
-                    <p className="text-sm text-gray-600 max-w-[250px]">
-                      {assistant.description}
-                    </p>
-                  </div>
+            <CardContent className="p-0">
+              <ScrollArea className="h-[450px] p-4" ref={chatContainerRef}>
+                <div className="space-y-4">
                   {chatHistory.map((msg, index) => (
                     <div
                       key={index}
@@ -141,14 +144,12 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
                         msg.sender === "user" ? "justify-end" : "justify-start"
                       }`}
                     >
-                      {msg.sender === "support" && (
-                        <Avatar className="h-8 w-8 mr-2 mt-3">
-                          <AvatarImage src={assistant.avatarUrl} alt="Bot" />
-                          <AvatarFallback>AI</AvatarFallback>
-                        </Avatar>
-                      )}
                       <div
-                        className={`max-w-[75%] p-3 rounded-lg `}
+                        className={`max-w-[75%] p-3 rounded-lg ${
+                          msg.sender === "user"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary text-secondary-foreground"
+                        }`}
                         style={{
                           backgroundColor:
                             msg.sender === "user"
@@ -163,7 +164,7 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
                   ))}
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="max-w-[75%] p-3 rounded-lg bg-gray-200">
+                      <div className="max-w-[75%] p-3 rounded-lg bg-secondary">
                         <Skeleton className="h-5 w-[200px]" />
                       </div>
                     </div>
@@ -177,23 +178,20 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
                   e.preventDefault();
                   sendMessage();
                 }}
-                className="relative w-full flex items-center"
+                className="flex items-center space-x-2 w-full"
               >
                 <Input
-                  autoFocus={true}
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Type your message..."
-                  className="w-full rounded-full pr-12 pl-4" // Increased padding-right for button space, added padding-left for aesthetics
-                  style={{ paddingRight: "4rem" }} // Extra padding to avoid text overlap
+                  className="flex-grow"
+                  disabled={!userDetails}
                 />
                 <Button
                   type="submit"
                   size="icon"
                   disabled={isLoading || !userDetails}
-                  className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
-                  style={{ backgroundColor: assistant.primaryColor }}
                 >
                   <Send className="h-4 w-4" />
                   <span className="sr-only">Send message</span>
