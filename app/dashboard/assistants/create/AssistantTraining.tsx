@@ -74,6 +74,7 @@ export default function AssistantTrainingPage() {
       return;
     }
     setIsLoading(true);
+    console.log(data);
     try {
       await axios.post("/api/assistants/create", {
         assistantId,

@@ -36,7 +36,16 @@ model Assistants {
 }
 
 model langchain_chat_histories {
-  id         Int    @id @default(autoincrement())
-  session_id String @db.VarChar(255)
-  message    Json
+  id              Int              @id @default(autoincrement())
+  session_id      String           @db.VarChar(255)
+  message         Json
+  session_details session_details? @relation(fields: [session_id], references: [session_id])
+}
+
+model session_details {
+  id         Int                        @id @default(autoincrement())
+  userName   String
+  userEmail  String
+  session_id String                     @unique
+  messages   langchain_chat_histories[]
 }
