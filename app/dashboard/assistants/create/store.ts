@@ -3,7 +3,7 @@ import { create } from "zustand";
 
 interface DataStore {
   data: NewAssistantData;
-  setData: (newData: NewAssistantData) => void;
+  setData: (newData: Partial<NewAssistantData>) => void;
 }
 
 export const useNewAssistantStore = create<DataStore>((set) => ({
@@ -19,5 +19,5 @@ export const useNewAssistantStore = create<DataStore>((set) => ({
     secondaryColor: "#ffffff",
     avatarUrl: "/placeholder.svg",
   },
-  setData: (newData: NewAssistantData) => set(() => ({ data: newData })),
+  setData: (newData) => set((prev) => ({ data: { ...prev.data, ...newData } })),
 }));

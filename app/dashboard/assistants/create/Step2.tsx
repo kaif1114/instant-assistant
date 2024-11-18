@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { CldUploadWidget, getCldImageUrl } from "next-cloudinary";
 import { useNewAssistantStore } from "./store";
+import { NewAssistantData } from "@/app/schemas";
 
 const Step2 = () => {
   const { data, setData } = useNewAssistantStore();
@@ -36,16 +37,12 @@ const Step2 = () => {
               id="primaryColor"
               type="color"
               value={data.primaryColor}
-              onChange={(e) =>
-                setData({ ...data, primaryColor: e.target.value })
-              }
+              onChange={(e) => setData({ primaryColor: e.target.value })}
               className="w-12 h-12 p-1"
             />
             <Input
               value={data.primaryColor}
-              onChange={(e) =>
-                setData({ ...data, primaryColor: e.target.value })
-              }
+              onChange={(e) => setData({ primaryColor: e.target.value })}
               placeholder="#478ACD"
             />
           </div>
@@ -57,16 +54,12 @@ const Step2 = () => {
               id="secondaryColor"
               type="color"
               value={data.secondaryColor}
-              onChange={(e) =>
-                setData({ ...data, secondaryColor: e.target.value })
-              }
+              onChange={(e) => setData({ secondaryColor: e.target.value })}
               className="w-12 h-12 p-1"
             />
             <Input
               value={data.secondaryColor}
-              onChange={(e) =>
-                setData({ ...data, secondaryColor: e.target.value })
-              }
+              onChange={(e) => setData({ secondaryColor: e.target.value })}
               placeholder="#0A0A15"
             />
           </div>
@@ -76,9 +69,7 @@ const Step2 = () => {
           <Input
             id="startingMessage"
             value={data.startingMessage}
-            onChange={(e) =>
-              setData({ ...data, startingMessage: e.target.value })
-            }
+            onChange={(e) => setData({ startingMessage: e.target.value })}
             placeholder="Enter starting message"
           />
         </div>
@@ -90,11 +81,7 @@ const Step2 = () => {
               <AvatarFallback>AI</AvatarFallback>
             </Avatar>
             <div className="space-y-2">
-              <Select
-                onValueChange={(value) =>
-                  setData({ ...data, avatarUrl: value })
-                }
-              >
+              <Select onValueChange={(value) => setData({ avatarUrl: value })}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Select avatar" />
                 </SelectTrigger>
@@ -109,10 +96,14 @@ const Step2 = () => {
                 onSuccess={(result) => {
                   console.log(result);
                   if (result.info && typeof result.info !== "string") {
+                    console.log(data);
                     const url = getCldImageUrl({
                       src: result.info.public_id,
                     });
-                    setData({ ...data, avatarUrl: url });
+                    setData({
+                      avatarUrl: url,
+                    });
+                    console.log(data);
                   }
                 }}
               >

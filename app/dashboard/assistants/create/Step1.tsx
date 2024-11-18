@@ -29,7 +29,7 @@ const Step1 = () => {
           <Input
             id="name"
             value={data.name}
-            onChange={(e) => setData({ ...data, name: e.target.value })}
+            onChange={(e) => setData({ name: e.target.value })}
             placeholder="Enter assistant name"
             required
           />
@@ -39,7 +39,7 @@ const Step1 = () => {
           <Input
             id="description"
             value={data.description}
-            onChange={(e) => setData({ ...data, description: e.target.value })}
+            onChange={(e) => setData({ description: e.target.value })}
             placeholder="Short one-line description"
             required
           />
@@ -49,7 +49,7 @@ const Step1 = () => {
           <RadioGroup
             value={data.assistantType}
             onValueChange={(value) =>
-              setData({ ...data, assistantType: value as AssistantType })
+              setData({ assistantType: value as AssistantType })
             }
             className="flex flex-col space-y-1"
           >
@@ -77,7 +77,7 @@ const Step1 = () => {
           {data.assistantType === "Custom" && (
             <Input
               value={data.customType}
-              onChange={(e) => setData({ ...data, customType: e.target.value })}
+              onChange={(e) => setData({ customType: e.target.value })}
               placeholder="Enter custom assistant type"
               className="mt-2"
               required={data.assistantType === "Custom"}
@@ -89,9 +89,9 @@ const Step1 = () => {
           <Textarea
             id="functionality"
             value={data.functionality}
-            onChange={(e) =>
-              setData({ ...data, functionality: e.target.value })
-            }
+            onChange={(e) => {
+              setData({ functionality: e.target.value });
+            }}
             placeholder="Describe how the assistant should function"
             required
           />

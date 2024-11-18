@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface Props {
   assistantId: string;
@@ -108,7 +109,13 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
   return (
     <div className="flex justify-center items-center min-h-screen bg-background p-4 ">
       <div className="relative w-full max-w-2xl ">
-        <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+        <div
+          className={cn({
+            "flex justify-center items-center min-h-screen  p-4 transition-all duration-200":
+              true,
+            "blur-[2px]": !userDetails,
+          })}
+        >
           <Card className="w-full max-w-md h-[600px] sm:h-[700px] flex flex-col rounded-[20px] overflow-hidden shadow-md">
             <CardHeader
               className="flex flex-row items-center gap-4 p-4 "
@@ -206,7 +213,7 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
         {!userDetails && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="absolute inset-0  rounded-[20px]" />
-            <Card className="w-full max-w-md shadow-xl rounded-2xl relative z-50">
+            <Card className="w-96 max-w-md shadow-xl rounded-2xl relative z-50">
               <CardHeader
                 className=" text-white p-4 rounded-t-2xl"
                 style={{ backgroundColor: assistant.primaryColor }}

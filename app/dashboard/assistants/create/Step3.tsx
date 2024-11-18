@@ -35,7 +35,6 @@ const Step3 = () => {
 
   const addDataField = () => {
     setData({
-      ...data,
       dataFields: [
         ...data.dataFields,
         { pageContent: "", metadata: { title: "", description: "" } },
@@ -46,7 +45,7 @@ const Step3 = () => {
   const removeDataField = (index: number) => {
     if (data.dataFields.length > 1) {
       const newDataFields = data.dataFields.filter((_, i) => i !== index);
-      setData({ ...data, dataFields: newDataFields });
+      setData({ dataFields: newDataFields });
     }
   };
 
@@ -61,7 +60,7 @@ const Step3 = () => {
     } else {
       newDataFields[index].metadata[field] = value;
     }
-    setData({ ...data, dataFields: newDataFields });
+    setData({ dataFields: newDataFields });
   };
 
   const handleWebsiteAction = async () => {
@@ -97,7 +96,6 @@ const Step3 = () => {
       }
 
       setData({
-        ...data,
         dataFields: newDataFields,
       });
     } catch (error) {
