@@ -20,32 +20,35 @@ model User {
 }
 
 model Assistants {
-  id              Int    @id @default(autoincrement())
-  assistantId     String @unique
+  id              Int               @id @default(autoincrement())
+  assistantId     String            @unique
   name            String
   description     String
-  Type            String @default("support")
-  Status          String @default("active")
+  Type            String            @default("support")
+  Status          String            @default("active")
   userId          String
   functionality   String
-  primaryColor    String @default("#478ACD")
-  secondaryColor  String @default("#0A0A15")
+  primaryColor    String            @default("#478ACD")
+  secondaryColor  String            @default("#0A0A15")
   avatarUrl       String
-  startingMessage String @default("Hello! How may I help you?")
-  user            User   @relation(fields: [userId], references: [userId])
+  startingMessage String            @default("Hello! How may I help you?")
+  user            User              @relation(fields: [userId], references: [userId])
+  session_details session_details[]
 }
 
 model langchain_chat_histories {
-  id              Int              @id @default(autoincrement())
-  session_id      String           @db.VarChar(255)
+  id              Int             @id @default(autoincrement())
+  session_id      String          @db.VarChar(255)
   message         Json
-  session_details session_details? @relation(fields: [session_id], references: [session_id])
+  session_details session_details @relation(fields: [session_id], references: [session_id])
 }
 
 model session_details {
-  id         Int                        @id @default(autoincrement())
-  userName   String
-  userEmail  String
-  session_id String                     @unique
-  messages   langchain_chat_histories[]
+  id          Int                        @id @default(autoincrement())
+  userName    String
+  userEmail   String
+  session_id  String                     @unique
+  assistantId String
+  assistant   Assistants                 @relation(fields: [assistantId], references: [assistantId])
+  messages    langchain_chat_histories[]
 }

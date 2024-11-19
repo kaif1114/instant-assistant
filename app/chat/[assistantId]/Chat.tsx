@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useRef, useState } from "react";
 
 interface Props {
   assistantId: string;
@@ -30,15 +31,13 @@ interface UserDetails {
 }
 
 export default function Chat({ assistantId, sessionId, assistant }: Props) {
-  const [userDetails, setUserDetails] = React.useState<UserDetails | null>(
-    null
-  );
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [message, setMessage] = React.useState("");
-  const [chatHistory, setChatHistory] = React.useState<
+  const [chatHistory, setChatHistory] = useState<
     Array<{ sender: string; text: string }>
   >([]);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const chatContainerRef = React.useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (chatContainerRef.current) {
@@ -95,12 +94,13 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
     const email = formData.get("email") as string;
     if (name && email) {
       setUserDetails({ name, email });
-      console.log(sessionId);
+      console.log(sessionId, assistantId, name, email);
       try {
         axios.post("/api/session/create", {
           userName: name,
           userEmail: email,
-          sessionId,
+          session_id: sessionId,
+          assistantId,
         });
       } catch (error) {}
     }
@@ -170,7 +170,14 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
                   ))}
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="max-w-[75%] p-3 rounded-lg bg-gray-200">
+                      <Avatar className="h-8 w-8 mr-2 mt-3">
+                        <AvatarImage src={assistant.avatarUrl} alt="Bot" />
+                        <AvatarFallback>AI</AvatarFallback>
+                      </Avatar>
+                      <div
+                        className="max-w-[75%] p-3 rounded-lg "
+                        style={{ backgroundColor: assistant.secondaryColor }}
+                      >
                         <Skeleton className="h-5 w-[200px]" />
                       </div>
                     </div>

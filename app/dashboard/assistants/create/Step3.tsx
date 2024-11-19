@@ -86,15 +86,12 @@ const Step3 = () => {
           url: doc.metadata.url,
         },
       }));
-
-      // Ensure there's at least one data field
       if (newDataFields.length === 0) {
         newDataFields.push({
           pageContent: "",
           metadata: { title: "", description: "" },
         });
       }
-
       setData({
         dataFields: newDataFields,
       });
@@ -103,7 +100,6 @@ const Step3 = () => {
         `Error ${websiteMode === "scrape" ? "scraping" : "crawling"} site:`,
         error
       );
-      // Handle error (show error message to user)
     } finally {
       setIsLoading(false);
     }

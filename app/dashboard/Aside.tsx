@@ -59,29 +59,10 @@ const data = {
   },
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
       title: "Assistants",
       url: "/dashboard/assistants",
       icon: Bot,
+      isActive: true,
       items: [
         {
           title: "Create",
@@ -96,6 +77,17 @@ const data = {
           url: "#",
         },
       ],
+    },
+    {
+      title: "Playground",
+      url: "#",
+      icon: SquareTerminal,
+    },
+
+    {
+      title: "Chats",
+      url: "/dashboard/chats",
+      icon: Settings2,
     },
     {
       title: "Guide",
@@ -116,29 +108,6 @@ const data = {
         },
         {
           title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
           url: "#",
         },
       ],
