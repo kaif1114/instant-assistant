@@ -3,6 +3,7 @@ import {
   AssistantType,
   DataFieldEntry,
 } from "./dashboard/assistants/create/AssistantTraining";
+import { Prisma } from "@prisma/client";
 
 const MetadataSchema = z
   .object({
@@ -51,3 +52,7 @@ export interface NewAssistantData {
   secondaryColor: string;
   avatarUrl: string;
 }
+
+export type AssistantWithSessionDetails = Prisma.AssistantsGetPayload<{
+  include: { session_details: true };
+}>;

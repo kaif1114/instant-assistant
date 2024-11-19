@@ -12,13 +12,13 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
-  console.log(sessionId);
+
   try {
     const messages = await prisma.langchain_chat_histories.findMany({
       where: { session_id: sessionId },
       orderBy: { id: "asc" },
     });
-    console.log(messages);
+
     if (messages.length == 0) {
       return NextResponse.json(
         { error: "No chat found with provided sessionId" },

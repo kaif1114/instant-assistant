@@ -19,8 +19,9 @@ import {
 } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Assistants } from "@prisma/client";
+import { Assistants, session_details } from "@prisma/client";
 import axios from "axios";
+import { AssistantWithSessionDetails } from "@/app/schemas";
 
 interface ChatMessage {
   id: string;
@@ -45,113 +46,8 @@ interface Assistant {
 }
 
 interface Props {
-  Assistants: Assistants[];
+  Assistants: AssistantWithSessionDetails[];
 }
-
-const dummyData: Assistant[] = [
-  {
-    id: "1",
-    name: "Sales Assistant",
-    description: "Helps with sales inquiries",
-    avatarUrl: "/placeholder.svg?height=40&width=40",
-    chatSessions: [
-      {
-        id: "1",
-        userName: "John Doe",
-        userEmail: "john@example.com",
-        messages: [
-          {
-            id: "1",
-            type: "user",
-            content: "Hi, I'm interested in your product.",
-            timestamp: "2023-06-01T10:00:00Z",
-          },
-          {
-            id: "2",
-            type: "ai",
-            content:
-              "Hello John! I'd be happy to help you with our product. What would you like to know?",
-            timestamp: "2023-06-01T10:01:00Z",
-          },
-          {
-            id: "3",
-            type: "user",
-            content: "What are the pricing options?",
-            timestamp: "2023-06-01T10:02:00Z",
-          },
-          {
-            id: "4",
-            type: "ai",
-            content:
-              "We have three pricing tiers: Basic at $9.99/month, Pro at $19.99/month, and Enterprise with custom pricing. Each tier comes with different features. Would you like me to explain them in detail?",
-            timestamp: "2023-06-01T10:03:00Z",
-          },
-        ],
-      },
-      {
-        id: "2",
-        userName: "Jane Smith",
-        userEmail: "jane@example.com",
-        messages: [
-          {
-            id: "1",
-            type: "user",
-            content: "Do you offer a free trial?",
-            timestamp: "2023-06-02T14:00:00Z",
-          },
-          {
-            id: "2",
-            type: "ai",
-            content:
-              "Yes, we do! We offer a 14-day free trial for all our pricing tiers. Would you like me to set one up for you?",
-            timestamp: "2023-06-02T14:01:00Z",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "Support Assistant",
-    description: "Provides technical support",
-    avatarUrl: "/placeholder.svg?height=40&width=40",
-    chatSessions: [
-      {
-        id: "1",
-        userName: "Alice Johnson",
-        userEmail: "alice@example.com",
-        messages: [
-          {
-            id: "1",
-            type: "user",
-            content: "I'm having trouble logging in.",
-            timestamp: "2023-06-03T09:00:00Z",
-          },
-          {
-            id: "2",
-            type: "ai",
-            content:
-              "I'm sorry to hear that, Alice. Let's troubleshoot this issue. First, can you confirm that you're using the correct email address to log in?",
-            timestamp: "2023-06-03T09:01:00Z",
-          },
-          {
-            id: "3",
-            type: "user",
-            content: "Yes, I'm sure it's the right email.",
-            timestamp: "2023-06-03T09:02:00Z",
-          },
-          {
-            id: "4",
-            type: "ai",
-            content:
-              "Alright, thank you for confirming. The next step would be to reset your password. Would you like me to guide you through the process?",
-            timestamp: "2023-06-03T09:03:00Z",
-          },
-        ],
-      },
-    ],
-  },
-];
 
 interface Message {
   id: string;
@@ -167,21 +63,27 @@ interface Message {
 }
 
 export default function ({ Assistants }: Props) {
-  const [selectedChat, setSelectedChat] = useState<ChatSession | null>(null);
-  const [selectedAssistant, setSelectedAssistant] = useState<Assistant | null>(
+  const [selectedChat, setSelectedChat] = useState<session_details | null>(
     null
   );
+  const [selectedAssistant, setSelectedAssistant] =
+    useState<AssistantWithSessionDetails | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const handleChatSelect = async (assistant: Assistant, chat: ChatSession) => {
-    // try {
-    //   const response = await axios.get(`api/session/chat`, {params: {sessionId: }})
-
-    // } catch (error) {
-
-    // }
+  const handleChatSelect = async (
+    assistant: AssistantWithSessionDetails,
+    session: session_details
+  ) => {
+    try {
+      const response = await axios.get(`/api/session/chat`, {
+        params: { sessionId: session.session_id },
+      });
+      setMessages(response.data);
+    } catch (error) {
+      console.error(error);
+    }
     setSelectedAssistant(assistant);
-    setSelectedChat(chat);
+    setSelectedChat(session);
   };
 
   const handleCloseChat = () => {
@@ -215,9 +117,12 @@ export default function ({ Assistants }: Props) {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {/* <Accordion type="single" collapsible className="w-full">
-                    {assistant.chatSessions.map((session) => (
-                      <AccordionItem key={session.id} value={session.id}>
+                  <Accordion type="single" collapsible className="w-full">
+                    {assistant.session_details.map((session) => (
+                      <AccordionItem
+                        key={session.id}
+                        value={session.id.toString()}
+                      >
                         <AccordionTrigger>
                           <div className="flex items-center space-x-2">
                             <User className="h-4 w-4" />
@@ -237,7 +142,7 @@ export default function ({ Assistants }: Props) {
                         </AccordionContent>
                       </AccordionItem>
                     ))}
-                  </Accordion> */}
+                  </Accordion>
                 </CardContent>
               </Card>
             ))}
@@ -278,16 +183,16 @@ export default function ({ Assistants }: Props) {
                 </CardHeader>
                 <CardContent className="flex-grow overflow-hidden">
                   <ScrollArea className="h-full w-full">
-                    {selectedChat.messages.map((message) => (
+                    {messages.map((messageObj) => (
                       <div
-                        key={message.id}
+                        key={messageObj.id}
                         className={`flex items-start space-x-2 mb-4 ${
-                          message.type === "ai"
+                          messageObj.message.type === "ai"
                             ? "justify-start"
                             : "justify-end"
                         }`}
                       >
-                        {message.type === "ai" && (
+                        {messageObj.message.type === "ai" && (
                           <Avatar className="h-8 w-8">
                             <AvatarImage
                               src={selectedAssistant.avatarUrl}
@@ -300,17 +205,14 @@ export default function ({ Assistants }: Props) {
                         )}
                         <div
                           className={`rounded-lg p-3 max-w-[70%] ${
-                            message.type === "ai"
+                            messageObj.message.type === "ai"
                               ? "bg-secondary text-secondary-foreground"
                               : "bg-primary text-primary-foreground"
                           }`}
                         >
-                          <p>{message.content}</p>
-                          <p className="text-xs mt-1 opacity-70">
-                            {new Date(message.timestamp).toLocaleString()}
-                          </p>
+                          <p>{messageObj.message.content}</p>
                         </div>
-                        {message.type === "user" && (
+                        {messageObj.message.type === "human" && (
                           <Avatar className="h-8 w-8">
                             <AvatarFallback>
                               {selectedChat.userName.charAt(0)}

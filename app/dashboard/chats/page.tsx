@@ -3,10 +3,7 @@ import Chats from "./chats";
 import prisma from "@/prisma/client";
 import { auth } from "@clerk/nextjs/server";
 import { Assistants, Prisma } from "@prisma/client";
-
-type AssistantWithSessionDetails = Prisma.AssistantsGetPayload<{
-  include: { session_details: true };
-}>;
+import { AssistantWithSessionDetails } from "@/app/schemas";
 
 const page = async () => {
   const { userId } = await auth();
@@ -16,7 +13,6 @@ const page = async () => {
       where: { userId },
       include: { session_details: true },
     });
-    console.log(assistants[0].session_details);
   }
 
   if (assistants.length != 0) {
