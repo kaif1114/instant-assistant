@@ -1,8 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
-import { ChevronRight, MessageSquare, User, X } from "lucide-react";
+import {
+  AlertCircle,
+  ChevronRight,
+  Loader2,
+  MessageSquare,
+  User,
+  X,
+} from "lucide-react";
+import { useState } from "react";
 
+import { AssistantWithSessionDetails } from "@/app/schemas";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,39 +27,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Assistants, session_details } from "@prisma/client";
+import { session_details } from "@prisma/client";
 import axios from "axios";
-import { AssistantWithSessionDetails } from "@/app/schemas";
-
-interface ChatMessage {
-  id: string;
-  type: "user" | "ai";
-  content: string;
-  timestamp: string;
-}
-
-interface ChatSession {
-  id: string;
-  userName: string;
-  userEmail: string;
-  messages: ChatMessage[];
-}
-
-interface Assistant {
-  id: string;
-  name: string;
-  description: string;
-  avatarUrl: string;
-  chatSessions: ChatSession[];
-}
 
 interface Props {
   Assistants: AssistantWithSessionDetails[];
@@ -57,38 +43,52 @@ interface Message {
     content: string;
     additional_kwargs: Record<string, unknown>;
     response_metadata: Record<string, unknown>;
-    tool_calls?: any[]; // Optional, included only for "ai" type messages
-    invalid_tool_calls?: any[]; // Optional, included only for "ai" type messages
+    tool_calls?: any[];
+    invalid_tool_calls?: any[];
   };
 }
 
-export default function ({ Assistants }: Props) {
+export default function AssistantChatsPage({ Assistants }: Props) {
   const [selectedChat, setSelectedChat] = useState<session_details | null>(
     null
   );
   const [selectedAssistant, setSelectedAssistant] =
     useState<AssistantWithSessionDetails | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChatSelect = async (
     assistant: AssistantWithSessionDetails,
     session: session_details
   ) => {
+    setIsLoading(true);
+    setLoadingSessionId(session.session_id);
+    setError(null);
     try {
       const response = await axios.get(`/api/session/chat`, {
         params: { sessionId: session.session_id },
       });
       setMessages(response.data);
+      setSelectedAssistant(assistant);
+      setSelectedChat(session);
     } catch (error) {
       console.error(error);
+      setError(
+        "We encountered an issue while retrieving your messages. Please try again later."
+      );
+    } finally {
+      setIsLoading(false);
+      setLoadingSessionId(null);
     }
-    setSelectedAssistant(assistant);
-    setSelectedChat(session);
   };
 
   const handleCloseChat = () => {
     setSelectedChat(null);
     setSelectedAssistant(null);
+    setMessages([]);
+    setError(null);
   };
 
   return (
@@ -136,8 +136,19 @@ export default function ({ Assistants }: Props) {
                           <Button
                             onClick={() => handleChatSelect(assistant, session)}
                             className="w-full"
+                            disabled={isLoading}
                           >
-                            View Chat <ChevronRight className="ml-2 h-4 w-4" />
+                            {loadingSessionId === session.session_id ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Loading...
+                              </>
+                            ) : (
+                              <>
+                                View Chat{" "}
+                                <ChevronRight className="ml-2 h-4 w-4" />
+                              </>
+                            )}
                           </Button>
                         </AccordionContent>
                       </AccordionItem>
@@ -183,44 +194,59 @@ export default function ({ Assistants }: Props) {
                 </CardHeader>
                 <CardContent className="flex-grow overflow-hidden">
                   <ScrollArea className="h-full w-full">
-                    {messages.map((messageObj) => (
-                      <div
-                        key={messageObj.id}
-                        className={`flex items-start space-x-2 mb-4 ${
-                          messageObj.message.type === "ai"
-                            ? "justify-start"
-                            : "justify-end"
-                        }`}
-                      >
-                        {messageObj.message.type === "ai" && (
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage
-                              src={selectedAssistant.avatarUrl}
-                              alt={selectedAssistant.name}
-                            />
-                            <AvatarFallback>
-                              {selectedAssistant.name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
+                    {isLoading ? (
+                      <div className="flex items-center justify-center h-full">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <span className="ml-2 text-lg">
+                          Loading messages...
+                        </span>
+                      </div>
+                    ) : error ? (
+                      <Alert variant="destructive" className="mt-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
+                    ) : (
+                      messages.map((messageObj) => (
                         <div
-                          className={`rounded-lg p-3 max-w-[70%] ${
+                          key={messageObj.id}
+                          className={`flex items-start space-x-2 mb-4 ${
                             messageObj.message.type === "ai"
-                              ? "bg-secondary text-secondary-foreground"
-                              : "bg-primary text-primary-foreground"
+                              ? "justify-start"
+                              : "justify-end"
                           }`}
                         >
-                          <p>{messageObj.message.content}</p>
+                          {messageObj.message.type === "ai" && (
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage
+                                src={selectedAssistant.avatarUrl}
+                                alt={selectedAssistant.name}
+                              />
+                              <AvatarFallback>
+                                {selectedAssistant.name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                          <div
+                            className={`rounded-lg p-3 max-w-[70%] ${
+                              messageObj.message.type === "ai"
+                                ? "bg-secondary text-secondary-foreground"
+                                : "bg-primary text-primary-foreground"
+                            }`}
+                          >
+                            <p>{messageObj.message.content}</p>
+                          </div>
+                          {messageObj.message.type === "human" && (
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>
+                                {selectedChat.userName.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
                         </div>
-                        {messageObj.message.type === "human" && (
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>
-                              {selectedChat.userName.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </ScrollArea>
                 </CardContent>
               </>
