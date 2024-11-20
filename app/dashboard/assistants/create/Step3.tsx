@@ -10,11 +10,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, X, Globe, Scissors } from "lucide-react";
+import {
+  PlusCircle,
+  X,
+  Globe,
+  Scissors,
+  Upload,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import { useNewAssistantStore } from "./store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import axios from "axios";
+import { DataFieldEntry } from "./AssistantTraining";
+import { pdfLoaderDocument } from "@/app/schemas";
 
 interface Document {
   pageContent: string;
@@ -32,6 +44,8 @@ const Step3 = () => {
   const [scrapedContent, setScrapedContent] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [websiteMode, setWebsiteMode] = useState<"scrape" | "crawl">("scrape");
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const addDataField = () => {
     setData({
@@ -65,6 +79,7 @@ const Step3 = () => {
 
   const handleWebsiteAction = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const response = await fetch("/api/crawl", {
         method: "POST",
@@ -74,6 +89,10 @@ const Step3 = () => {
         body: JSON.stringify({ url: siteUrl, mode: websiteMode }),
       });
       const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch website data");
+      }
 
       setScrapedContent(result.docs);
 
@@ -92,14 +111,87 @@ const Step3 = () => {
           metadata: { title: "", description: "" },
         });
       }
-      setData({
-        dataFields: newDataFields,
-      });
+      data.dataFields.length <= 1
+        ? setData({ dataFields: newDataFields })
+        : setData({
+            dataFields: [...data.dataFields, ...newDataFields],
+          });
     } catch (error) {
       console.error(
         `Error ${websiteMode === "scrape" ? "scraping" : "crawling"} site:`,
         error
       );
+      setError(
+        `Failed to ${
+          websiteMode === "scrape" ? "scrape" : "crawl"
+        } the website. Please try again.`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+    }
+  };
+
+  const handleFileSubmit = async () => {
+    if (!file) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axios.post<pdfLoaderDocument[]>(
+        "/api/savecontext/file",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        if (response.data.length > 0) {
+          let dataFields: DataFieldEntry[] = [];
+          response.data.forEach((document) => {
+            const newDataField = {
+              pageContent: document.pageContent,
+              metadata: {
+                title: file.name,
+                description: "Uploaded file content",
+              },
+            };
+            newDataField.pageContent.trim().length > 1 &&
+              dataFields.push(newDataField);
+          });
+
+          data.dataFields.length <= 1
+            ? dataFields.length > 0
+              ? setData({ dataFields })
+              : setError("Could not find any content inside file.")
+            : setData({
+                dataFields: [...data.dataFields, ...dataFields],
+              });
+          setFile(null);
+        } else {
+          setError("Could not find any content inside file.");
+        }
+      } else {
+        throw new Error("Failed to upload file");
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setError("Failed to upload and process the file. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -110,14 +202,16 @@ const Step3 = () => {
       <CardHeader>
         <CardTitle>Training Data</CardTitle>
         <CardDescription>
-          Add data fields to train your assistant or gather website data
+          Add data fields to train your assistant, gather website data, or
+          upload a file
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Tabs defaultValue="manual" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="manual">Manual Input</TabsTrigger>
             <TabsTrigger value="website">Website Data</TabsTrigger>
+            <TabsTrigger value="file">File Upload</TabsTrigger>
           </TabsList>
           <TabsContent value="manual">
             {data.dataFields.map((field, index) => (
@@ -225,7 +319,9 @@ const Step3 = () => {
                 onClick={handleWebsiteAction}
                 disabled={isLoading || !siteUrl}
               >
-                {websiteMode === "scrape" ? (
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : websiteMode === "scrape" ? (
                   <Scissors className="mr-2 h-4 w-4" />
                 ) : (
                   <Globe className="mr-2 h-4 w-4" />
@@ -238,6 +334,13 @@ const Step3 = () => {
                   ? "Scrape Page"
                   : "Crawl Website"}
               </Button>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
               {scrapedContent.length > 0 && (
                 <div className="space-y-2">
                   <Label>Scraped Content</Label>
@@ -268,6 +371,43 @@ const Step3 = () => {
                     ))}
                   </ScrollArea>
                 </div>
+              )}
+            </div>
+          </TabsContent>
+          <TabsContent value="file">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="file-upload">Upload File</Label>
+                <Input
+                  id="file-upload"
+                  type="file"
+                  onChange={handleFileUpload}
+                  accept=".txt,.pdf,.doc,.docx"
+                />
+              </div>
+              <Button
+                type="button"
+                onClick={handleFileSubmit}
+                disabled={isLoading || !file}
+              >
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="mr-2 h-4 w-4" />
+                )}
+                {isLoading ? "Uploading..." : "Upload File"}
+              </Button>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              {file && (
+                <p className="text-sm text-muted-foreground">
+                  Selected file: {file.name}
+                </p>
               )}
             </div>
           </TabsContent>

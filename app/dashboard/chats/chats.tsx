@@ -74,7 +74,7 @@ export default function AssistantChatsPage({ Assistants }: Props) {
       setSelectedAssistant(assistant);
       setSelectedChat(session);
     } catch (error) {
-      console.error(error);
+      console.log(error);
       setError(
         "We encountered an issue while retrieving your messages. Please try again later."
       );

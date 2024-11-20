@@ -53,6 +53,17 @@ export interface NewAssistantData {
   avatarUrl: string;
 }
 
+export interface pdfLoaderDocument {
+  pageContent: string;
+  metadata: {
+    source: string;
+    blobType: string;
+    pdf: any;
+    loc: any;
+  };
+  id?: string | Number;
+}
+
 export type AssistantWithSessionDetails = Prisma.AssistantsGetPayload<{
   include: { session_details: true };
 }>;
