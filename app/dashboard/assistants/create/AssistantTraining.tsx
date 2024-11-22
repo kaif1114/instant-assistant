@@ -22,6 +22,7 @@ import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import { useNewAssistantStore } from "./store";
+import { LoadingAnimation } from "./Loading";
 
 export interface DataFieldEntry {
   pageContent: string;
@@ -95,6 +96,7 @@ export default function AssistantTrainingPage() {
         assistantId,
         documents: data.dataFields,
       });
+
       setIsSuccess(true);
     } catch (error) {
       console.error(error);
@@ -128,6 +130,16 @@ export default function AssistantTrainingPage() {
     setStep((prevStep) => Math.max(prevStep - 1, 1));
   };
 
+  if (isLoading) {
+    return (
+      <Card className="w-full max-w-md mx-auto mt-8">
+        <CardContent className="h-[400px]">
+          <LoadingAnimation />
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (isSuccess) {
     return (
       <Card className="w-full max-w-md mx-auto mt-8">
@@ -139,15 +151,25 @@ export default function AssistantTrainingPage() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center">
-            <Check className="w-16 h-16 text-green-500" />
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            >
+              <Check className="w-16 h-16 text-green-500" />
+            </motion.div>
           </div>
-          <p className="text-center mt-4">
+          <motion.p
+            className="text-center mt-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             Your AI assistant is now functional and ready to use.
-          </p>
+          </motion.p>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex justify-between">
           <Button
-            className="w-full"
             onClick={() => {
               // Reset form and go back to step 1
               setStep(1);
@@ -165,12 +187,12 @@ export default function AssistantTrainingPage() {
                 secondaryColor: "#ffffff",
                 avatarUrl: "/placeholder.svg",
               });
-
               setIsSuccess(false);
             }}
           >
             Create Another Assistant
           </Button>
+          <Button variant="outline">Preview Assistant</Button>
         </CardFooter>
       </Card>
     );

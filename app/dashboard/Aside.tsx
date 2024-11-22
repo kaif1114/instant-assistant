@@ -69,12 +69,8 @@ const data = {
           url: "/dashboard/assistants/create",
         },
         {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
+          title: "Preview",
+          url: "/dashboard/assistants/preview",
         },
       ],
     },
