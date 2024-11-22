@@ -36,7 +36,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
       where: { assistantId },
       select: { session_id: true },
     });
-    console.log(sessionIds);
+
     // if (!sessionIds || sessionIds.length === 0) {
     //   return NextResponse.json(
     //     { error: "No sessions found for the specified assistantId" },

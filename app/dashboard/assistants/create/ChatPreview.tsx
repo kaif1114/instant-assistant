@@ -1,42 +1,46 @@
+"use client";
+
+import * as React from "react";
+import { ArrowLeft, Send } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardHeader,
   CardContent,
+  CardHeader,
   CardFooter,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import React, { useEffect, useState } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface Props {
   name: string;
   description: string;
   startingMessage: string;
   avatarUrl: string;
-  primaryColor: string | undefined;
-  secondaryColor: string | undefined;
+  primaryColor: string;
+  secondaryColor: string;
 }
 
-const ChatPreview = ({
+export default function ChatPreview({
   name,
   description,
   startingMessage,
   avatarUrl,
   primaryColor,
   secondaryColor,
-}: Props) => {
-  const [message, setMessage] = useState("");
-  const [chatHistory, setChatHistory] = useState([
+}: Props) {
+  const [message, setMessage] = React.useState("");
+  const [chatHistory, setChatHistory] = React.useState([
     {
       sender: "assistant",
       text: startingMessage || "Hey! How can I help you today?",
     },
   ]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setChatHistory([
       {
         sender: "assistant",
@@ -54,72 +58,84 @@ const ChatPreview = ({
   };
 
   return (
-    <Card className="w-full h-full rounded-xl overflow-hidden shadow-lg flex flex-col">
-      <CardHeader className="p-4" style={{ backgroundColor: primaryColor }}>
-        <div className="flex items-center space-x-4">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={avatarUrl} alt="Assistant Avatar" />
-            <AvatarFallback>AI</AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="text-xl font-bold text-white">
-              {name || "AI Assistant"}
-            </h2>
-            <p className="text-sm text-white opacity-80">
-              {description || "Your personal AI assistant"}
-            </p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0 flex-1 flex flex-col">
-        <ScrollArea className="flex-1">
-          <div className="space-y-4 p-4">
-            {chatHistory.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  msg.sender === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div
-                  className={`max-w-[75%] p-3 rounded-lg ${
-                    msg.sender === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-secondary-foreground"
-                  }`}
-                  style={{
-                    backgroundColor:
-                      msg.sender === "user" ? primaryColor : secondaryColor,
-                    color: msg.sender === "user" ? "white" : "black",
-                  }}
-                >
-                  {msg.text}
-                </div>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </CardContent>
-      <CardFooter className="p-4 border-t mt-auto">
-        <form
-          onSubmit={sendMessage}
-          className="flex items-center space-x-2 w-full"
+    <div className="flex justify-center items-center bg-background p-4">
+      <Card className="w-full max-w-md h-[600px] sm:h-[650px] flex flex-col rounded-[20px] overflow-hidden shadow-md">
+        <CardHeader
+          className="flex flex-row items-center gap-4 p-4"
+          style={{ backgroundColor: primaryColor }}
         >
-          <Input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-grow"
-          />
-          <Button type="submit" size="icon">
-            <Send className="h-4 w-4" />
-            <span className="sr-only">Send message</span>
+          <Button variant="ghost" size="icon" className="text-white">
+            <ArrowLeft className="h-6 w-6" />
           </Button>
-        </form>
-      </CardFooter>
-    </Card>
+          <h2 className="text-xl font-bold text-white text-center w-full pr-10">
+            {name || "AI Assistant"}
+          </h2>
+        </CardHeader>
+        <CardContent className="flex-grow p-0 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="p-4 space-y-4">
+              <div className="flex flex-col items-center text-center mb-6">
+                <Avatar className="w-16 h-16 bg-[#4051b5] rounded-full flex items-center justify-center mb-4">
+                  <AvatarImage src={avatarUrl} alt="Assistant" />
+                  <AvatarFallback>AI</AvatarFallback>
+                </Avatar>
+                <p className="text-sm text-gray-600 max-w-[250px]">
+                  {description || "Your Personal AI Assistant"}
+                </p>
+              </div>
+              {chatHistory.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${
+                    msg.sender === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  {msg.sender === "assistant" && (
+                    <Avatar className="h-8 w-8 mr-2 mt-3">
+                      <AvatarImage src={avatarUrl} alt="Bot" />
+                      <AvatarFallback>AI</AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div
+                    className={`max-w-[75%] p-3 rounded-lg`}
+                    style={{
+                      backgroundColor:
+                        msg.sender === "user" ? primaryColor : secondaryColor,
+                      color: msg.sender === "user" ? "white" : "black",
+                    }}
+                  >
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </CardContent>
+        <CardFooter className="p-4 border-t">
+          <form
+            onSubmit={sendMessage}
+            className="relative w-full flex items-center"
+          >
+            <Input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="w-full rounded-full pr-12 pl-4"
+              style={{ paddingRight: "4rem" }}
+            />
+            <Button
+              type="submit"
+              size="icon"
+              className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
+              style={{ backgroundColor: primaryColor }}
+            >
+              <Send className="h-4 w-4" />
+              <span className="sr-only">Send message</span>
+            </Button>
+          </form>
+        </CardFooter>
+      </Card>
+    </div>
   );
-};
-
-export default ChatPreview;
+}

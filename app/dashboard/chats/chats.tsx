@@ -92,7 +92,7 @@ export default function AssistantChatsPage({ Assistants }: Props) {
   };
 
   return (
-    <div className="container mx-auto py-8 px-8 h-[calc(100vh-4rem)]">
+    <div className="container mx-auto px-8 h-[calc(100vh-8rem)]">
       <h1 className="text-3xl font-bold mb-8">Your Assistant Chats</h1>
       <div className="flex gap-8 h-full">
         <div className="w-2/5 overflow-auto">
