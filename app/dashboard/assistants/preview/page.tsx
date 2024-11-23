@@ -45,8 +45,9 @@ export default async function page() {
   }
 
   return (
-    <div className="container p-4 ">
-      <Breadcrumb className="mb-6">
+    <>
+      {" "}
+      <Breadcrumb className="mb-6 p-4">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
@@ -63,8 +64,9 @@ export default async function page() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-
-      {<AssistantList assistants={assistants} />}
-    </div>
+      <div className="container mx-auto p-4 max-w-5xl">
+        {<AssistantList assistants={assistants} />}
+      </div>{" "}
+    </>
   );
 }

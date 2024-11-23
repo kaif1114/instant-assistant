@@ -23,6 +23,7 @@ import Step2 from "./Step2";
 import Step3 from "./Step3";
 import { useNewAssistantStore } from "./store";
 import { LoadingAnimation } from "./Loading";
+import { useRouter } from "next/navigation";
 
 export interface DataFieldEntry {
   pageContent: string;
@@ -53,17 +54,16 @@ const stepVariants = {
     opacity: 0,
   }),
 };
-
+const assistantId = uuidv4();
 export default function AssistantTrainingPage() {
   const { data, setData } = useNewAssistantStore();
-
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const { user } = useUser();
-  const assistantId = uuidv4();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -76,6 +76,7 @@ export default function AssistantTrainingPage() {
     }
     setIsLoading(true);
     console.log(data);
+    console.log(assistantId);
     try {
       await axios.post("/api/assistants/create", {
         assistantId,
@@ -192,7 +193,14 @@ export default function AssistantTrainingPage() {
           >
             Create Another Assistant
           </Button>
-          <Button variant="outline">Preview Assistant</Button>
+          <Button
+            onClick={() => {
+              router.push(`/dashboard/assistants/preview/${assistantId}`);
+            }}
+            variant="outline"
+          >
+            Preview Assistant
+          </Button>
         </CardFooter>
       </Card>
     );
