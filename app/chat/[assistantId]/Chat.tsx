@@ -4,7 +4,7 @@ import * as React from "react";
 import { ArrowLeft, Send } from "lucide-react";
 import axios from "axios";
 import { Assistants } from "@prisma/client";
-
+import MarkdownPreview from "@uiw/react-markdown-preview";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,13 +37,25 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
     Array<{ sender: string; text: string }>
   >([]);
   const [isLoading, setIsLoading] = useState(false);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-    }
+    // Small delay to ensure content is rendered
+    const scrollToBottom = () => {
+      const scrollViewport = document.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      );
+      if (scrollViewport) {
+        scrollViewport.scrollTop = scrollViewport.scrollHeight;
+      }
+    };
+
+    // Immediate scroll
+    scrollToBottom();
+    // Additional scroll after a small delay to handle dynamic content
+    const timeoutId = setTimeout(scrollToBottom, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [chatHistory]);
 
   React.useEffect(() => {
@@ -130,7 +142,7 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
             </CardHeader>
             <CardContent className="flex-grow p-0 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="p-4 space-y-4">
+                <div className="p-4 space-y-4" ref={scrollAreaRef}>
                   <div className="flex flex-col items-center text-center mb-6">
                     <Avatar className="w-16 h-16 bg-[#4051b5] rounded-full flex items-center justify-center mb-4">
                       <AvatarImage src={assistant.avatarUrl} alt="Assistant" />
@@ -154,7 +166,8 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
                           <AvatarFallback>AI</AvatarFallback>
                         </Avatar>
                       )}
-                      <div
+                      <MarkdownPreview
+                        source={msg.text}
                         className={`max-w-[75%] p-3 rounded-lg `}
                         style={{
                           backgroundColor:
@@ -163,9 +176,7 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
                               : assistant.secondaryColor,
                           color: msg.sender === "user" ? "white" : "black",
                         }}
-                      >
-                        {msg.text}
-                      </div>
+                      />
                     </div>
                   ))}
                   {isLoading && (

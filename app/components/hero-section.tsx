@@ -25,15 +25,19 @@ function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="max-w-3xl space-y-4"
+              className="max-w-6xl space-y-4"
             >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-                Ship product <span className="text-[#E97451]">videos</span> and{" "}
-                <span className="text-[#8B7FD3]">docs</span> effortlessly
+              <h1 className="text-4xl  lg:text-5xl font-bold tracking-tight">
+                Tired of Answering the{" "}
+                <span className="text-[#E97451]">Same Questions</span> ?{" "}
+                <p>
+                  Let <span className="text-[#8B7FD3]">AI</span> Do It for You!
+                </p>
               </h1>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                Let AI turn your simple screen recordings into polished videos
-                and detailed guides. See it in action below.
+                Instantly create an AI-powered assistant that answers questions,
+                provides support, and works 24/7—all without coding or manual
+                training.
               </p>
             </motion.div>
 
@@ -59,7 +63,7 @@ function HeroSection() {
               </Button>
             </motion.div>
           </div>
-          <CurvedArrow />
+          {/* <CurvedArrow /> */}
         </div>
       </section>
 
