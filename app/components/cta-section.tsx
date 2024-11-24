@@ -5,28 +5,25 @@ import { Button } from "@/components/ui/button";
 
 function CTASection() {
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32">
-      <div className="container mx-auto  max-w-7xl px-4 md:px-6">
+    <section className="w-full py-8 md:py-12 lg:py-16">
+      <div className="container mx-auto max-w-7xl px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="flex flex-col items-center justify-center space-y-4 text-center"
+          className="relative overflow-hidden rounded-xl bg-gradient-to-br from-black via-gray-900 to-black p-12 md:px-8 lg:px-14 lg:py-28"
         >
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-            Let AI Assist You, So You Can Focus on What Matters
-          </h2>
-          <div className="flex flex-col gap-2 min-[400px]:flex-row">
-            <Button size="lg" className="btn-gradient text-white">
-              Create My AI Assistant Today
-            </Button>
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5" />
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white max-w-2xl text-left">
+              Let AI Assist You, So You Can Focus on What Matters
+            </h2>
             <Button
               size="lg"
-              variant="outline"
-              className="border-black text-black hover:bg-gray-100"
+              className="bg-white rounded-xl text-black hover:bg-gray-100 min-w-[150px] px-4"
             >
-              Talk to Our Team for Custom Needs
+              Start creating for free
             </Button>
           </div>
         </motion.div>

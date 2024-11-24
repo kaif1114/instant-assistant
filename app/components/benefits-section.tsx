@@ -1,53 +1,63 @@
-import { Clock, Globe, MessageSquare, Paintbrush } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Mic, Pencil, Download } from "lucide-react";
 
 function BenefitsSection() {
   const benefits = [
     {
-      title: "No More Repeated Questions",
+      title: "Record",
       description:
-        "Your assistant handles FAQs and routine tasks, so you don't have to.",
-      icon: MessageSquare,
+        "Record with our chrome extension. Get AI generated document and video in seconds.",
+      icon: Mic,
+      image: "/placeholder.svg?height=400&width=600",
     },
     {
-      title: "Customizable in Minutes",
+      title: "Edit",
       description:
-        "Tailor your assistant's tone, responses, and appearance to fit your brand.",
-      icon: Paintbrush,
+        "Modify the script if required. Select your desired AI voiceover, wallpaper, music.",
+      icon: Pencil,
+      image: "/placeholder.svg?height=400&width=600",
     },
     {
-      title: "Works 24/7",
-      description: "Never miss a query, even outside business hours.",
-      icon: Clock,
-    },
-    {
-      title: "Embed Anywhere",
+      title: "Download",
       description:
-        "Integrate seamlessly into your website, app, or share a unique link.",
-      icon: Globe,
+        "Hit generate and download the document & video in the format of your choice.",
+      icon: Download,
+      image: "/placeholder.svg?height=400&width=600",
     },
   ];
 
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32">
-      <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-            Let Your Assistant Handle the Repetitive Tasks
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
-            {benefits.map((benefit) => (
-              <Card key={benefit.title} className="relative overflow-hidden">
-                <CardHeader>
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <benefit.icon className="h-6 w-6 text-primary" />
+    <section className="w-full py-24 bg-[#FAFAFA]">
+      <div className="container mx-auto px-4 md:px-6 max-w-[1200px]">
+        <div className="flex flex-col items-start">
+          <div className="mb-16">
+            <Badge className="mb-6 px-4 py-1.5 text-sm font-medium bg-amber-50 text-amber-900 hover:bg-amber-50 border-0">
+              PICTURE PERFECT CONTENT IN 1, 2 AND 3.
+            </Badge>
+            <h2 className="text-[48px] font-bold tracking-tight text-gray-900">
+              How Instant Assistant works
+            </h2>
+          </div>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 w-full">
+            {benefits.map((benefit, index) => (
+              <div key={index} className="flex flex-col">
+                <Card className="border rounded-xl overflow-hidden bg-white shadow-sm mb-6">
+                  <div className="aspect-video relative bg-gray-100 w-full overflow-hidden">
+                    <img
+                      src={benefit.image}
+                      alt={`${benefit.title} illustration`}
+                      className="object-cover w-full h-full"
+                    />
                   </div>
-                  <CardTitle className="text-xl">{benefit.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{benefit.description}</p>
-                </CardContent>
-              </Card>
+                </Card>
+                <h3 className="text-2xl font-semibold mb-2 text-gray-900">
+                  {benefit.title}
+                </h3>
+                <p className="text-base text-gray-600 leading-relaxed">
+                  {benefit.description}
+                </p>
+              </div>
             ))}
           </div>
         </div>

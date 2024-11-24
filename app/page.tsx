@@ -1,14 +1,14 @@
-import BenefitsSection from "./components/benefits-section";
-import CTASection from "./components/cta-section";
-import FAQ from "./components/faq";
-import Footer from "./components/footer";
-import HeroSection from "./components/hero-section";
-import HowItWorks from "./components/how-it-works";
 import Navbar from "./components/navbar";
+import HeroSection from "./components/hero-section";
 import SocialProof from "./components/social-proof";
+import BenefitsSection from "./components/benefits-section";
+import HowItWorks from "./components/how-it-works";
 import Testimonials from "./components/testimonials";
+import FAQ from "./components/faq";
+import CTASection from "./components/cta-section";
+import Footer from "./components/footer";
 
-const page = () => {
+export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -24,6 +24,4 @@ const page = () => {
       <Footer />
     </div>
   );
-};
-
-export default page;
+}
