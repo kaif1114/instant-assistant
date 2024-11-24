@@ -8,6 +8,17 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import "./globals.css";
+import { Inter_Tight } from "next/font/google";
+
+const interTight = Inter_Tight({
+  subsets: ["latin"],
+  variable: "--font-inter-tight",
+});
+
+const satoshi = localFont({
+  src: "./fonts/Satoshi-Variable.woff",
+  variable: "--font-satoshi",
+});
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,7 +45,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${interTight.variable} ${satoshi.variable} font-sans antialiased`}
         >
           {/* <header>
             <SignedOut>
