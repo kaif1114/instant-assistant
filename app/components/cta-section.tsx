@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 function CTASection() {
   return (
     <section className="w-full py-8 md:py-12 lg:py-16">
-      <div className="container mx-auto max-w-7xl px-4 md:px-6">
+      <div className="container mx-auto max-w-6xl px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -16,7 +16,7 @@ function CTASection() {
         >
           <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5" />
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white max-w-2xl text-left">
+            <h2 className="text-3xl lg:text-[2.5rem] font-bold tracking-tight text-white max-w-2xl text-left">
               Let AI Assist You, So You Can Focus on What Matters
             </h2>
             <Button

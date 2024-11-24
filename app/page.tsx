@@ -10,9 +10,9 @@ import Footer from "./components/footer";
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col relative">
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 -mt-16">
         <HeroSection />
         <SocialProof />
         <BenefitsSection />
