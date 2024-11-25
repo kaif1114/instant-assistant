@@ -125,7 +125,7 @@ const data = {
 
 export default function Aside({ children }: PropsWithChildren) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="bg-gradient-to-br from-black via-gray-900 to-black text-white">
       <Sidebar variant="inset">
         <SidebarHeader>
           <SidebarMenu>

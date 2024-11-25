@@ -6,12 +6,15 @@ import { Assistants } from "@prisma/client";
 
 interface Props {
   params: Promise<{ assistantId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-const sessionId = uuidv4();
-
-const Page = async ({ params }: Props) => {
+const Page = async ({ params, searchParams }: Props) => {
   const { assistantId } = await params;
+  const searchParamsResolved = await searchParams;
+  const isEmbedded = searchParamsResolved.embedded === "true";
+  const sessionId = uuidv4();
+
   let assistant: Assistants | null;
   try {
     assistant = await prisma.assistants.findUnique({
@@ -31,6 +34,7 @@ const Page = async ({ params }: Props) => {
       assistantId={assistantId}
       assistant={assistant}
       sessionId={sessionId}
+      embedded={isEmbedded}
     />
   );
 };

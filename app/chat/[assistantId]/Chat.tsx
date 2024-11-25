@@ -23,6 +23,7 @@ interface Props {
   assistantId: string;
   sessionId: string;
   assistant: Assistants;
+  embedded?: boolean;
 }
 
 interface UserDetails {
@@ -30,7 +31,12 @@ interface UserDetails {
   email: string;
 }
 
-export default function Chat({ assistantId, sessionId, assistant }: Props) {
+export default function Chat({
+  assistantId,
+  sessionId,
+  assistant,
+  embedded = false,
+}: Props) {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [message, setMessage] = React.useState("");
   const [chatHistory, setChatHistory] = useState<
@@ -118,9 +124,145 @@ export default function Chat({ assistantId, sessionId, assistant }: Props) {
     }
   };
 
+  if (embedded) {
+    return (
+      <Card className="w-full h-[100vh] flex flex-col rounded-[20px] overflow-hidden shadow-md">
+        <CardHeader
+          className="flex flex-row items-center gap-4 p-4"
+          style={{ backgroundColor: assistant.primaryColor }}
+        >
+          <h2 className="text-xl font-bold text-white text-center w-full">
+            {assistant.name}
+          </h2>
+        </CardHeader>
+
+        {!userDetails ? (
+          <CardContent className="p-6 space-y-6">
+            <form onSubmit={handleUserDetailsSubmit} className="space-y-4">
+              <Input
+                type="text"
+                name="name"
+                placeholder="Your Name"
+                className="h-12 px-4 text-base rounded-xl"
+                required
+              />
+              <Input
+                type="email"
+                name="email"
+                placeholder="Your Email"
+                className="h-12 px-4 text-base rounded-xl"
+                required
+              />
+              <Button
+                style={{ backgroundColor: assistant.primaryColor }}
+                type="submit"
+                className="w-full h-12 text-base rounded-xl"
+              >
+                Start Conversation
+              </Button>
+            </form>
+          </CardContent>
+        ) : (
+          <>
+            <CardContent className="flex-grow p-0 overflow-hidden h-full">
+              <ScrollArea className="h-full">
+                <div className="p-4 space-y-4" ref={scrollAreaRef}>
+                  <div className="flex flex-col items-center text-center mb-6">
+                    <Avatar className="w-16 h-16 bg-[#4051b5] rounded-full flex items-center justify-center mb-4">
+                      <AvatarImage src={assistant.avatarUrl} alt="Assistant" />
+                      <AvatarFallback>AI</AvatarFallback>
+                    </Avatar>
+
+                    <p className="text-sm text-gray-600 max-w-[250px]">
+                      {assistant.description}
+                    </p>
+                  </div>
+                  {chatHistory.map((msg, index) => (
+                    <div
+                      key={index}
+                      className={`flex ${
+                        msg.sender === "user" ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      {msg.sender === "support" && (
+                        <Avatar className="h-8 w-8 mr-2 mt-3">
+                          <AvatarImage src={assistant.avatarUrl} alt="Bot" />
+                          <AvatarFallback>AI</AvatarFallback>
+                        </Avatar>
+                      )}
+                      <MarkdownPreview
+                        source={msg.text}
+                        className={`max-w-[75%] p-3 rounded-lg `}
+                        style={{
+                          backgroundColor:
+                            msg.sender === "user"
+                              ? assistant.primaryColor
+                              : assistant.secondaryColor,
+                          color: msg.sender === "user" ? "white" : "black",
+                        }}
+                      />
+                    </div>
+                  ))}
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <Avatar className="h-8 w-8 mr-2 mt-3">
+                        <AvatarImage src={assistant.avatarUrl} alt="Bot" />
+                        <AvatarFallback>AI</AvatarFallback>
+                      </Avatar>
+                      <div
+                        className="max-w-[75%] p-3 rounded-lg "
+                        style={{ backgroundColor: assistant.secondaryColor }}
+                      >
+                        <Skeleton className="h-5 w-[200px]" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+            <CardFooter className="p-4 border-t">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  sendMessage();
+                }}
+                className="relative w-full flex items-center"
+              >
+                <Input
+                  autoFocus={true}
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Type your message..."
+                  className="w-full rounded-full pr-12 pl-4" // Increased padding-right for button space, added padding-left for aesthetics
+                  style={{ paddingRight: "4rem" }} // Extra padding to avoid text overlap
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={isLoading || !userDetails}
+                  className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
+                  style={{ backgroundColor: assistant.primaryColor }}
+                >
+                  <Send className="h-4 w-4" />
+                  <span className="sr-only">Send message</span>
+                </Button>
+              </form>
+            </CardFooter>
+          </>
+        )}
+      </Card>
+    );
+  }
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-background p-4 ">
-      <div className="relative w-full max-w-2xl ">
+    <div
+      className={cn(
+        "flex justify-center items-center bg-background p-4",
+        embedded ? "fixed bottom-4 right-4 min-h-0" : "min-h-screen"
+      )}
+    >
+      <div className="relative w-full max-w-2xl">
         <div
           className={cn({
             "flex justify-center items-center min-h-screen  p-4 transition-all duration-200":
