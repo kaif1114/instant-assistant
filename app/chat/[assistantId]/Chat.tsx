@@ -18,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Props {
   assistantId: string;
@@ -124,306 +125,213 @@ export default function Chat({
     }
   };
 
-  if (embedded) {
-    return (
-      <Card className="w-full h-[100vh] flex flex-col rounded-[20px] overflow-hidden shadow-md">
-        <CardHeader
-          className="flex flex-row items-center gap-4 p-4"
-          style={{ backgroundColor: assistant.primaryColor }}
-        >
-          <h2 className="text-xl font-bold text-white text-center w-full">
-            {assistant.name}
-          </h2>
-        </CardHeader>
-
-        {!userDetails ? (
-          <CardContent className="p-6 space-y-6">
-            <form onSubmit={handleUserDetailsSubmit} className="space-y-4">
-              <Input
-                type="text"
-                name="name"
-                placeholder="Your Name"
-                className="h-12 px-4 text-base rounded-xl"
-                required
-              />
-              <Input
-                type="email"
-                name="email"
-                placeholder="Your Email"
-                className="h-12 px-4 text-base rounded-xl"
-                required
-              />
-              <Button
-                style={{ backgroundColor: assistant.primaryColor }}
-                type="submit"
-                className="w-full h-12 text-base rounded-xl"
-              >
-                Start Conversation
-              </Button>
-            </form>
-          </CardContent>
-        ) : (
-          <>
-            <CardContent className="flex-grow p-0 overflow-hidden h-full">
-              <ScrollArea className="h-full">
-                <div className="p-4 space-y-4" ref={scrollAreaRef}>
-                  <div className="flex flex-col items-center text-center mb-6">
-                    <Avatar className="w-16 h-16 bg-[#4051b5] rounded-full flex items-center justify-center mb-4">
-                      <AvatarImage src={assistant.avatarUrl} alt="Assistant" />
-                      <AvatarFallback>AI</AvatarFallback>
-                    </Avatar>
-
-                    <p className="text-sm text-gray-600 max-w-[250px]">
-                      {assistant.description}
-                    </p>
-                  </div>
-                  {chatHistory.map((msg, index) => (
-                    <div
-                      key={index}
-                      className={`flex ${
-                        msg.sender === "user" ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      {msg.sender === "support" && (
-                        <Avatar className="h-8 w-8 mr-2 mt-3">
-                          <AvatarImage src={assistant.avatarUrl} alt="Bot" />
-                          <AvatarFallback>AI</AvatarFallback>
-                        </Avatar>
-                      )}
-                      <MarkdownPreview
-                        source={msg.text}
-                        className={`max-w-[75%] p-3 rounded-lg `}
-                        style={{
-                          backgroundColor:
-                            msg.sender === "user"
-                              ? assistant.primaryColor
-                              : assistant.secondaryColor,
-                          color: msg.sender === "user" ? "white" : "black",
-                        }}
-                      />
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="flex justify-start">
-                      <Avatar className="h-8 w-8 mr-2 mt-3">
-                        <AvatarImage src={assistant.avatarUrl} alt="Bot" />
-                        <AvatarFallback>AI</AvatarFallback>
-                      </Avatar>
-                      <div
-                        className="max-w-[75%] p-3 rounded-lg "
-                        style={{ backgroundColor: assistant.secondaryColor }}
-                      >
-                        <Skeleton className="h-5 w-[200px]" />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-            <CardFooter className="p-4 border-t">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  sendMessage();
-                }}
-                className="relative w-full flex items-center"
-              >
-                <Input
-                  autoFocus={true}
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="w-full rounded-full pr-12 pl-4" // Increased padding-right for button space, added padding-left for aesthetics
-                  style={{ paddingRight: "4rem" }} // Extra padding to avoid text overlap
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  disabled={isLoading || !userDetails}
-                  className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
-                  style={{ backgroundColor: assistant.primaryColor }}
-                >
-                  <Send className="h-4 w-4" />
-                  <span className="sr-only">Send message</span>
-                </Button>
-              </form>
-            </CardFooter>
-          </>
-        )}
-      </Card>
-    );
-  }
-
   return (
-    <div
-      className={cn(
-        "flex justify-center items-center bg-background p-4",
-        embedded ? "fixed bottom-4 right-4 min-h-0" : "min-h-screen"
-      )}
-    >
-      <div className="relative w-full max-w-2xl">
+    <AnimatePresence>
+      <motion.div
+        className={cn(
+          "flex justify-center items-center bg-background",
+          embedded ? "w-full h-[100vh]" : "min-h-screen p-4"
+        )}
+        initial={embedded ? { opacity: 0, y: 100 } : { opacity: 1, y: 0 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={embedded ? { opacity: 0, y: 100 } : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      >
         <div
-          className={cn({
-            "flex justify-center items-center min-h-screen  p-4 transition-all duration-200":
-              true,
-            "blur-[2px]": !userDetails,
-          })}
+          className={cn("relative", embedded ? "w-full" : "w-full max-w-2xl")}
         >
-          <Card className="w-full max-w-md h-[600px] sm:h-[700px] flex flex-col rounded-[20px] overflow-hidden shadow-md">
-            <CardHeader
-              className="flex flex-row items-center gap-4 p-4 "
-              style={{ backgroundColor: assistant.primaryColor }}
+          {/* Chat UI - Will be blurred when no user details */}
+          <div
+            className={cn(
+              "flex justify-center items-center transition-all duration-200",
+              {
+                "h-screen": embedded,
+                "blur-[2px]": !userDetails,
+              }
+            )}
+          >
+            <Card
+              className={cn(
+                "flex flex-col rounded-[20px] overflow-hidden shadow-md",
+                embedded
+                  ? "w-full h-full"
+                  : "w-full max-w-md h-[600px] sm:h-[700px]"
+              )}
             >
-              <Button variant="ghost" size="icon" className="text-white ">
-                <ArrowLeft className="h-6 w-6" />
-              </Button>
-              <h2 className="text-xl font-bold text-white  text-center w-full pr-10">
-                {assistant.name}
-              </h2>
-            </CardHeader>
-            <CardContent className="flex-grow p-0 overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="p-4 space-y-4" ref={scrollAreaRef}>
-                  <div className="flex flex-col items-center text-center mb-6">
-                    <Avatar className="w-16 h-16 bg-[#4051b5] rounded-full flex items-center justify-center mb-4">
-                      <AvatarImage src={assistant.avatarUrl} alt="Assistant" />
-                      <AvatarFallback>AI</AvatarFallback>
-                    </Avatar>
+              <CardHeader
+                className="flex flex-row items-center gap-4 p-4"
+                style={{ backgroundColor: assistant.primaryColor }}
+              >
+                {!embedded && (
+                  <Button variant="ghost" size="icon" className="text-white">
+                    <ArrowLeft className="h-6 w-6" />
+                  </Button>
+                )}
+                <h2
+                  className={cn(
+                    "text-xl font-bold text-white text-center",
+                    embedded ? "w-full" : "w-full pr-10"
+                  )}
+                >
+                  {assistant.name}
+                </h2>
+              </CardHeader>
 
-                    <p className="text-sm text-gray-600 max-w-[250px]">
-                      {assistant.description}
-                    </p>
-                  </div>
-                  {chatHistory.map((msg, index) => (
-                    <div
-                      key={index}
-                      className={`flex ${
-                        msg.sender === "user" ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      {msg.sender === "support" && (
+              <CardContent className="flex-grow p-0 overflow-hidden h-full">
+                <ScrollArea className="h-full">
+                  <div className="p-4 space-y-4" ref={scrollAreaRef}>
+                    <div className="flex flex-col items-center text-center mb-6">
+                      <Avatar className="w-16 h-16 bg-[#4051b5] rounded-full flex items-center justify-center mb-4">
+                        <AvatarImage
+                          src={assistant.avatarUrl}
+                          alt="Assistant"
+                        />
+                        <AvatarFallback>AI</AvatarFallback>
+                      </Avatar>
+
+                      <p className="text-sm text-gray-600 max-w-[250px]">
+                        {assistant.description}
+                      </p>
+                    </div>
+                    {chatHistory.map((msg, index) => (
+                      <div
+                        key={index}
+                        className={`flex ${
+                          msg.sender === "user"
+                            ? "justify-end"
+                            : "justify-start"
+                        }`}
+                      >
+                        {msg.sender === "support" && (
+                          <Avatar className="h-8 w-8 mr-2 mt-3">
+                            <AvatarImage src={assistant.avatarUrl} alt="Bot" />
+                            <AvatarFallback>AI</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <MarkdownPreview
+                          source={msg.text}
+                          className={`max-w-[75%] p-3 rounded-lg `}
+                          style={{
+                            backgroundColor:
+                              msg.sender === "user"
+                                ? assistant.primaryColor
+                                : assistant.secondaryColor,
+                            color: msg.sender === "user" ? "white" : "black",
+                          }}
+                        />
+                      </div>
+                    ))}
+                    {isLoading && (
+                      <div className="flex justify-start">
                         <Avatar className="h-8 w-8 mr-2 mt-3">
                           <AvatarImage src={assistant.avatarUrl} alt="Bot" />
                           <AvatarFallback>AI</AvatarFallback>
                         </Avatar>
-                      )}
-                      <MarkdownPreview
-                        source={msg.text}
-                        className={`max-w-[75%] p-3 rounded-lg `}
-                        style={{
-                          backgroundColor:
-                            msg.sender === "user"
-                              ? assistant.primaryColor
-                              : assistant.secondaryColor,
-                          color: msg.sender === "user" ? "white" : "black",
-                        }}
-                      />
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="flex justify-start">
-                      <Avatar className="h-8 w-8 mr-2 mt-3">
-                        <AvatarImage src={assistant.avatarUrl} alt="Bot" />
-                        <AvatarFallback>AI</AvatarFallback>
-                      </Avatar>
-                      <div
-                        className="max-w-[75%] p-3 rounded-lg "
-                        style={{ backgroundColor: assistant.secondaryColor }}
-                      >
-                        <Skeleton className="h-5 w-[200px]" />
+                        <div
+                          className="max-w-[75%] p-3 rounded-lg "
+                          style={{
+                            backgroundColor: assistant.secondaryColor,
+                          }}
+                        >
+                          <Skeleton className="h-5 w-[200px]" />
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-            <CardFooter className="p-4 border-t">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  sendMessage();
-                }}
-                className="relative w-full flex items-center"
-              >
-                <Input
-                  autoFocus={true}
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="w-full rounded-full pr-12 pl-4" // Increased padding-right for button space, added padding-left for aesthetics
-                  style={{ paddingRight: "4rem" }} // Extra padding to avoid text overlap
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  disabled={isLoading || !userDetails}
-                  className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
-                  style={{ backgroundColor: assistant.primaryColor }}
-                >
-                  <Send className="h-4 w-4" />
-                  <span className="sr-only">Send message</span>
-                </Button>
-              </form>
-            </CardFooter>
-          </Card>
-        </div>
-
-        {!userDetails && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="absolute inset-0  rounded-[20px]" />
-            <Card className="w-96 max-w-md shadow-xl rounded-2xl relative z-50">
-              <CardHeader
-                className=" text-white p-4 rounded-t-2xl"
-                style={{ backgroundColor: assistant.primaryColor }}
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 bg-white text-black">
-                    <AvatarImage
-                      src={assistant.avatarUrl}
-                      alt="Assistant Avatar"
-                    />
-                    <AvatarFallback>AI</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h2 className="text-xl font-semibold">{assistant.name}</h2>
-                    <p className="text-sm text-gray-300">Online</p>
+                    )}
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                <h3 className="text-xl font-semibold">
-                  Please provide your details to start the conversation:
-                </h3>
-                <form onSubmit={handleUserDetailsSubmit} className="space-y-4">
+                </ScrollArea>
+              </CardContent>
+              <CardFooter className="p-4 border-t">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    sendMessage();
+                  }}
+                  className="relative w-full flex items-center"
+                >
                   <Input
+                    autoFocus={true}
                     type="text"
-                    name="name"
-                    placeholder="Your Name"
-                    className="h-12 px-4 text-base rounded-xl"
-                    required
-                  />
-                  <Input
-                    type="email"
-                    name="email"
-                    placeholder="Your Email"
-                    className="h-12 px-4 text-base rounded-xl"
-                    required
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    className="w-full rounded-full pr-12 pl-4" // Increased padding-right for button space, added padding-left for aesthetics
+                    style={{ paddingRight: "4rem" }} // Extra padding to avoid text overlap
                   />
                   <Button
-                    style={{ backgroundColor: assistant.primaryColor }}
                     type="submit"
-                    className="w-full h-12 text-base bg-black hover:bg-gray-900 rounded-xl"
+                    size="icon"
+                    disabled={isLoading || !userDetails}
+                    className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
+                    style={{ backgroundColor: assistant.primaryColor }}
                   >
-                    Start Conversation
+                    <Send className="h-4 w-4" />
+                    <span className="sr-only">Send message</span>
                   </Button>
                 </form>
-              </CardContent>
+              </CardFooter>
             </Card>
           </div>
-        )}
-      </div>
-    </div>
+
+          {/* Single User Details Form - Shown as overlay when no user details */}
+          {!userDetails && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Card className="w-96 max-w-md shadow-xl rounded-2xl relative z-50">
+                <CardHeader
+                  className="text-white p-4 rounded-t-2xl"
+                  style={{ backgroundColor: assistant.primaryColor }}
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10 bg-white text-black">
+                      <AvatarImage
+                        src={assistant.avatarUrl}
+                        alt="Assistant Avatar"
+                      />
+                      <AvatarFallback>AI</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h2 className="text-xl font-semibold">
+                        {assistant.name}
+                      </h2>
+                      <p className="text-sm text-gray-300">Online</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  <h3 className="text-xl font-semibold">
+                    Please provide your details to start the conversation:
+                  </h3>
+                  <form
+                    onSubmit={handleUserDetailsSubmit}
+                    className="space-y-4"
+                  >
+                    <Input
+                      type="text"
+                      name="name"
+                      placeholder="Your Name"
+                      className="h-12 px-4 text-base rounded-xl"
+                      required
+                    />
+                    <Input
+                      type="email"
+                      name="email"
+                      placeholder="Your Email"
+                      className="h-12 px-4 text-base rounded-xl"
+                      required
+                    />
+                    <Button
+                      style={{ backgroundColor: assistant.primaryColor }}
+                      type="submit"
+                      className="w-full h-12 text-base rounded-xl"
+                    >
+                      Start Conversation
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
