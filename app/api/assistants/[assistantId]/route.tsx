@@ -1,6 +1,58 @@
 import { pineconeIndex } from "@/app/pinecone-config";
 import prisma from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import sha1 from "sha1";
+
+async function deleteImage(url: string) {
+  const regex = /\/v\d+\/([^/?]+)/;
+  const publicId = url.match(regex);
+  const timestamp = new Date().getTime();
+
+  if (publicId) {
+    try {
+      // Make sure these environment variables are properly set
+      if (
+        !process.env.CLOUDINARY_API_SECRET ||
+        !process.env.CLOUDINARY_API_KEY ||
+        !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+      ) {
+        throw new Error("Missing Cloudinary credentials");
+      }
+
+      const string = `public_id=${publicId[1]}&timestamp=${timestamp}${process.env.CLOUDINARY_API_SECRET}`;
+      const signature = sha1(string);
+
+      const formData = new FormData();
+      formData.append("public_id", publicId[1]);
+      formData.append("signature", signature);
+      formData.append("api_key", process.env.CLOUDINARY_API_KEY);
+      formData.append("timestamp", timestamp.toString());
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/destroy`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Cloudinary error:", errorData);
+        throw new Error(
+          `Failed to delete image: ${res.status} ${res.statusText}`
+        );
+      }
+
+      return await res.json();
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      throw error;
+    }
+  } else {
+    throw new Error("Unable to delete image: No publicId found");
+  }
+}
 
 interface Props {
   params: Promise<{ assistantId: string }>;
@@ -46,6 +98,9 @@ export async function DELETE(request: NextRequest, { params }: Props) {
     // sessionIds.forEach((id) => {
     //   return { session_id: id };
     // });
+    const assistant = await prisma.assistants.findUnique({
+      where: { assistantId },
+    });
     await prisma.$transaction([
       prisma.langchain_chat_histories.deleteMany({
         where: { OR: [...sessionIds] },
@@ -59,6 +114,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
 
     const pineconeNamespace = pineconeIndex.namespace(assistantId);
     await pineconeNamespace.deleteAll();
+    deleteImage(assistant!.avatarUrl);
     return NextResponse.json({ message: "success" }, { status: 202 });
   } catch (error) {
     console.log(error);

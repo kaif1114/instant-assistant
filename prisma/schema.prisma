@@ -29,7 +29,7 @@ model Assistants {
   userId          String
   functionality   String
   primaryColor    String            @default("#478ACD")
-  secondaryColor  String            @default("#0A0A15")
+  secondaryColor  String            @default("#f2f2f2")
   avatarUrl       String
   startingMessage String            @default("Hello! How may I help you?")
   user            User              @relation(fields: [userId], references: [userId])

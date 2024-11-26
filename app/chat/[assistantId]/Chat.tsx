@@ -249,12 +249,13 @@ export default function Chat({
                   className="relative w-full flex items-center"
                 >
                   <Input
+                    focusColor={assistant.primaryColor}
                     autoFocus={true}
                     type="text"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type your message..."
-                    className="w-full rounded-full pr-12 pl-4" // Increased padding-right for button space, added padding-left for aesthetics
+                    className="w-full rounded-full pr-12 pl-4 shadow-sm" // Increased padding-right for button space, added padding-left for aesthetics
                     style={{ paddingRight: "4rem" }} // Extra padding to avoid text overlap
                   />
                   <Button
