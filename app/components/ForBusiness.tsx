@@ -91,25 +91,31 @@ export default function ForBusiness() {
               onHoverStart={() => setHoveredId(example.id)}
               onHoverEnd={() => setHoveredId(null)}
             >
-              <div className="relative rounded-xl overflow-hidden shadow-lg">
+              <div className="relative overflow-visible">
                 <Image
                   src={example.image}
                   alt={example.name}
                   width={400}
                   height={600}
-                  className="w-full h-auto"
+                  className="w-full h-auto transition-all duration-300 ease-in-out"
+                  style={{
+                    background: "transparent",
+                    filter:
+                      hoveredId === example.id
+                        ? "brightness(1.1) contrast(1.1)"
+                        : "none",
+                  }}
                 />
-
                 <AnimatePresence>
                   {hoveredId === example.id && (
                     <motion.div
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
+                      exit={{ opacity: 0, y: 10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-sm"
+                      className="absolute -bottom-20  -translate-x-1/2 bg-white rounded-lg shadow-lg px-4 py-3 min-w-[200px] w-full text-center"
                     >
-                      <h3 className="text-lg font-semibold mb-1">
+                      <h3 className="text-base font-medium mb-1">
                         {example.name}
                       </h3>
                       <p className="text-sm text-gray-600">
@@ -118,45 +124,6 @@ export default function ForBusiness() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-
-                {/* Chat UI Elements */}
-                <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
-                      <svg
-                        className="w-5 h-5 text-gray-700"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-sm font-medium text-white/90 bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
-                      {example.name}
-                    </span>
-                  </div>
-                  <button className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5 text-gray-700"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
               </div>
             </motion.div>
           ))}
