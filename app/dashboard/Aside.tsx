@@ -5,17 +5,10 @@ import {
   Bot,
   ChevronRight,
   Command,
-  Folder,
-  Frame,
   LifeBuoy,
-  Map,
-  MoreHorizontal,
-  PieChart,
   Send,
   Settings2,
-  Share,
   SquareTerminal,
-  Trash2,
 } from "lucide-react";
 
 import {
@@ -23,13 +16,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -48,7 +34,7 @@ import {
   SidebarMenuSubItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { UserButton } from "@clerk/nextjs";
+import { useAuth, UserButton, useUser } from "@clerk/nextjs";
 import { PropsWithChildren } from "react";
 
 const data = {
@@ -124,6 +110,7 @@ const data = {
 };
 
 export default function Aside({ children }: PropsWithChildren) {
+  const { user } = useUser();
   return (
     <SidebarProvider className="bg-gradient-to-br from-black via-gray-900 to-black text-white">
       <Sidebar variant="inset">
@@ -211,8 +198,10 @@ export default function Aside({ children }: PropsWithChildren) {
           <div className="flex gap-2">
             <UserButton />
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{data.user.name}</span>
-              <span className="truncate text-xs">{data.user.email}</span>
+              <span className="truncate font-semibold">{user?.fullName}</span>
+              <span className="truncate text-xs">
+                {user?.primaryEmailAddress?.toString()}
+              </span>
             </div>
           </div>
         </SidebarFooter>

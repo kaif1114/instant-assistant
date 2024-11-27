@@ -17,6 +17,12 @@ async function deleteImage(url: string) {
         !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
       ) {
         throw new Error("Missing Cloudinary credentials");
+      } else if (
+        publicId[1] === "avatars/avatar1" ||
+        publicId[1] === "avatars/avatar2" ||
+        publicId[1] === "avatars/avatar3"
+      ) {
+        return;
       }
 
       const string = `public_id=${publicId[1]}&timestamp=${timestamp}${process.env.CLOUDINARY_API_SECRET}`;

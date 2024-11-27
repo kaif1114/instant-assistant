@@ -4,8 +4,17 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 function Navbar() {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -67,10 +76,24 @@ function Navbar() {
             Testimonials
           </Link>
         </nav>
+
         <div className="flex items-center gap-4">
-          <Button variant="default" className="btn-gradient text-white">
-            Create My Assistant Now
-          </Button>
+          <SignedOut>
+            <SignUpButton>
+              <Button variant="default" className="btn-gradient text-white">
+                Create My Assistant Now
+              </Button>
+            </SignUpButton>
+          </SignedOut>
+          <SignedIn>
+            <Button
+              onClick={() => router.push("/dashboard")}
+              variant="default"
+              className="btn-gradient text-white"
+            >
+              Dashboard
+            </Button>
+          </SignedIn>
         </div>
       </div>
     </motion.header>

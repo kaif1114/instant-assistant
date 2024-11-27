@@ -17,7 +17,8 @@ export const useNewAssistantStore = create<DataStore>((set) => ({
     startingMessage: "",
     primaryColor: "#478ACD",
     secondaryColor: "#f2f2f2",
-    avatarUrl: "/placeholder.svg",
+    avatarUrl:
+      "https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg",
   },
   setData: (newData) => set((prev) => ({ data: { ...prev.data, ...newData } })),
 }));

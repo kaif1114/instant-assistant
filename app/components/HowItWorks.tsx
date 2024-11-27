@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Mic, Pencil, Download } from "lucide-react";
 
-function BenefitsSection() {
+function HowItWorks() {
   const benefits = [
     {
       title: "Record",
@@ -33,7 +33,7 @@ function BenefitsSection() {
         <div className="flex flex-col items-start">
           <div className="mb-16">
             <Badge className="mb-6 px-4 py-1.5 text-sm font-medium bg-amber-50 text-amber-900 hover:bg-amber-50 border-0">
-              PICTURE PERFECT CONTENT IN 1, 2 AND 3.
+              YOUR ASSISTANT IN 3 STEPS.
             </Badge>
             <h2 className="text-[48px] font-bold tracking-tight text-gray-900">
               How Instant Assistant works
@@ -66,4 +66,4 @@ function BenefitsSection() {
   );
 }
 
-export default BenefitsSection;
+export default HowItWorks;

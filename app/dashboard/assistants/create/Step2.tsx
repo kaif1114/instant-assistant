@@ -81,14 +81,23 @@ const Step2 = () => {
               <AvatarFallback>AI</AvatarFallback>
             </Avatar>
             <div className="space-y-2">
-              <Select onValueChange={(value) => setData({ avatarUrl: value })}>
+              <Select
+                defaultValue="https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg"
+                onValueChange={(value) => setData({ avatarUrl: value })}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Select avatar" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="/avatars/avatar1.png">Avatar 1</SelectItem>
-                  <SelectItem value="/avatars/avatar2.png">Avatar 2</SelectItem>
-                  <SelectItem value="/avatars/avatar3.png">Avatar 3</SelectItem>
+                  <SelectItem value="https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar1.jpg">
+                    Avatar 1
+                  </SelectItem>
+                  <SelectItem value="https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar2.jpg">
+                    Avatar 2
+                  </SelectItem>
+                  <SelectItem value="https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg">
+                    Avatar 3
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <CldUploadWidget
