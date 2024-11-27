@@ -8,7 +8,7 @@ function executeScript() {
     if (typeof window.initAIChat === "function") {
       console.log("initAIChat is available");
       window.initAIChat({
-        assistantId: "ae04643b-f123-4359-abed-2e1a27d7344b",
+        assistantId: "5533213a-74b6-4713-be51-4f59e65d9b17",
       });
     } else {
       console.error("initAIChat is not available");

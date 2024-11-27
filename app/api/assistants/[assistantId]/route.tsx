@@ -49,8 +49,6 @@ async function deleteImage(url: string) {
       console.error("Error deleting image:", error);
       throw error;
     }
-  } else {
-    throw new Error("Unable to delete image: No publicId found");
   }
 }
 

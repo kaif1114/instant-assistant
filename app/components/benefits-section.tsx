@@ -9,21 +9,21 @@ function BenefitsSection() {
       description:
         "Record with our chrome extension. Get AI generated document and video in seconds.",
       icon: Mic,
-      image: "/placeholder.svg?height=400&width=600",
+      image: "/placeholder.webp?height=400&width=600",
     },
     {
       title: "Edit",
       description:
         "Modify the script if required. Select your desired AI voiceover, wallpaper, music.",
       icon: Pencil,
-      image: "/placeholder.svg?height=400&width=600",
+      image: "/placeholder.webp?height=400&width=600",
     },
     {
       title: "Download",
       description:
         "Hit generate and download the document & video in the format of your choice.",
       icon: Download,
-      image: "/placeholder.svg?height=400&width=600",
+      image: "/placeholder.webp?height=400&width=600",
     },
   ];
 

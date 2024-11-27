@@ -2,11 +2,11 @@ import Navbar from "./components/navbar";
 import HeroSection from "./components/hero-section";
 import SocialProof from "./components/social-proof";
 import BenefitsSection from "./components/benefits-section";
-import HowItWorks from "./components/how-it-works";
 import Testimonials from "./components/testimonials";
 import FAQ from "./components/faq";
 import CTASection from "./components/cta-section";
 import Footer from "./components/footer";
+import Benefits from "./components/Benefits/benefits";
 
 export default function LandingPage() {
   return (
@@ -14,9 +14,9 @@ export default function LandingPage() {
       <Navbar />
       <main className="flex-1 -mt-16">
         <HeroSection />
-        <SocialProof />
+
         <BenefitsSection />
-        <HowItWorks />
+        <Benefits />
         <Testimonials />
         <FAQ />
         <CTASection />

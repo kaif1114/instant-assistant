@@ -3,9 +3,10 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import ProductHuntBadge from "./product-hunt-badge";
-import CurvedArrow from "./curved-arrow";
 import { Play } from "lucide-react";
 import { ChatPreview } from "./chat-preview";
+import SocialProof from "./social-proof";
+import ForBusiness from "./ForBusiness";
 
 function HeroSection() {
   return (
@@ -27,7 +28,7 @@ function HeroSection() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="max-w-6xl space-y-4"
             >
-              <h1 className="text-4xl  lg:text-5xl font-bold tracking-tight">
+              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight">
                 Tired of Answering the{" "}
                 <span className="text-[#E97451]">Same Questions</span> ?{" "}
                 <p>
@@ -63,7 +64,6 @@ function HeroSection() {
               </Button>
             </motion.div>
           </div>
-          {/* <CurvedArrow /> */}
         </div>
       </section>
 
@@ -169,6 +169,7 @@ function HeroSection() {
           </div>
         </div>
       </section>
+      <ForBusiness />
     </div>
   );
 }
