@@ -3,6 +3,33 @@ import prisma from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import sha1 from "sha1";
 
+interface Props {
+  params: Promise<{ assistantId: string }>;
+}
+
+export async function GET(request: NextRequest, { params }: Props) {
+  const { assistantId } = await params;
+
+  try {
+    const assistant = await prisma.assistants.findUnique({
+      where: { assistantId },
+    });
+
+    if (!assistant) {
+      return NextResponse.json(
+        {
+          error: "No assistant found with specified assistantId",
+        },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json({ assistant }, { status: 200 });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ error }, { status: 500 });
+  }
+}
+
 async function deleteImage(url: string) {
   const regex = /\/v\d+\/([^/?]+)/;
   const publicId = url.match(regex);
@@ -58,32 +85,6 @@ async function deleteImage(url: string) {
   }
 }
 
-interface Props {
-  params: Promise<{ assistantId: string }>;
-}
-
-export async function GET(request: NextRequest, { params }: Props) {
-  const { assistantId } = await params;
-
-  try {
-    const assistant = await prisma.assistants.findUnique({
-      where: { assistantId },
-    });
-
-    if (!assistant) {
-      return NextResponse.json(
-        {
-          error: "No assistant found with specified assistantId",
-        },
-        { status: 404 }
-      );
-    }
-    return NextResponse.json({ assistant }, { status: 200 });
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json({ error }, { status: 500 });
-  }
-}
 export async function DELETE(request: NextRequest, { params }: Props) {
   const { assistantId } = await params;
   console.log(assistantId);

@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardFooter,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Input } from "./input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";

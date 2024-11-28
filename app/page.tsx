@@ -17,7 +17,7 @@ export default function LandingPage() {
 
         <BenefitsSection />
         <Benefits />
-        <Testimonials />
+
         <FAQ />
         <CTASection />
       </main>
