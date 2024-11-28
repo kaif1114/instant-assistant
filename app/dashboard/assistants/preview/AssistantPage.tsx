@@ -6,6 +6,7 @@ import { CustomTabs } from "./custom-tabs";
 import { AppearanceTab } from "./appearance-tab";
 import { InstallTab } from "./install-tab";
 import { PreviewTab } from "./preview-tab";
+import { Assistants } from "@prisma/client";
 
 const tabs = [
   { id: "appearance", label: "Appearance" },
@@ -30,7 +31,7 @@ const tabVariants = {
   },
 };
 
-const AssistantPage = ({ assistantId }: { assistantId: string }) => {
+const AssistantPage = ({ Assistant }: { Assistant: Assistants }) => {
   const [activeTab, setActiveTab] = useState("appearance");
 
   return (
@@ -56,13 +57,13 @@ const AssistantPage = ({ assistantId }: { assistantId: string }) => {
               x: { duration: 0.4 },
             }}
           >
-            {activeTab === "appearance" && <AppearanceTab />}
+            {activeTab === "appearance" && (
+              <AppearanceTab Assistant={Assistant} />
+            )}
             {activeTab === "install" && (
-              <InstallTab assistantId={assistantId} />
+              <InstallTab assistantId={Assistant.assistantId} />
             )}
-            {activeTab === "preview" && (
-              <PreviewTab assistantId={assistantId} />
-            )}
+            {activeTab === "preview" && <PreviewTab Assistant={Assistant} />}
           </motion.div>
         </AnimatePresence>
       </div>

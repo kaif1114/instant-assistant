@@ -24,20 +24,6 @@ import { Separator } from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
 import AssistantsList from "./AssistantsList";
 
-// Sample data for assistants
-// const assistants = [
-//   { id: 1, name: "Customer Support Bot", status: "active", type: "Support" },
-//   { id: 2, name: "Sales Assistant", status: "inactive", type: "Sales" },
-//   {
-//     id: 3,
-//     name: "Product Recommender",
-//     status: "active",
-//     type: "Recommendation",
-//   },
-//   { id: 4, name: "FAQ Bot", status: "active", type: "Support" },
-//   { id: 5, name: "Lead Qualifier", status: "inactive", type: "Sales" },
-// ];
-
 export default async function Page() {
   const { userId } = await auth();
   const assistants = await prisma.assistants.findMany({

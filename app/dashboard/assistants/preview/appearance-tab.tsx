@@ -21,20 +21,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { Assistants } from "@prisma/client";
 
-export function AppearanceTab() {
-  const [data, setData] = useState({
-    name: "",
-    description: "",
-    assistantType: "Support",
-    customType: "",
-    functionality: "",
-    primaryColor: "#478ACD",
-    secondaryColor: "#0A0A15",
-    startingMessage: "",
-    avatarUrl:
-      "https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg",
-  });
+export function AppearanceTab({ Assistant }: { Assistant: Assistants }) {
+  const [data, setData] = useState(Assistant);
 
   const updateData = (update: Partial<typeof data>) => {
     setData((current) => ({ ...current, ...update }));
@@ -76,8 +66,8 @@ export function AppearanceTab() {
           <div className="space-y-2">
             <Label htmlFor="assistantType">Assistant Type</Label>
             <RadioGroup
-              value={data.assistantType}
-              onValueChange={(value) => updateData({ assistantType: value })}
+              value={data.Type}
+              onValueChange={(value) => updateData({ Type: value })}
               className="flex flex-col space-y-1"
             >
               {["Support", "Sales", "Technical", "General", "Custom"].map(
@@ -89,10 +79,10 @@ export function AppearanceTab() {
                 )
               )}
             </RadioGroup>
-            {data.assistantType === "Custom" && (
+            {data.Type === "Custom" && (
               <Input
-                value={data.customType}
-                onChange={(e) => updateData({ customType: e.target.value })}
+                value={data.Type}
+                onChange={(e) => updateData({ Type: e.target.value })}
                 placeholder="Enter custom assistant type"
                 className="mt-2"
               />

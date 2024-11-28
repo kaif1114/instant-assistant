@@ -18,11 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import AssistantPage from "./AssistantPage";
 
 export function AssistantList({ assistants }: { assistants: Assistants[] }) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [selectedAssistant, setSelectedAssistant] = useState<Assistants | null>(
+    null
+  );
 
   const filteredAssistants = assistants.filter((assistant) => {
     const matchesSearch =
@@ -36,7 +40,9 @@ export function AssistantList({ assistants }: { assistants: Assistants[] }) {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
-
+  if (selectedAssistant) {
+    return <AssistantPage Assistant={selectedAssistant} />;
+  }
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -77,11 +83,7 @@ export function AssistantList({ assistants }: { assistants: Assistants[] }) {
           >
             <Card
               className="cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-              onClick={() =>
-                router.push(
-                  `/dashboard/assistants/preview/${assistant.assistantId}`
-                )
-              }
+              onClick={() => setSelectedAssistant(assistant)}
             >
               <CardHeader className="flex flex-row items-center gap-4">
                 <Avatar className="h-14 w-14">
@@ -110,10 +112,7 @@ export function AssistantList({ assistants }: { assistants: Assistants[] }) {
                   variant="ghost"
                   className="w-full justify-between"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(
-                      `/dashboard/assistants/preview/${assistant.assistantId}`
-                    );
+                    setSelectedAssistant(assistant);
                   }}
                 >
                   Preview
