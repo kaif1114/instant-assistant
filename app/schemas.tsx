@@ -40,6 +40,27 @@ export const CreateAssistantRequestSchema = z.object({
   avatarUrl: z.string(),
 });
 
+export const AssistantUpdateSchema = z
+  .object({
+    id: z.number(),
+    userId: z.string(),
+    assistantId: z.string(),
+    avatarUrl: z.string().url(),
+    name: z.string().min(1),
+    description: z.string(),
+    functionality: z.string(),
+    primaryColor: z.string(),
+    startingMessage: z.string(),
+    Status: z.string(),
+    Type: z.string(),
+    secondaryColor: z.string(),
+  })
+  .strict({ message: "Unrecognized data field provided" })
+  .partial()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field must be provided for patch request",
+  });
+
 export interface NewAssistantData {
   name: string;
   description: string;

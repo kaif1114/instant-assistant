@@ -43,9 +43,7 @@ export default async function page() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="container mx-auto p-4 max-w-5xl">
-        {<AssistantList assistants={assistants} />}
-      </div>{" "}
+      {<AssistantList assistants={assistants} />}
     </>
   );
 }

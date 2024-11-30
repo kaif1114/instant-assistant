@@ -44,94 +44,101 @@ export function AssistantList({ assistants }: { assistants: Assistants[] }) {
     return <AssistantPage Assistant={selectedAssistant} />;
   }
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search assistants..."
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+    <div className="container mx-auto p-4 max-w-5xl">
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search assistants..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter className="text-gray-400" />
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="support">Support</SelectItem>
+                <SelectItem value="sales">Sales</SelectItem>
+                <SelectItem value="technical">Technical</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="text-gray-400" />
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="support">Support</SelectItem>
-              <SelectItem value="sales">Sales</SelectItem>
-              <SelectItem value="technical">Technical</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredAssistants.map((assistant, index) => (
-          <motion.div
-            key={assistant.id}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card
-              className="cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-              onClick={() => setSelectedAssistant(assistant)}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredAssistants.map((assistant, index) => (
+            <motion.div
+              key={assistant.id}
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: index * 0.1 }}
             >
-              <CardHeader className="flex flex-row items-center gap-4">
-                <Avatar className="h-14 w-14">
-                  <AvatarImage src={assistant.avatarUrl} alt={assistant.name} />
-                  <AvatarFallback>{assistant.name[0]}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-1">
-                  <CardTitle className="text-xl">{assistant.name}</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={
-                        assistant.Status === "active" ? "default" : "secondary"
-                      }
-                    >
-                      {assistant.Status}
-                    </Badge>
-                    <Badge variant="outline">{assistant.Type}</Badge>
+              <Card
+                className="cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                onClick={() => setSelectedAssistant(assistant)}
+              >
+                <CardHeader className="flex flex-row items-center gap-4">
+                  <Avatar className="h-14 w-14">
+                    <AvatarImage
+                      src={assistant.avatarUrl}
+                      alt={assistant.name}
+                    />
+                    <AvatarFallback>{assistant.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 space-y-1">
+                    <CardTitle className="text-xl">{assistant.name}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={
+                          assistant.Status === "active"
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
+                        {assistant.Status}
+                      </Badge>
+                      <Badge variant="outline">{assistant.Type}</Badge>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                  {assistant.description}
-                </p>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-between"
-                  onClick={(e) => {
-                    setSelectedAssistant(assistant);
-                  }}
-                >
-                  Preview
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      {filteredAssistants.length === 0 && (
-        <div className="text-center py-10">
-          <p className="text-xl font-semibold text-gray-600">
-            No assistants found
-          </p>
-          <p className="text-gray-400">Try adjusting your search or filter</p>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                    {assistant.description}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-between"
+                    onClick={(e) => {
+                      setSelectedAssistant(assistant);
+                    }}
+                  >
+                    Preview
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
         </div>
-      )}
+
+        {filteredAssistants.length === 0 && (
+          <div className="text-center py-10">
+            <p className="text-xl font-semibold text-gray-600">
+              No assistants found
+            </p>
+            <p className="text-gray-400">Try adjusting your search or filter</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

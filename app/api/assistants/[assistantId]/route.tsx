@@ -1,5 +1,7 @@
 import { pineconeIndex } from "@/app/pinecone-config";
+import { AssistantUpdateSchema } from "@/app/schemas";
 import prisma from "@/prisma/client";
+import { Assistants } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import sha1 from "sha1";
 
@@ -28,6 +30,27 @@ export async function GET(request: NextRequest, { params }: Props) {
     console.log(error);
     return NextResponse.json({ error }, { status: 500 });
   }
+}
+
+export async function PATCH(request: NextRequest, { params }: Props) {
+  const { assistantId } = await params;
+  const body = await request.json();
+
+  const validation = AssistantUpdateSchema.safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: validation.error.message },
+      { status: 400 }
+    );
+  }
+  try {
+    const updated = await prisma.assistants.update({
+      where: { assistantId },
+      data: body,
+    });
+    return NextResponse.json({ updated }, { status: 200 });
+  } catch (error) {}
+  return NextResponse.json({ body }, { status: 200 });
 }
 
 async function deleteImage(url: string) {

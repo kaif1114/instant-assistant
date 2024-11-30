@@ -1,14 +1,8 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import "./globals.css";
 import { Inter_Tight } from "next/font/google";
+import localFont from "next/font/local";
+import "./globals.css";
 
 const interTight = Inter_Tight({
   subsets: ["latin"],
