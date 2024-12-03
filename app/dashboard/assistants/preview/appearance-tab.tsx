@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Assistants } from "@prisma/client";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { CldUploadWidget, getCldImageUrl } from "next-cloudinary";
 import { useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
 
@@ -243,6 +244,28 @@ export function AppearanceTab({
                       ))}
                     </SelectContent>
                   </Select>
+                  <CldUploadWidget
+                    uploadPreset="ml_default"
+                    onSuccess={(result) => {
+                      console.log(result);
+                      if (result.info && typeof result.info !== "string") {
+                        console.log(data);
+                        const url = getCldImageUrl({
+                          src: result.info.public_id,
+                        });
+                        console.log("url:", url);
+                        updateData({
+                          avatarUrl: url,
+                        });
+                      }
+                    }}
+                  >
+                    {({ open }) => {
+                      return (
+                        <Button onClick={() => open()}>Upload Custom</Button>
+                      );
+                    }}
+                  </CldUploadWidget>
                 </div>
               </div>
             </div>

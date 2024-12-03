@@ -4,8 +4,6 @@ import Chat from "@/app/chat/[assistantId]/Chat";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Assistants } from "@prisma/client";
-import axios from "axios";
-import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 const sessionId = uuidv4();

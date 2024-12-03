@@ -18,6 +18,7 @@ import {
 import { CldUploadWidget, getCldImageUrl } from "next-cloudinary";
 import { useNewAssistantStore } from "./store";
 import { NewAssistantData } from "@/app/schemas";
+import { Button } from "@/components/ui/button";
 
 const Step2 = () => {
   const { data, setData } = useNewAssistantStore();
@@ -112,12 +113,11 @@ const Step2 = () => {
                     setData({
                       avatarUrl: url,
                     });
-                    console.log(data);
                   }
                 }}
               >
                 {({ open }) => {
-                  return <p onClick={() => open()}>Upload Avatar</p>;
+                  return <Button onClick={() => open()}>Upload Avatar</Button>;
                 }}
               </CldUploadWidget>
             </div>

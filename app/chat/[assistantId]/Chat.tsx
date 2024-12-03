@@ -17,8 +17,9 @@ import { Input } from "./input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { TypingIndicator } from "./TypingIndicator";
 
 interface Props {
   assistantId: string;
@@ -28,8 +29,15 @@ interface Props {
 }
 
 interface UserDetails {
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
+}
+
+interface Message {
+  sender: "user" | "support";
+  text: string;
+  type?: "text" | "input";
+  inputType?: "name" | "email";
 }
 
 export default function Chat({
@@ -38,16 +46,42 @@ export default function Chat({
   assistant,
   embedded = false,
 }: Props) {
-  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetails>({});
   const [message, setMessage] = React.useState("");
-  const [chatHistory, setChatHistory] = useState<
-    Array<{ sender: string; text: string }>
-  >([]);
+  const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [nextStep, setnextStep] = useState<
+    "init" | "askName" | "askEmail" | "chat"
+  >("init");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    // Small delay to ensure content is rendered
+  useEffect(() => {
+    if (nextStep === "init") {
+      addTypingIndicator();
+      setTimeout(() => {
+        removeTypingIndicator();
+        sendSystemMessage({
+          sender: "support",
+          text: "Hello! To get started, I would need your name and email.",
+          type: "text",
+        });
+        setnextStep("askName");
+      }, 1500);
+    } else if (nextStep == "askName") {
+      addTypingIndicator();
+      setTimeout(() => {
+        removeTypingIndicator();
+        sendSystemMessage({
+          sender: "support",
+          text: "Please enter your name below.",
+          type: "input",
+          inputType: "name",
+        });
+      }, 3500);
+    }
+  }, [nextStep]);
+
+  useEffect(() => {
     const scrollToBottom = () => {
       const scrollViewport = document.querySelector(
         "[data-radix-scroll-area-viewport]"
@@ -57,32 +91,83 @@ export default function Chat({
       }
     };
 
-    // Immediate scroll
     scrollToBottom();
-    // Additional scroll after a small delay to handle dynamic content
     const timeoutId = setTimeout(scrollToBottom, 100);
 
     return () => clearTimeout(timeoutId);
   }, [chatHistory]);
 
-  React.useEffect(() => {
-    if (userDetails) {
-      setChatHistory([
-        {
-          sender: "support",
-          text: assistant.startingMessage,
-        },
+  const addTypingIndicator = () => {
+    setIsLoading(true);
+  };
+
+  const removeTypingIndicator = () => {
+    setIsLoading(false);
+  };
+
+  const sendSystemMessage = (message: Message) => {
+    setChatHistory((prev) => [...prev, message]);
+  };
+
+  const handleInputSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+    inputType: "name" | "email"
+  ) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const inputValue = formData.get(inputType) as string;
+
+    if (inputValue) {
+      setChatHistory((prev) => [
+        ...prev,
+        { sender: "user", text: inputValue, type: "text" },
       ]);
+
+      addTypingIndicator();
+
+      setTimeout(async () => {
+        removeTypingIndicator();
+        if (inputType === "name") {
+          setUserDetails((prev) => ({ ...prev, name: inputValue }));
+          sendSystemMessage({
+            sender: "support",
+            text: `Thank you, ${inputValue}! Could you please provide your email address?`,
+            type: "input",
+            inputType: "email",
+          });
+          setnextStep("askEmail");
+        } else if (inputType === "email") {
+          setUserDetails((prev) => ({ ...prev, email: inputValue }));
+          sendSystemMessage({
+            sender: "support",
+            text: "Thank you! We have your details. How can I assist you today?",
+            type: "text",
+          });
+          setnextStep("chat");
+
+          // Optionally, send the user details to your backend
+          try {
+            await axios.post("/api/session/create", {
+              userName: userDetails.name || "",
+              userEmail: inputValue,
+              session_id: sessionId,
+              assistantId,
+            });
+          } catch (error) {
+            console.error(error);
+          }
+        }
+      }, 1500);
     }
-  }, [userDetails]);
+  };
 
   async function sendMessage() {
-    if (message.trim()) {
+    if (message.trim() && nextStep === "chat") {
       try {
         setIsLoading(true);
-        const updatedHistory = [
+        const updatedHistory: Message[] = [
           ...chatHistory,
-          { sender: "user", text: message },
+          { sender: "user", text: message, type: "text" },
         ];
         setChatHistory(updatedHistory);
         setMessage("");
@@ -96,7 +181,7 @@ export default function Chat({
 
         setChatHistory([
           ...updatedHistory,
-          { sender: "support", text: response.data.message },
+          { sender: "support", text: response.data.message, type: "text" },
         ]);
       } catch (error) {
         console.error(error);
@@ -105,25 +190,6 @@ export default function Chat({
       }
     }
   }
-
-  const handleUserDetailsSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
-    if (name && email) {
-      setUserDetails({ name, email });
-      console.log(sessionId, assistantId, name, email);
-      try {
-        axios.post("/api/session/create", {
-          userName: name,
-          userEmail: email,
-          session_id: sessionId,
-          assistantId,
-        });
-      } catch (error) {}
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -140,13 +206,12 @@ export default function Chat({
         <div
           className={cn("relative", embedded ? "w-full" : "w-full max-w-2xl")}
         >
-          {/* Chat UI - Will be blurred when no user details */}
+          {/* Chat UI */}
           <div
             className={cn(
               "flex justify-center items-center transition-all duration-200",
               {
                 "h-screen": embedded,
-                "blur-[2px]": !userDetails,
               }
             )}
           >
@@ -208,17 +273,58 @@ export default function Chat({
                             <AvatarFallback>AI</AvatarFallback>
                           </Avatar>
                         )}
-                        <MarkdownPreview
-                          source={msg.text}
-                          className={`max-w-[75%] p-3 rounded-lg `}
-                          style={{
-                            backgroundColor:
-                              msg.sender === "user"
-                                ? assistant.primaryColor
-                                : assistant.secondaryColor,
-                            color: msg.sender === "user" ? "white" : "black",
-                          }}
-                        />
+                        {msg.type === "text" && (
+                          <MarkdownPreview
+                            source={msg.text}
+                            className={`max-w-[75%] p-3 rounded-lg `}
+                            style={{
+                              backgroundColor:
+                                msg.sender === "user"
+                                  ? assistant.primaryColor
+                                  : assistant.secondaryColor,
+                              color: msg.sender === "user" ? "white" : "black",
+                            }}
+                          />
+                        )}
+                        {msg.type === "input" && msg.sender === "support" && (
+                          <div
+                            className={`max-w-[75%] p-3 rounded-lg `}
+                            style={{
+                              backgroundColor: assistant.secondaryColor,
+                            }}
+                          >
+                            <p>{msg.text}</p>
+                            <form
+                              onSubmit={(e) =>
+                                handleInputSubmit(e, msg.inputType!)
+                              }
+                              className="mt-2 flex"
+                            >
+                              <Input
+                                type="text"
+                                name={msg.inputType}
+                                placeholder={
+                                  msg.inputType === "name"
+                                    ? "Your Name"
+                                    : "Your Email"
+                                }
+                                required
+                                className="flex-grow px-2 py-1 rounded-md border"
+                              />
+                              <Button
+                                type="submit"
+                                size="icon"
+                                className="ml-2"
+                                style={{
+                                  backgroundColor: assistant.primaryColor,
+                                }}
+                              >
+                                <Send className="h-4 w-4" />
+                                <span className="sr-only">Submit</span>
+                              </Button>
+                            </form>
+                          </div>
+                        )}
                       </div>
                     ))}
                     {isLoading && (
@@ -233,104 +339,52 @@ export default function Chat({
                             backgroundColor: assistant.secondaryColor,
                           }}
                         >
-                          <Skeleton className="h-5 w-[200px]" />
+                          {" "}
+                          <TypingIndicator />
                         </div>
                       </div>
                     )}
                   </div>
                 </ScrollArea>
               </CardContent>
-              <CardFooter className="p-4 border-t">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    sendMessage();
-                  }}
-                  className="relative w-full flex items-center"
-                >
-                  <Input
-                    focusColor={assistant.primaryColor}
-                    autoFocus={true}
-                    type="text"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="w-full rounded-full pr-12 pl-4 shadow-sm" // Increased padding-right for button space, added padding-left for aesthetics
-                    style={{ paddingRight: "4rem" }} // Extra padding to avoid text overlap
-                  />
-                  <Button
-                    type="submit"
-                    size="icon"
-                    disabled={isLoading || !userDetails}
-                    className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
-                    style={{ backgroundColor: assistant.primaryColor }}
+              {nextStep === "chat" && (
+                <CardFooter className="p-4 border-t">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      sendMessage();
+                    }}
+                    className="relative w-full flex items-center"
                   >
-                    <Send className="h-4 w-4" />
-                    <span className="sr-only">Send message</span>
-                  </Button>
-                </form>
-              </CardFooter>
+                    <Input
+                      focusColor={assistant.primaryColor}
+                      autoFocus={true}
+                      type="text"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Type your message..."
+                      className="w-full rounded-full pr-12 pl-4 shadow-sm"
+                      style={{ paddingRight: "4rem" }}
+                    />
+                    <Button
+                      type="submit"
+                      size="icon"
+                      disabled={
+                        isLoading || !userDetails.name || !userDetails.email
+                      }
+                      className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
+                      style={{ backgroundColor: assistant.primaryColor }}
+                    >
+                      <Send className="h-4 w-4" />
+                      <span className="sr-only">Send message</span>
+                    </Button>
+                  </form>
+                </CardFooter>
+              )}
             </Card>
           </div>
 
-          {/* Single User Details Form - Shown as overlay when no user details */}
-          {!userDetails && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Card className="w-96 max-w-md shadow-xl rounded-2xl relative z-50">
-                <CardHeader
-                  className="text-white p-4 rounded-t-2xl"
-                  style={{ backgroundColor: assistant.primaryColor }}
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 bg-white text-black">
-                      <AvatarImage
-                        src={assistant.avatarUrl}
-                        alt="Assistant Avatar"
-                      />
-                      <AvatarFallback>AI</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h2 className="text-xl font-semibold">
-                        {assistant.name}
-                      </h2>
-                      <p className="text-sm text-gray-300">Online</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <h3 className="text-xl font-semibold">
-                    Please provide your details to start the conversation:
-                  </h3>
-                  <form
-                    onSubmit={handleUserDetailsSubmit}
-                    className="space-y-4"
-                  >
-                    <Input
-                      type="text"
-                      name="name"
-                      placeholder="Your Name"
-                      className="h-12 px-4 text-base rounded-xl"
-                      required
-                    />
-                    <Input
-                      type="email"
-                      name="email"
-                      placeholder="Your Email"
-                      className="h-12 px-4 text-base rounded-xl"
-                      required
-                    />
-                    <Button
-                      style={{ backgroundColor: assistant.primaryColor }}
-                      type="submit"
-                      className="w-full h-12 text-base rounded-xl"
-                    >
-                      Start Conversation
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          {/* Removed Overlay Form */}
         </div>
       </motion.div>
     </AnimatePresence>
