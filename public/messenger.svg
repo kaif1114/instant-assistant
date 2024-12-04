@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <linearGradient id="messenger-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#00B2FF"/>
+    <stop offset="100%" style="stop-color:#006AFF"/>
+  </linearGradient>
+  <path fill="url(#messenger-gradient)" d="M24,4C12.4,4,3,12.7,3,23.5c0,6.3,3.1,11.8,8,15.5v7.5l7.3-4c1.8,0.5,3.7,0.7,5.7,0.7c11.6,0,21-8.7,21-19.5S35.6,4,24,4z M26.7,28.8l-5.5-5.9l-10.7,5.9l11.8-12.6l5.5,5.9l10.7-5.9L26.7,28.8z"/>
+</svg>
+

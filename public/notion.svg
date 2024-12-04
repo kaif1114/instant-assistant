@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 126" fill="none">
+  <path d="M 20 15 h 80 c 5.523 0 10 4.477 10 10 v 76 c 0 5.523 -4.477 10 -10 10 h -80 c -5.523 0 -10 -4.477 -10 -10 v -76 c 0 -5.523 4.477 -10 10 -10 z" fill="white"/>
+  <path d="m 30 35 h 60 v 8 h -60 z" fill="black"/>
+  <path d="m 30 55 h 60 v 8 h -60 z" fill="black"/>
+  <path d="m 30 75 h 40 v 8 h -40 z" fill="black"/>
+</svg>
+

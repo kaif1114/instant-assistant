@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  AlertCircle,
-  ChevronRight,
-  Loader2,
-  MessageSquare,
-  User,
-  X,
-} from "lucide-react";
 import { useState } from "react";
+import { ChevronDown, Loader2, MessageSquare, User, X } from "lucide-react";
 
 import { AssistantWithSessionDetails } from "@/app/schemas";
 import {
@@ -28,6 +21,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { session_details } from "@prisma/client";
 import axios from "axios";
 
@@ -41,10 +41,6 @@ interface Message {
   message: {
     type: "ai" | "human";
     content: string;
-    additional_kwargs: Record<string, unknown>;
-    response_metadata: Record<string, unknown>;
-    tool_calls?: any[];
-    invalid_tool_calls?: any[];
   };
 }
 
@@ -53,11 +49,18 @@ export default function AssistantChatsPage({ Assistants }: Props) {
     null
   );
   const [selectedAssistant, setSelectedAssistant] =
-    useState<AssistantWithSessionDetails | null>(null);
+    useState<AssistantWithSessionDetails | null>(Assistants[0]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleAssistantSelect = (assistantId: string) => {
+    const assistant = Assistants.find((a) => a.assistantId === assistantId);
+    setSelectedAssistant(assistant || null);
+    setSelectedChat(null);
+    setMessages([]);
+  };
 
   const handleChatSelect = async (
     assistant: AssistantWithSessionDetails,
@@ -84,41 +87,56 @@ export default function AssistantChatsPage({ Assistants }: Props) {
     }
   };
 
-  const handleCloseChat = () => {
-    setSelectedChat(null);
-    setSelectedAssistant(null);
-    setMessages([]);
-    setError(null);
-  };
-
   return (
-    <div className="container mx-auto px-8 h-[calc(100vh-10rem)]">
+    <div className="container mx-auto px-8 h-[calc(100vh-14rem)]">
       <h1 className="text-3xl font-bold mb-8">Your Assistant Chats</h1>
+      <div className="text-black mb-4">
+        <Select
+          onValueChange={handleAssistantSelect}
+          value={selectedAssistant?.assistantId || Assistants[0].assistantId}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Select an assistant" />
+          </SelectTrigger>
+          <SelectContent>
+            {Assistants.map((assistant) => (
+              <SelectItem
+                key={assistant.assistantId}
+                value={assistant.assistantId}
+              >
+                {assistant.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <div className="flex gap-8 h-full">
         <div className="w-2/5 overflow-auto">
           <ScrollArea className="h-full">
-            {Assistants.map((assistant) => (
-              <Card key={assistant.id} className="mb-8">
+            {selectedAssistant && (
+              <Card className="mb-8">
                 <CardHeader>
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-12 w-12">
                       <AvatarImage
-                        src={assistant.avatarUrl}
-                        alt={assistant.name}
+                        src={selectedAssistant.avatarUrl}
+                        alt={selectedAssistant.name}
                       />
                       <AvatarFallback>
-                        {assistant.name.charAt(0)}
+                        {selectedAssistant.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <CardTitle>{assistant.name}</CardTitle>
-                      <CardDescription>{assistant.description}</CardDescription>
+                      <CardTitle>{selectedAssistant.name}</CardTitle>
+                      <CardDescription>
+                        {selectedAssistant.description}
+                      </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="single" collapsible className="w-full">
-                    {assistant.session_details.map((session) => (
+                    {selectedAssistant.session_details.map((session) => (
                       <AccordionItem
                         key={session.id}
                         value={session.id.toString()}
@@ -134,21 +152,12 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                         </AccordionTrigger>
                         <AccordionContent>
                           <Button
-                            onClick={() => handleChatSelect(assistant, session)}
+                            onClick={() =>
+                              handleChatSelect(selectedAssistant, session)
+                            }
                             className="w-full"
-                            disabled={isLoading}
                           >
-                            {loadingSessionId === session.session_id ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Loading...
-                              </>
-                            ) : (
-                              <>
-                                View Chat{" "}
-                                <ChevronRight className="ml-2 h-4 w-4" />
-                              </>
-                            )}
+                            View Chat
                           </Button>
                         </AccordionContent>
                       </AccordionItem>
@@ -156,23 +165,23 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                   </Accordion>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </ScrollArea>
         </div>
         <div className="w-3/5">
           <Card className="h-full flex flex-col">
-            {selectedChat && selectedAssistant ? (
+            {selectedChat ? (
               <>
                 <CardHeader className="flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <Avatar className="h-10 w-10">
                         <AvatarImage
-                          src={selectedAssistant.avatarUrl}
-                          alt={selectedAssistant.name}
+                          src={selectedAssistant?.avatarUrl}
+                          alt={selectedAssistant?.name}
                         />
                         <AvatarFallback>
-                          {selectedAssistant.name.charAt(0)}
+                          {selectedAssistant?.name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
@@ -185,7 +194,7 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={handleCloseChat}
+                      onClick={() => setSelectedChat(null)}
                     >
                       <X className="h-4 w-4" />
                       <span className="sr-only">Close chat</span>
@@ -201,12 +210,6 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                           Loading messages...
                         </span>
                       </div>
-                    ) : error ? (
-                      <Alert variant="destructive" className="mt-4">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Error</AlertTitle>
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
                     ) : (
                       messages.map((messageObj) => (
                         <div
@@ -220,11 +223,11 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                           {messageObj.message.type === "ai" && (
                             <Avatar className="h-8 w-8">
                               <AvatarImage
-                                src={selectedAssistant.avatarUrl}
-                                alt={selectedAssistant.name}
+                                src={selectedAssistant?.avatarUrl}
+                                alt={selectedAssistant?.name}
                               />
                               <AvatarFallback>
-                                {selectedAssistant.name.charAt(0)}
+                                {selectedAssistant?.name.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                           )}
@@ -257,8 +260,8 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                   No Chat Selected
                 </h2>
                 <p className="text-muted-foreground">
-                  Select a chat from the list on the left to view the
-                  conversation.
+                  Select an assistant and a chat from the list on the left to
+                  view the conversation.
                 </p>
               </CardContent>
             )}

@@ -15,9 +15,32 @@ model User {
   lastName          String
   emailVerification String
   imageUrl          String?
+  assistantsCreated Int          @default(0)
   userId            String       @unique
-  assistants        Assistants[]
+  currentPlan       Int          @default(1)
+  PricingPlans      PricingPlans @relation(fields: [currentPlan], references: [id])
+  Assistants        Assistants[]
 }
+
+model PricingPlans {
+  id              Int    @id @default(autoincrement())
+  name            String
+  description     String
+  price           String
+  charactersLimit Int
+  assistantsLimit Int
+  User            User[]
+}
+
+// model PlanDetails {
+//   id                Int          @id @default(autoincrement())
+//   assistantsCreated Int
+//   charactersUsed    Int
+//   userId            String       @unique
+//   planId            Int          @unique
+//   plan              PricingPlans @relation(fields: [planId], references: [id])
+//   user              User         @relation(fields: [userId], references: [userId])
+// }
 
 model Assistants {
   id              Int               @id @default(autoincrement())
@@ -31,6 +54,7 @@ model Assistants {
   primaryColor    String            @default("#478ACD")
   secondaryColor  String            @default("#f2f2f2")
   avatarUrl       String
+  charactersUsed  Int               @default(0)
   startingMessage String            @default("Hello! How may I help you?")
   user            User              @relation(fields: [userId], references: [userId])
   session_details session_details[]

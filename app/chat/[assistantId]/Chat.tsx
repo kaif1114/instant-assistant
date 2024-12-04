@@ -347,40 +347,37 @@ export default function Chat({
                   </div>
                 </ScrollArea>
               </CardContent>
-              {nextStep === "chat" && (
-                <CardFooter className="p-4 border-t">
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      sendMessage();
-                    }}
-                    className="relative w-full flex items-center"
+
+              <CardFooter className="p-4 border-t">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    sendMessage();
+                  }}
+                  className="relative w-full flex items-center"
+                >
+                  <Input
+                    focusColor={assistant.primaryColor}
+                    autoFocus={true}
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    className="w-full rounded-full pr-12 pl-4 shadow-sm"
+                    style={{ paddingRight: "4rem" }}
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    disabled={isLoading || nextStep !== "chat"}
+                    className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
+                    style={{ backgroundColor: assistant.primaryColor }}
                   >
-                    <Input
-                      focusColor={assistant.primaryColor}
-                      autoFocus={true}
-                      type="text"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Type your message..."
-                      className="w-full rounded-full pr-12 pl-4 shadow-sm"
-                      style={{ paddingRight: "4rem" }}
-                    />
-                    <Button
-                      type="submit"
-                      size="icon"
-                      disabled={
-                        isLoading || !userDetails.name || !userDetails.email
-                      }
-                      className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
-                      style={{ backgroundColor: assistant.primaryColor }}
-                    >
-                      <Send className="h-4 w-4" />
-                      <span className="sr-only">Send message</span>
-                    </Button>
-                  </form>
-                </CardFooter>
-              )}
+                    <Send className="h-4 w-4" />
+                    <span className="sr-only">Send message</span>
+                  </Button>
+                </form>
+              </CardFooter>
             </Card>
           </div>
 

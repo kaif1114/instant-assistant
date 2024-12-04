@@ -1,5 +1,5 @@
 import React from "react";
-import Chats from "./chats";
+import Chats from "./chats2";
 import prisma from "@/prisma/client";
 import { auth } from "@clerk/nextjs/server";
 import { Assistants, Prisma } from "@prisma/client";

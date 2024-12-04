@@ -38,6 +38,7 @@ export const CreateAssistantRequestSchema = z.object({
   primaryColor: z.string(),
   secondaryColor: z.string(),
   avatarUrl: z.string(),
+  charactersUsed: z.number(),
 });
 
 export const AssistantUpdateSchema = z
@@ -46,6 +47,7 @@ export const AssistantUpdateSchema = z
     userId: z.string(),
     assistantId: z.string(),
     avatarUrl: z.string().url(),
+    assistantsCreated: z.number(),
     name: z.string().min(1),
     description: z.string(),
     functionality: z.string(),
@@ -72,6 +74,7 @@ export interface NewAssistantData {
   primaryColor: string;
   secondaryColor: string;
   avatarUrl: string;
+  charactersUsed: number;
 }
 
 export interface pdfLoaderDocument {
