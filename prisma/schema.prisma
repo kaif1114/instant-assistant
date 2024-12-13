@@ -58,6 +58,15 @@ model Assistants {
   startingMessage String            @default("Hello! How may I help you?")
   user            User              @relation(fields: [userId], references: [userId])
   session_details session_details[]
+  knowledgeSource KnowledgeSource[]
+}
+
+model KnowledgeSource {
+  id          Int        @id @default(autoincrement())
+  assistantId String
+  assistant   Assistants @relation(fields: [assistantId], references: [assistantId])
+  source      String
+  type        String
 }
 
 model langchain_chat_histories {

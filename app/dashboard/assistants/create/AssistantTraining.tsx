@@ -24,6 +24,8 @@ import Step3 from "./Step3";
 import { useNewAssistantStore } from "./store";
 import { LoadingAnimation } from "./Loading";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { pdfLoaderDocument, SelectedFile } from "@/app/schemas";
 
 export interface DataFieldEntry {
   pageContent: string;
@@ -55,6 +57,8 @@ const stepVariants = {
   }),
 };
 const assistantId = uuidv4();
+const MAX_CHARACTERS = 1000000;
+
 export default function AssistantTrainingPage() {
   const { data, setData } = useNewAssistantStore();
   const router = useRouter();
@@ -62,8 +66,43 @@ export default function AssistantTrainingPage() {
   const [direction, setDirection] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-
+  const [totalCharacterCount, setTotalCharacterCount] = useState(0);
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
   const { user } = useUser();
+
+  const handleFileSubmit = async () => {
+    setIsLoading(true);
+
+    for (const selectedFile of selectedFiles) {
+      const formData = new FormData();
+      formData.append("file", selectedFile.file);
+      formData.append("fileName", selectedFile.name || "");
+      formData.append("assistantId", assistantId);
+      console.log(selectedFile.name);
+
+      try {
+        const response = await axios.post<pdfLoaderDocument[]>(
+          "/api/savecontext/file",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+        } else {
+          throw new Error(`Failed to upload file: ${selectedFile.file.name}`);
+        }
+      } catch (error) {
+        console.error("Error uploading file:", error);
+      }
+    }
+
+    setIsLoading(false);
+    setSelectedFiles([]);
+  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -93,10 +132,16 @@ export default function AssistantTrainingPage() {
         startingMessage: data.secondaryColor,
         avatarUrl: data.avatarUrl,
       });
-      await axios.post("/api/savecontext", {
-        assistantId,
-        documents: data.dataFields,
-      });
+      if (
+        data.dataFields.length > 0 &&
+        data.dataFields[0].pageContent.length > 2
+      ) {
+        await axios.post("/api/savecontext", {
+          assistantId,
+          documents: data.dataFields,
+        });
+      }
+      handleFileSubmit();
 
       setIsSuccess(true);
     } catch (error) {
@@ -114,7 +159,17 @@ export default function AssistantTrainingPage() {
       case 2:
         return <Step2 />;
       case 3:
-        return <Step3 />;
+        return (
+          <>
+            <Step3
+              totalCharacterCount={totalCharacterCount}
+              onUpdateCharacterCount={setTotalCharacterCount}
+              assistantId={assistantId}
+              selectedFiles={selectedFiles}
+              onSetSelectedFiles={setSelectedFiles}
+            />
+          </>
+        );
       default:
         return null;
     }
@@ -238,6 +293,24 @@ export default function AssistantTrainingPage() {
                 </motion.div>
               </AnimatePresence>
             </ScrollArea>
+            {step === 3 && (
+              <div className="mt-4">
+                <Alert
+                  variant={
+                    totalCharacterCount > MAX_CHARACTERS
+                      ? "destructive"
+                      : "default"
+                  }
+                >
+                  <AlertTitle>Character Count</AlertTitle>
+                  <AlertDescription>
+                    Total characters: {totalCharacterCount} / {MAX_CHARACTERS}
+                    {totalCharacterCount > MAX_CHARACTERS &&
+                      " (Exceeded limit)"}
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
             <div className="flex justify-between items-center">
               <Button type="button" onClick={prevStep} disabled={step === 1}>
                 <ChevronLeft className="mr-2 h-4 w-4" />

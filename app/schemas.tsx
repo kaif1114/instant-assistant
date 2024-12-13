@@ -38,7 +38,7 @@ export const CreateAssistantRequestSchema = z.object({
   primaryColor: z.string(),
   secondaryColor: z.string(),
   avatarUrl: z.string(),
-  charactersUsed: z.number(),
+  charactersUsed: z.number().optional(),
 });
 
 export const AssistantUpdateSchema = z
@@ -91,3 +91,9 @@ export interface pdfLoaderDocument {
 export type AssistantWithSessionDetails = Prisma.AssistantsGetPayload<{
   include: { session_details: true };
 }>;
+
+export interface SelectedFile {
+  file: File;
+  characterCount: number;
+  name?: string;
+}
