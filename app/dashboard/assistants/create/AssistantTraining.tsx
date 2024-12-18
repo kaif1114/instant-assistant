@@ -32,6 +32,7 @@ export interface DataFieldEntry {
   metadata: {
     title: string;
     description: string;
+    id?: number;
   };
 }
 
@@ -139,6 +140,7 @@ export default function AssistantTrainingPage() {
         await axios.post("/api/savecontext", {
           assistantId,
           documents: data.dataFields,
+          ids: true,
         });
       }
       handleFileSubmit();

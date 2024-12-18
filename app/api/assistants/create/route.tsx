@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json({ response }, { status: 201 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Failed to create assistant" },
       { status: 500 }

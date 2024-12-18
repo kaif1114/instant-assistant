@@ -1,4 +1,4 @@
-import { pdfLoaderDocument, SelectedFile } from "@/app/schemas";
+import { SelectedFile } from "@/app/schemas";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,14 +14,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import axios from "axios";
 import {
   AlertCircle,
   Globe,
   Loader2,
   PlusCircle,
   Scissors,
-  Upload,
   X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -34,7 +32,7 @@ interface Document {
     url: string;
     title: string;
     description: string;
-    [key: string]: string;
+    [key: string]: string | undefined;
   };
 }
 
@@ -72,11 +70,14 @@ const Step3 = ({
     onUpdateCharacterCount(newTotalCount);
   }, [selectedFiles, data.dataFields]);
 
-  const addDataField = () => {
+  const addDataField = (index: number) => {
     setData({
       dataFields: [
         ...data.dataFields,
-        { pageContent: "", metadata: { title: "", description: "" } },
+        {
+          pageContent: "",
+          metadata: { title: "", description: "", id: index + 1 },
+        },
       ],
     });
   };
@@ -195,79 +196,89 @@ const Step3 = ({
               <TabsTrigger value="file">File Upload</TabsTrigger>
             </TabsList>
             <TabsContent value="manual">
-              {data.dataFields.map((field, index) => (
-                <Card key={index}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Data Field {index + 1}
-                    </CardTitle>
-                    {data.dataFields.length > 1 && (
+              {data.dataFields.map((field, index) => {
+                return (
+                  <div key={index}>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                          Data Field {index + 1}
+                        </CardTitle>
+                        {data.dataFields.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeDataField(index)}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove data field</span>
+                          </Button>
+                        )}
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor={`title-${index}`}>Title</Label>
+                            <Input
+                              id={`title-${index}`}
+                              value={field.metadata.title}
+                              onChange={(e) =>
+                                updateDataField(index, "title", e.target.value)
+                              }
+                              placeholder="Enter data field title"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor={`description-${index}`}>
+                              Description
+                            </Label>
+                            <Input
+                              id={`description-${index}`}
+                              value={field.metadata.description}
+                              onChange={(e) =>
+                                updateDataField(
+                                  index,
+                                  "description",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Enter data field description"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`pageContent-${index}`}>
+                            Page Content
+                          </Label>
+                          <Textarea
+                            id={`pageContent-${index}`}
+                            value={field.pageContent}
+                            onChange={(e) =>
+                              updateDataField(
+                                index,
+                                "pageContent",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Enter training data"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    {index == data.dataFields.length - 1 && (
                       <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeDataField(index)}
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => addDataField(index)}
                       >
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Remove data field</span>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add Data Field
                       </Button>
                     )}
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor={`title-${index}`}>Title</Label>
-                        <Input
-                          id={`title-${index}`}
-                          value={field.metadata.title}
-                          onChange={(e) =>
-                            updateDataField(index, "title", e.target.value)
-                          }
-                          placeholder="Enter data field title"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`description-${index}`}>
-                          Description
-                        </Label>
-                        <Input
-                          id={`description-${index}`}
-                          value={field.metadata.description}
-                          onChange={(e) =>
-                            updateDataField(
-                              index,
-                              "description",
-                              e.target.value
-                            )
-                          }
-                          placeholder="Enter data field description"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`pageContent-${index}`}>
-                        Page Content
-                      </Label>
-                      <Textarea
-                        id={`pageContent-${index}`}
-                        value={field.pageContent}
-                        onChange={(e) =>
-                          updateDataField(index, "pageContent", e.target.value)
-                        }
-                        placeholder="Enter training data"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={addDataField}
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Data Field
-              </Button>
+                  </div>
+                );
+              })}
             </TabsContent>
             <TabsContent value="website">
               <div className="space-y-4">

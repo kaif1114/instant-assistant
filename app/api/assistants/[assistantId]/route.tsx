@@ -134,7 +134,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
         where: { OR: [...sessionIds] },
       }),
       prisma.session_details.deleteMany({ where: { assistantId } }),
-
+      prisma.knowledgeSource.deleteMany({ where: { assistantId } }),
       prisma.assistants.delete({
         where: { assistantId },
       }),

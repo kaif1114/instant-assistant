@@ -1,24 +1,24 @@
 "use client";
 
-import * as React from "react";
-import { ArrowLeft, Send } from "lucide-react";
-import axios from "axios";
-import { Assistants } from "@prisma/client";
-import MarkdownPreview from "@uiw/react-markdown-preview";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardHeader,
   CardFooter,
+  CardHeader,
 } from "@/components/ui/card";
-import { Input } from "./input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { Assistants } from "@prisma/client";
+import MarkdownPreview from "@uiw/react-markdown-preview";
+import axios from "axios";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Send } from "lucide-react";
+import * as React from "react";
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Input } from "./input";
+import { Input as Input2 } from "@/components/ui/input";
 import { TypingIndicator } from "./TypingIndicator";
 
 interface Props {
@@ -300,7 +300,7 @@ export default function Chat({
                               }
                               className="mt-2 flex"
                             >
-                              <Input
+                              <Input2
                                 type="text"
                                 name={msg.inputType}
                                 placeholder={

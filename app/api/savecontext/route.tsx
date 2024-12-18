@@ -16,7 +16,18 @@ export async function POST(request: NextRequest) {
   const documents: Document[] = body.documents;
 
   try {
-    await vectorStore.addDocuments(documents, { namespace: body.assistantId });
+    if (body.ids) {
+      let ids: string[] = [];
+      documents.map((doc) => ids.push(`textfield-${doc.metadata.id}`));
+      await vectorStore.addDocuments(documents, {
+        namespace: body.assistantId,
+        ids,
+      });
+    } else {
+      await vectorStore.addDocuments(documents, {
+        namespace: body.assistantId,
+      });
+    }
     return NextResponse.json({ message: "Success" }, { status: 200 });
   } catch (error) {
     console.log(error);

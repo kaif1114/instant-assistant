@@ -10,6 +10,7 @@ import { Assistants } from "@prisma/client";
 
 const tabs = [
   { id: "appearance", label: "Appearance" },
+  { id: "knowledge-base", label: "Knowledge Base" },
   { id: "install", label: "Installation" },
   { id: "preview", label: "Preview" },
 ];
