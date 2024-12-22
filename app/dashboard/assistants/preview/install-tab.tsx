@@ -10,12 +10,12 @@ import {
 } from "@/components/ui/card";
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import { useSelectedAssistantStore } from "./store";
 
-interface InstallTabProps {
-  assistantId: string;
-}
-
-export function InstallTab({ assistantId }: InstallTabProps) {
+export function InstallTab() {
+  const { selectedAssistant, setSelectedAssistant } =
+    useSelectedAssistantStore();
+  const assistantId = selectedAssistant?.id;
   const [copied, setCopied] = useState(false);
 
   const scriptCode = `<script>

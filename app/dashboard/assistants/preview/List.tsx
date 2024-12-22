@@ -19,14 +19,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import AssistantPage from "./AssistantPage";
+import { useSelectedAssistantStore } from "./store";
 
 export function AssistantList({ assistants }: { assistants: Assistants[] }) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [selectedAssistant, setSelectedAssistant] = useState<Assistants | null>(
-    null
-  );
+  const { selectedAssistant, setSelectedAssistant } =
+    useSelectedAssistantStore();
 
   const filteredAssistants = assistants.filter((assistant) => {
     const matchesSearch =
@@ -41,7 +41,7 @@ export function AssistantList({ assistants }: { assistants: Assistants[] }) {
     visible: { opacity: 1, y: 0 },
   };
   if (selectedAssistant) {
-    return <AssistantPage Assistant={selectedAssistant} />;
+    return <AssistantPage />;
   }
   return (
     <div className="container mx-auto p-4 max-w-5xl">

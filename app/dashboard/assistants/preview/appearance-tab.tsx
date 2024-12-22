@@ -26,20 +26,18 @@ import { motion } from "framer-motion";
 import { CldUploadWidget, getCldImageUrl } from "next-cloudinary";
 import { useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
+import { useSelectedAssistantStore } from "./store";
 
-export function AppearanceTab({
-  Assistant,
-}: {
-  Assistant: Partial<Assistants>;
-}) {
-  const [currentAssistant, setCurrentAssistant] = useState(Assistant);
-  const [data, setData] = useState(Assistant);
+export function AppearanceTab() {
+  const { selectedAssistant, setSelectedAssistant } =
+    useSelectedAssistantStore();
+  const [data, setData] = useState(selectedAssistant!);
   const [isLoading, setIsLoading] = useState(false);
 
   const hasChanges = () => {
     return Object.keys(data).some((key) => {
       // @ts-ignore - we know these keys exist
-      return data[key] !== currentAssistant[key];
+      return data[key] !== selectedAssistant[key];
     });
   };
 
@@ -52,10 +50,10 @@ export function AppearanceTab({
     setIsLoading(true);
     try {
       const response = await axios.patch(
-        `/api/assistants/${Assistant.assistantId}`,
+        `/api/assistants/${selectedAssistant?.assistantId}`,
         data
       );
-      setCurrentAssistant(response.data.updated);
+      setSelectedAssistant(response.data.updated);
       setData(response.data.updated);
       toast.dismiss(loadingToast);
       toast.success("Assistant settings updated successfully!", {
@@ -231,7 +229,7 @@ export function AppearanceTab({
                       <SelectValue placeholder="Select avatar" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={Assistant.avatarUrl!}>
+                      <SelectItem value={selectedAssistant?.avatarUrl!}>
                         Custom Avatar
                       </SelectItem>
                       {[1, 2, 3].map((num) => (

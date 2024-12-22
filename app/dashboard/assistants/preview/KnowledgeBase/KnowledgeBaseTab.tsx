@@ -35,12 +35,14 @@ const initialData = {
       title: "Company Overview",
       description: "Basic information about our company",
       content: "We are a technology company focused on AI solutions...",
+      new: false,
     },
   ],
   websites: [
     {
       id: "1",
       url: "https://example.com/docs",
+      new: false,
     },
   ],
   files: [
@@ -48,6 +50,7 @@ const initialData = {
       id: "1",
       name: "product-manual.pdf",
       size: "2.5 MB",
+      new: false,
     },
   ],
   characterLimit: 100000,
@@ -73,11 +76,7 @@ export function KnowledgeBaseTab() {
 
   useEffect(() => {
     const totalCharacters = data.manualInputs.reduce(
-      (acc, input) =>
-        acc +
-        input.title.length +
-        input.description.length +
-        input.content.length,
+      (acc, input) => acc + input.content.length,
       0
     );
     setData((prev) => ({ ...prev, characterCount: totalCharacters }));
@@ -94,6 +93,7 @@ export function KnowledgeBaseTab() {
     ) {
       const newInput = {
         id: Math.random().toString(36).substr(2, 9),
+        new: true,
         ...newManualInput,
       };
       setData((prev) => ({
@@ -110,6 +110,7 @@ export function KnowledgeBaseTab() {
     if (newWebsite) {
       const newSite = {
         id: Math.random().toString(36).substr(2, 9),
+        new: true,
         url: newWebsite,
       };
       setData((prev) => ({
@@ -128,6 +129,7 @@ export function KnowledgeBaseTab() {
       const newFileEntry = {
         id: Math.random().toString(36).substr(2, 9),
         name: file.name,
+        new: true,
         size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
       };
       setData((prev) => ({
@@ -167,8 +169,21 @@ export function KnowledgeBaseTab() {
 
   const handleRetrain = async () => {
     setIsRetraining(true);
-    // Simulate retraining
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    for (const key in data) {
+      let newData: {
+        title: string;
+        description: string;
+        id: string;
+        content: string;
+        new: boolean;
+      }[] = [];
+      if (key === "manualInputs") {
+        newData = data[key].filter((input) => input.new);
+      }
+      console.log(newData);
+    }
+
     setIsRetraining(false);
     setHasChanges(false);
   };

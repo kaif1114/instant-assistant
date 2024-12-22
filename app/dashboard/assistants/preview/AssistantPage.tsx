@@ -8,6 +8,7 @@ import { InstallTab } from "./install-tab";
 import { PreviewTab } from "./preview-tab";
 import { Assistants } from "@prisma/client";
 import { KnowledgeBaseTab } from "./KnowledgeBase/KnowledgeBaseTab";
+import { useSelectedAssistantStore } from "./store";
 
 const tabs = [
   { id: "appearance", label: "Appearance" },
@@ -33,8 +34,10 @@ const tabVariants = {
   },
 };
 
-const AssistantPage = ({ Assistant }: { Assistant: Assistants }) => {
+const AssistantPage = () => {
   const [activeTab, setActiveTab] = useState("appearance");
+  const { selectedAssistant, setSelectedAssistant } =
+    useSelectedAssistantStore();
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
@@ -59,13 +62,9 @@ const AssistantPage = ({ Assistant }: { Assistant: Assistants }) => {
               x: { duration: 0.4 },
             }}
           >
-            {activeTab === "appearance" && (
-              <AppearanceTab Assistant={Assistant} />
-            )}
-            {activeTab === "install" && (
-              <InstallTab assistantId={Assistant.assistantId} />
-            )}
-            {activeTab === "preview" && <PreviewTab Assistant={Assistant} />}
+            {activeTab === "appearance" && <AppearanceTab />}
+            {activeTab === "install" && <InstallTab />}
+            {activeTab === "preview" && <PreviewTab />}
             {activeTab === "knowledge-base" && <KnowledgeBaseTab />}
           </motion.div>
         </AnimatePresence>
