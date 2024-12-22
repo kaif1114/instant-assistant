@@ -7,6 +7,7 @@ import { AppearanceTab } from "./appearance-tab";
 import { InstallTab } from "./install-tab";
 import { PreviewTab } from "./preview-tab";
 import { Assistants } from "@prisma/client";
+import { KnowledgeBaseTab } from "./KnowledgeBase/KnowledgeBaseTab";
 
 const tabs = [
   { id: "appearance", label: "Appearance" },
@@ -65,6 +66,7 @@ const AssistantPage = ({ Assistant }: { Assistant: Assistants }) => {
               <InstallTab assistantId={Assistant.assistantId} />
             )}
             {activeTab === "preview" && <PreviewTab Assistant={Assistant} />}
+            {activeTab === "knowledge-base" && <KnowledgeBaseTab />}
           </motion.div>
         </AnimatePresence>
       </div>
