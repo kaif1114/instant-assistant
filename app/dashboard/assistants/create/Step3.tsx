@@ -1,4 +1,4 @@
-import { SelectedFile } from "@/app/schemas";
+import { SelectedFile, SelectedWebsite } from "@/app/schemas";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,16 +25,8 @@ import {
 import React, { useEffect, useState } from "react";
 import SelectedFilesList from "./SelectedFilesList";
 import { useNewAssistantStore } from "./store";
+import { Document } from "@/app/schemas";
 
-interface Document {
-  pageContent: string;
-  metadata: {
-    url: string;
-    title: string;
-    description: string;
-    [key: string]: string | undefined;
-  };
-}
 
 const MAX_CHARACTERS = 10000;
 
@@ -44,6 +36,8 @@ interface Props {
   assistantId: string;
   selectedFiles: SelectedFile[];
   onSetSelectedFiles: (files: SelectedFile[]) => void;
+  scrapedContent: Document[];
+  onSetScrapedContent: (prev: Document[] | ((prev: Document[]) => Document[])) => void;
 }
 
 const Step3 = ({
@@ -52,10 +46,12 @@ const Step3 = ({
   assistantId,
   selectedFiles,
   onSetSelectedFiles,
+  scrapedContent,
+  onSetScrapedContent,
 }: Props) => {
   const { data, setData } = useNewAssistantStore();
   const [siteUrl, setSiteUrl] = useState("");
-  const [scrapedContent, setScrapedContent] = useState<Document[]>([]);
+  // const [scrapedContent, setScrapedContent] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [websiteMode, setWebsiteMode] = useState<"scrape" | "crawl">("scrape");
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +116,7 @@ const Step3 = ({
         throw new Error(result.message || "Failed to fetch website data");
       }
 
-      setScrapedContent(result.docs);
+      onSetScrapedContent((prev: Document[]) => [...prev, ...result.docs]);
 
       const newDataFields = result.docs.map((doc: Document) => ({
         pageContent: doc.pageContent,
@@ -139,16 +135,15 @@ const Step3 = ({
       data.dataFields.length <= 1
         ? setData({ dataFields: newDataFields })
         : setData({
-            dataFields: [...data.dataFields, ...newDataFields],
-          });
+          dataFields: [...data.dataFields, ...newDataFields],
+        });
     } catch (error) {
       console.error(
         `Error ${websiteMode === "scrape" ? "scraping" : "crawling"} site:`,
         error
       );
       setError(
-        `Failed to ${
-          websiteMode === "scrape" ? "scrape" : "crawl"
+        `Failed to ${websiteMode === "scrape" ? "scrape" : "crawl"
         } the website. Please try again.`
       );
     } finally {
@@ -329,8 +324,8 @@ const Step3 = ({
                       ? "Scraping..."
                       : "Crawling..."
                     : websiteMode === "scrape"
-                    ? "Scrape Page"
-                    : "Crawl Website"}
+                      ? "Scrape Page"
+                      : "Crawl Website"}
                 </Button>
                 {error && (
                   <Alert variant="destructive">
@@ -342,7 +337,7 @@ const Step3 = ({
                 {scrapedContent.length > 0 && (
                   <div className="space-y-2">
                     <Label>Scraped Content</Label>
-                    <ScrollArea className="h-[400px] w-full rounded-md border p-4">
+                    <ScrollArea className="h-max w-full rounded-md border p-4">
                       {scrapedContent.map((doc, index) => (
                         <div
                           key={index}

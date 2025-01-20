@@ -67,6 +67,7 @@ model KnowledgeSource {
   assistant   Assistants @relation(fields: [assistantId], references: [assistantId])
   source      String
   type        String
+  characterCount Int @default(0)
 }
 
 model langchain_chat_histories {

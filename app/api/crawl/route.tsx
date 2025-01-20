@@ -24,8 +24,9 @@ export async function POST(request: NextRequest) {
   const docs = await loader.load();
 
   // Apply the filter to each document's content
-  const filteredDocs = docs.map((doc) => ({
+  const filteredDocs = docs.map((doc, index) => ({
     ...doc,
+    id: `${body.url}-${index}`,
     pageContent: removeImageLinks(doc.pageContent),
   }));
 

@@ -1,5 +1,5 @@
 import { vectorStore } from "@/app/pinecone-config";
-import { RequestBodySchema } from "@/app/schemas";
+import { SaveContextSchema } from "@/app/schemas";
 
 import { Document } from "@langchain/core/documents";
 import { NextRequest, NextResponse } from "next/server";
@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
-  const validation = RequestBodySchema.safeParse(body);
+  const validation = SaveContextSchema.safeParse(body);
 
   if (!validation.success) {
     return NextResponse.json({ error: "Invalid format" }, { status: 400 });

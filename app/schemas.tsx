@@ -17,7 +17,20 @@ const DocumentsSchema = z.object({
   metadata: MetadataSchema,
 });
 
-export const RequestBodySchema = z.object({
+const SelectedWebsiteSchema = z.object({
+  source: z.string(),
+  type: z.string(),
+  assistantId: z.string(),
+  characterCount: z.number(),
+
+});
+
+export const SelectedWebsitesRequestSchema = z.object({
+  assistantId: z.string(),
+  websites: z.array(SelectedWebsiteSchema),
+});
+
+export const SaveContextSchema = z.object({
   assistantId: z.string(),
   documents: z.array(DocumentsSchema),
 });
@@ -96,4 +109,19 @@ export interface SelectedFile {
   file: File;
   characterCount: number;
   name?: string;
+}
+
+export interface SelectedWebsite {
+  url: string;
+  characterCount?: number;
+
+}
+export interface Document {
+  pageContent: string;
+  metadata: {
+    url: string;
+    title: string;
+    description: string;
+    [key: string]: string | undefined;
+  };
 }

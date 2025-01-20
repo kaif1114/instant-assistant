@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-
+import { Document } from "@/app/schemas";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,7 +25,7 @@ import { useNewAssistantStore } from "./store";
 import { LoadingAnimation } from "./Loading";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { pdfLoaderDocument, SelectedFile } from "@/app/schemas";
+import { pdfLoaderDocument, SelectedFile, SelectedWebsite } from "@/app/schemas";
 
 export interface DataFieldEntry {
   pageContent: string;
@@ -69,7 +69,12 @@ export default function AssistantTrainingPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [totalCharacterCount, setTotalCharacterCount] = useState(0);
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
+  const [scrapedContent, setScrapedContent] = useState<Document[]>([]);
   const { user } = useUser();
+
+  const handleWebsiteSubmit = async () => {
+    setIsLoading(true);
+  }
 
   const handleFileSubmit = async () => {
     setIsLoading(true);
@@ -143,6 +148,16 @@ export default function AssistantTrainingPage() {
           ids: true,
         });
       }
+      let websitesScraped: { source: string, type: string, assistantId: string, characterCount: number }[] = []
+      for (const content of scrapedContent) {
+        websitesScraped.push({ source: content.metadata.url, type: "url", assistantId, characterCount: content.pageContent.length })
+      }
+      await axios.post("/api/savecontext/website", {
+        assistantId,
+        websites: websitesScraped,
+      });
+
+
       handleFileSubmit();
 
       setIsSuccess(true);
@@ -164,6 +179,8 @@ export default function AssistantTrainingPage() {
         return (
           <>
             <Step3
+              scrapedContent={scrapedContent}
+              onSetScrapedContent={setScrapedContent}
               totalCharacterCount={totalCharacterCount}
               onUpdateCharacterCount={setTotalCharacterCount}
               assistantId={assistantId}
@@ -350,9 +367,8 @@ export default function AssistantTrainingPage() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className={`w-2 h-2 rounded-full ${
-              i === step ? "bg-primary" : "bg-gray-300"
-            }`}
+            className={`w-2 h-2 rounded-full ${i === step ? "bg-primary" : "bg-gray-300"
+              }`}
           />
         ))}
       </div>
