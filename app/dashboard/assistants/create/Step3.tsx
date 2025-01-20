@@ -1,4 +1,4 @@
-import { SelectedFile, SelectedWebsite } from "@/app/schemas";
+import { Document, SelectedFile } from "@/app/schemas";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,10 +25,8 @@ import {
 import React, { useEffect, useState } from "react";
 import SelectedFilesList from "./SelectedFilesList";
 import { useNewAssistantStore } from "./store";
-import { Document } from "@/app/schemas";
 
 
-const MAX_CHARACTERS = 10000;
 
 interface Props {
   totalCharacterCount: number;
@@ -41,9 +39,7 @@ interface Props {
 }
 
 const Step3 = ({
-  totalCharacterCount,
   onUpdateCharacterCount,
-  assistantId,
   selectedFiles,
   onSetSelectedFiles,
   scrapedContent,

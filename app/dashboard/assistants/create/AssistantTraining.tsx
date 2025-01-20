@@ -1,12 +1,7 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
-import axios from "axios";
-import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { Document } from "@/app/schemas";
+import { Document, pdfLoaderDocument, SelectedFile } from "@/app/schemas";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,15 +12,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useUser } from "@clerk/nextjs";
+import axios from "axios";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import ChatPreview from "./ChatPreview";
+import { LoadingAnimation } from "./Loading";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import { useNewAssistantStore } from "./store";
-import { LoadingAnimation } from "./Loading";
-import { useRouter } from "next/navigation";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { pdfLoaderDocument, SelectedFile, SelectedWebsite } from "@/app/schemas";
 
 export interface DataFieldEntry {
   pageContent: string;
@@ -72,9 +71,7 @@ export default function AssistantTrainingPage() {
   const [scrapedContent, setScrapedContent] = useState<Document[]>([]);
   const { user } = useUser();
 
-  const handleWebsiteSubmit = async () => {
-    setIsLoading(true);
-  }
+
 
   const handleFileSubmit = async () => {
     setIsLoading(true);
@@ -148,7 +145,7 @@ export default function AssistantTrainingPage() {
           ids: true,
         });
       }
-      let websitesScraped: { source: string, type: string, assistantId: string, characterCount: number }[] = []
+      const websitesScraped: { source: string, type: string, assistantId: string, characterCount: number }[] = []
       for (const content of scrapedContent) {
         websitesScraped.push({ source: content.metadata.url, type: "url", assistantId, characterCount: content.pageContent.length })
       }

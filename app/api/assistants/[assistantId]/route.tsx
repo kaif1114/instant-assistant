@@ -1,7 +1,6 @@
 import { pineconeIndex } from "@/app/pinecone-config";
 import { AssistantUpdateSchema } from "@/app/schemas";
 import prisma from "@/prisma/client";
-import { Assistants } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import sha1 from "sha1";
 
@@ -49,7 +48,7 @@ export async function PATCH(request: NextRequest, { params }: Props) {
       data: body,
     });
     return NextResponse.json({ updated }, { status: 200 });
-  } catch (error) {}
+  } catch (error) { console.log(error) }
   return NextResponse.json({ body }, { status: 200 });
 }
 

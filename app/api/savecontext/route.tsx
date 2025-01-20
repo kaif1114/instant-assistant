@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
   try {
     if (body.ids) {
-      let ids: string[] = [];
+      const ids: string[] = [];
       documents.map((doc) => ids.push(`textfield-${doc.metadata.id}`));
       await vectorStore.addDocuments(documents, {
         namespace: body.assistantId,

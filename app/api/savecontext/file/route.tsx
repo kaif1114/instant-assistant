@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
     const fileName = file[0].name;
     console.log(fileName);
 
-    let Documents: Document[] = [];
-    let ids: string[] = [];
+    const Documents: Document[] = [];
+    const ids: string[] = [];
     try {
       switch (fileType) {
         case "pdf":

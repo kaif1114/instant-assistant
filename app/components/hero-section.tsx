@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import ProductHuntBadge from "./product-hunt-badge";
 import { Play } from "lucide-react";
 import { ChatPreview } from "./chat-preview";
-import SocialProof from "./social-proof";
 import ForBusiness from "./ForBusiness";
 
 function HeroSection() {

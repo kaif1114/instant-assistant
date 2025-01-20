@@ -31,7 +31,7 @@ function FAQ() {
       <div className="container mx-auto px-4 md:px-6 max-w-7xl">
         <div className="flex flex-col items-center justify-center space-y-8 text-center">
           <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-            Have Questions? We've Got Answers
+            Have Questions? We&apos;ve Got Answers
           </h2>
           <Accordion type="single" collapsible className="w-full max-w-2xl">
             {faqs.map((faq, index) => (

@@ -48,7 +48,7 @@ const messages = [
   },
   {
     id: 7,
-    text: "You're welcome! I'm glad I could help. If you need any further assistance or have more questions, feel free to ask. Good luck with creating your user guide!",
+    text: "You&apos;re welcome! I&apos;m glad I could help. If you need any further assistance or have more questions, feel free to ask. Good luck with creating your user guide!",
     sender: "ai",
     delay: 2,
   },
@@ -151,7 +151,7 @@ export function ChatPreview() {
                         <AvatarFallback>AI</AvatarFallback>
                       </Avatar>
                       <p className="text-sm text-gray-600 max-w-[250px]">
-                        I'm here to help you with your questions and provide
+                        I&apos;m here to help you with your questions and provide
                         assistance.
                       </p>
                     </div>
@@ -162,11 +162,10 @@ export function ChatPreview() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className={`flex ${
-                          message.sender === "user"
+                        className={`flex ${message.sender === "user"
                             ? "justify-end"
                             : "justify-start"
-                        }`}
+                          }`}
                       >
                         {message.sender === "ai" && (
                           <Avatar className="h-8 w-8 mr-2 mt-3">
@@ -178,11 +177,10 @@ export function ChatPreview() {
                           </Avatar>
                         )}
                         <div
-                          className={`max-w-[75%] p-3 rounded-lg ${
-                            message.sender === "user"
+                          className={`max-w-[75%] p-3 rounded-lg ${message.sender === "user"
                               ? "bg-black text-white"
                               : "bg-gray-100 text-black"
-                          }`}
+                            }`}
                         >
                           {message.text}
                         </div>

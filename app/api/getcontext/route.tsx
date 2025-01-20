@@ -9,14 +9,14 @@ async function getTextFieldsData(assistantId: string) {
   const namespace = pineconeIndex.namespace(assistantId);
   const results = await namespace.listPaginated({ prefix: "textfield" });
   if (results.vectors && results.vectors.length >= 1) {
-    let ids: string[] = [];
+    const ids: string[] = [];
     results.vectors.forEach((vector) => {
-      vector.id && ids.push(vector.id);
+      if (vector.id) ids.push(vector.id);
     });
     const vectors = await namespace.fetch(ids);
-    let metadata: RecordMetadata[] = [];
-    Object.entries(vectors.records).forEach(([id, record]) => {
-      record.metadata && metadata.push(record.metadata);
+    const metadata: RecordMetadata[] = [];
+    Object.entries(vectors.records).forEach(([, record]) => {
+      if (record.metadata) metadata.push(record.metadata);
     });
     console.log(metadata);
     return metadata;

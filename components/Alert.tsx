@@ -11,10 +11,10 @@ import React from "react";
 import { AlertDialogHeader, AlertDialogFooter } from "./ui/alert-dialog";
 
 interface Props {
-  title: String;
-  description: String;
-  cancel: String;
-  cont: String;
+  title: string;
+  description: string;
+  cancel: string;
+  cont: string;
   open: boolean;
 }
 

@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, useEffect, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Globe, FileText, Sparkles, Plus, BookText, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { useSelectedAssistantStore } from "../store";
 import axios from "axios";
+import { BookText, FileText, Globe, Plus, Sparkles, X } from "lucide-react";
+import { useContext, useEffect, useState } from "react";
 import { pricingPlanContext } from "../../pricingPlanContext";
-import { set } from "zod";
+import { useSelectedAssistantStore } from "../store";
 
 interface ManualInput {
   id: string;

@@ -77,7 +77,7 @@ function Benefits() {
           viewport={{ once: true }}
           className="grid gap-24 w-full max-w-6xl mx-auto"
         >
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <motion.div
               key={feature.label}
               variants={itemVariants}

@@ -31,7 +31,6 @@ import {
 import { Assistants } from "@prisma/client";
 import axios from "axios";
 import { MoreHorizontal, Power, PowerOff } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { RotatingLines } from "react-loader-spinner";
 interface Props {

@@ -2,9 +2,9 @@ import { pineconeIndex } from "@/app/pinecone-config";
 import prisma from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
-interface Props {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
+// interface Props {
+//   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+// }
 
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -36,6 +36,7 @@ export async function DELETE(request: NextRequest) {
         );
       }
     } catch (error) {
+      console.log(error);
       return NextResponse.json(
         { error: "Failed to delete context" },
         { status: 500 }

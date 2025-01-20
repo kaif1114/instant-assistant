@@ -1,17 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
 import {
-  SignInButton,
   SignUpButton,
   SignedIn,
-  SignedOut,
-  UserButton,
+  SignedOut
 } from "@clerk/nextjs";
+import { motion } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function Navbar() {
   const router = useRouter();
@@ -31,11 +29,10 @@ function Navbar() {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-        scrolled
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled
           ? "backdrop-blur-md border-b border-gray-200/20"
           : "backdrop-blur-none border-transparent"
-      }`}
+        }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between max-w-7xl">
         <div className="flex items-center gap-2">

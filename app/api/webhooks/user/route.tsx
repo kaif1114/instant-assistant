@@ -9,9 +9,9 @@ export async function POST(request: NextRequest) {
   const payload = JSON.stringify(body);
   const headersPayload = headers();
 
-  const svixId = headersPayload.get("svix-id");
-  const svixTimestamp = headersPayload.get("svix-timestamp");
-  const svixSignature = headersPayload.get("svix-signature");
+  const svixId = (await headersPayload).get("svix-id");
+  const svixTimestamp = (await headersPayload).get("svix-timestamp");
+  const svixSignature = (await headersPayload).get("svix-signature");
 
   if (!svixId || !svixTimestamp || !svixSignature) {
     return NextResponse.json({ error: "No svix headers" }, { status: 400 });
@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
         { status: 202 }
       );
     } catch (error) {
+      console.log(error);
       return NextResponse.json(
         { error: "failed to delete user" },
         { status: 500 }

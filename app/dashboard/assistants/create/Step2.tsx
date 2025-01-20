@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,8 +18,6 @@ import {
 } from "@/components/ui/select";
 import { CldUploadWidget, getCldImageUrl } from "next-cloudinary";
 import { useNewAssistantStore } from "./store";
-import { NewAssistantData } from "@/app/schemas";
-import { Button } from "@/components/ui/button";
 
 const Step2 = () => {
   const { data, setData } = useNewAssistantStore();
@@ -27,7 +26,7 @@ const Step2 = () => {
       <CardHeader>
         <CardTitle>Appearance</CardTitle>
         <CardDescription>
-          Customize how your assistant's chat interface looks
+          Customize how your assistant&apos;s chat interface looks
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

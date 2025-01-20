@@ -1,7 +1,7 @@
 "use client";
 
+import { Loader2, MessageSquare, User, X } from "lucide-react";
 import { useState } from "react";
-import { ChevronDown, Loader2, MessageSquare, User, X } from "lucide-react";
 
 import { AssistantWithSessionDetails } from "@/app/schemas";
 import {
@@ -10,7 +10,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -214,11 +213,10 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                       messages.map((messageObj) => (
                         <div
                           key={messageObj.id}
-                          className={`flex items-start space-x-2 mb-4 ${
-                            messageObj.message.type === "ai"
+                          className={`flex items-start space-x-2 mb-4 ${messageObj.message.type === "ai"
                               ? "justify-start"
                               : "justify-end"
-                          }`}
+                            }`}
                         >
                           {messageObj.message.type === "ai" && (
                             <Avatar className="h-8 w-8">
@@ -232,11 +230,10 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                             </Avatar>
                           )}
                           <div
-                            className={`rounded-lg p-3 max-w-[70%] ${
-                              messageObj.message.type === "ai"
+                            className={`rounded-lg p-3 max-w-[70%] ${messageObj.message.type === "ai"
                                 ? "bg-secondary text-secondary-foreground"
                                 : "bg-primary text-primary-foreground"
-                            }`}
+                              }`}
                           >
                             <p>{messageObj.message.content}</p>
                           </div>
