@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Globe, FileText, Sparkles, Plus, BookText, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSelectedAssistantStore } from "../store";
+import axios from "axios";
+import { pricingPlanContext } from "../../pricingPlanContext";
+import { set } from "zod";
 
 interface ManualInput {
   id: string;
@@ -27,9 +31,27 @@ interface File {
   name: string;
   size: string;
 }
+interface Data {
+  textFieldsData: {
+    id: string;
+    text: string;
+    description: string;
+    title: string;
+    new?: boolean;
+  }[];
+  otherSources: {
+    source: string;
+    type: string;
+    id: string;
+    new?: boolean;
+  }[];
+  characterCount: {
+    charactersUsed: number;
+  };
+}
 
 const initialData = {
-  manualInputs: [
+  textFieldsData: [
     {
       id: "1",
       title: "Company Overview",
@@ -53,20 +75,20 @@ const initialData = {
       new: false,
     },
   ],
-  characterLimit: 100000,
-  characterCount: 25000,
 };
 
 type KnowledgeType = "manual" | "websites" | "files";
 
 export function KnowledgeBaseTab() {
-  const [data, setData] = useState(initialData);
+  const charactersLimit = useContext(pricingPlanContext);
+  const { selectedAssistant } = useSelectedAssistantStore();
+  const [data, setData] = useState<Data | null>(null);
   const [selectedType, setSelectedType] = useState<KnowledgeType>("manual");
   const [isRetraining, setIsRetraining] = useState(false);
   const [newManualInput, setNewManualInput] = useState({
     title: "",
     description: "",
-    content: "",
+    text: "",
   });
   const [newWebsite, setNewWebsite] = useState("");
   const [newFile, setNewFile] = useState<File | null>(null);
@@ -75,32 +97,54 @@ export function KnowledgeBaseTab() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const totalCharacters = data.manualInputs.reduce(
-      (acc, input) => acc + input.content.length,
-      0
-    );
-    setData((prev) => ({ ...prev, characterCount: totalCharacters }));
-    setError(
-      totalCharacters > data.characterLimit ? "Character limit exceeded" : null
-    );
-  }, [data.manualInputs, data.characterLimit]);
+    async function getKnowledgeBase() {
+      if (selectedAssistant) {
+        const response = await axios.get(
+          `/api/getcontext?assistantId=${selectedAssistant?.assistantId}`
+        );
+        return response.data;
+      }
+    }
+    getKnowledgeBase().then((data) => {
+      if (data) {
+        console.log("Data: ", data);
+        setData(data);
+      }
+    });
+  }, [selectedAssistant]);
+
+  useEffect(() => {
+    if (data != null && data.textFieldsData.length > 0) {
+      console.log("Data: ", data);
+      const totalCharacters = data.textFieldsData.reduce(
+        (acc, input) => acc + input.text.length,
+        0
+      );
+      setData((prev) => ({ ...prev!, charactersUsed: totalCharacters }));
+      setError(
+        totalCharacters > charactersLimit ? "Character limit exceeded" : null
+      );
+    }
+  }, [data?.textFieldsData, charactersLimit]);
 
   const handleAddManualInput = () => {
     if (
       newManualInput.title &&
       newManualInput.description &&
-      newManualInput.content
+      newManualInput.text
     ) {
       const newInput = {
         id: Math.random().toString(36).substr(2, 9),
         new: true,
         ...newManualInput,
       };
-      setData((prev) => ({
-        ...prev,
-        manualInputs: [...prev.manualInputs, newInput],
-      }));
-      setNewManualInput({ title: "", description: "", content: "" });
+      if (data) {
+        setData((prev) => ({
+          ...prev!,
+          textFieldsData: [...prev!.textFieldsData, newInput],
+        }));
+      }
+      setNewManualInput({ title: "", description: "", text: "" });
       setShowAddForm(null);
       setHasChanges(true);
     }
@@ -111,11 +155,12 @@ export function KnowledgeBaseTab() {
       const newSite = {
         id: Math.random().toString(36).substr(2, 9),
         new: true,
-        url: newWebsite,
+        type: "website",
+        source: newWebsite,
       };
       setData((prev) => ({
-        ...prev,
-        websites: [...prev.websites, newSite],
+        ...prev!,
+        otherSources: [...prev!.otherSources, newSite],
       }));
       setNewWebsite("");
       setShowAddForm(null);
@@ -128,13 +173,14 @@ export function KnowledgeBaseTab() {
     if (file) {
       const newFileEntry = {
         id: Math.random().toString(36).substr(2, 9),
-        name: file.name,
+        source: file.name,
         new: true,
-        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+        type: "file",
+        // size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
       };
       setData((prev) => ({
-        ...prev,
-        files: [...prev.files, newFileEntry],
+        ...prev!,
+        otherSources: [...prev!.otherSources, newFileEntry],
       }));
       setNewFile(null);
       setShowAddForm(null);
@@ -145,24 +191,24 @@ export function KnowledgeBaseTab() {
 
   const handleRemoveManualInput = (id: string) => {
     setData((prev) => ({
-      ...prev,
-      manualInputs: prev.manualInputs.filter((input) => input.id !== id),
+      ...prev!,
+      textFieldsData: prev!.textFieldsData.filter((input) => input.id !== id),
     }));
     setHasChanges(true);
   };
 
   const handleRemoveWebsite = (id: string) => {
     setData((prev) => ({
-      ...prev,
-      websites: prev.websites.filter((website) => website.id !== id),
+      ...prev!,
+      otherSources: prev!.otherSources.filter((website) => website.id !== id),
     }));
     setHasChanges(true);
   };
 
   const handleRemoveFile = (id: string) => {
     setData((prev) => ({
-      ...prev,
-      files: prev.files.filter((file) => file.id !== id),
+      ...prev!,
+      otherSources: prev!.otherSources.filter((file) => file.id !== id),
     }));
     setHasChanges(true);
   };
@@ -175,10 +221,10 @@ export function KnowledgeBaseTab() {
         title: string;
         description: string;
         id: string;
-        content: string;
-        new: boolean;
+        text: string;
+        new?: boolean;
       }[] = [];
-      if (key === "manualInputs") {
+      if (key === "textFieldsData") {
         newData = data[key].filter((input) => input.new);
       }
       console.log(newData);
@@ -188,23 +234,29 @@ export function KnowledgeBaseTab() {
     setHasChanges(false);
   };
 
-  const percentage = (data.characterCount / data.characterLimit) * 100;
-  const remaining = data.characterLimit - data.characterCount;
+  const percentage =
+    (selectedAssistant?.charactersUsed! / charactersLimit) * 100;
+  const remaining = charactersLimit - selectedAssistant?.charactersUsed!;
 
   const navigationItems = [
     {
       type: "manual",
       label: "Manual Input",
       icon: BookText,
-      count: data.manualInputs.length,
+      count: data?.textFieldsData.length,
     },
     {
       type: "websites",
       label: "Websites",
       icon: Globe,
-      count: data.websites.length,
+      count: data?.otherSources.length,
     },
-    { type: "files", label: "Files", icon: FileText, count: data.files.length },
+    {
+      type: "files",
+      label: "Files",
+      icon: FileText,
+      count: data?.otherSources.length,
+    },
   ] as const;
 
   return (
@@ -256,8 +308,8 @@ export function KnowledgeBaseTab() {
               {selectedType === "manual"
                 ? "Manual Input"
                 : selectedType === "websites"
-                ? "Website"
-                : "File"}
+                  ? "Website"
+                  : "File"}
             </Button>
           </div>
 
@@ -299,7 +351,7 @@ export function KnowledgeBaseTab() {
                     <Label htmlFor="content">Content</Label>
                     <Textarea
                       id="content"
-                      value={newManualInput.content}
+                      value={newManualInput.text}
                       onChange={(e) =>
                         setNewManualInput((prev) => ({
                           ...prev,
@@ -315,7 +367,7 @@ export function KnowledgeBaseTab() {
                   </Button>
                 </div>
               )}
-              {data.manualInputs.map((input) => (
+              {data?.textFieldsData.map((input) => (
                 <div
                   key={input.id}
                   className="p-4 rounded-lg border group relative"
@@ -331,7 +383,7 @@ export function KnowledgeBaseTab() {
                   <div className="space-y-2">
                     <h3 className="font-medium">{input.title}</h3>
                     <p className="text-sm text-gray-500">{input.description}</p>
-                    <p className="text-sm">{input.content}</p>
+                    <p className="text-sm">{input.text}</p>
                   </div>
                 </div>
               ))}
@@ -350,25 +402,29 @@ export function KnowledgeBaseTab() {
                   <Button onClick={handleAddWebsite}>Add Website</Button>
                 </div>
               )}
-              {data.websites.map((website) => (
-                <div
-                  key={website.id}
-                  className="flex items-center justify-between p-3 rounded-lg border group"
-                >
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm">{website.url}</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleRemoveWebsite(website.id)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+              {data?.otherSources.map((dataSource) => {
+                if (dataSource.type == "website") {
+                  return (
+                    <div
+                      key={dataSource.id}
+                      className="flex items-center justify-between p-3 rounded-lg border group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">{dataSource.source}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleRemoveWebsite(dataSource.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  );
+                }
+              })}
             </div>
           )}
 
@@ -387,26 +443,32 @@ export function KnowledgeBaseTab() {
                   />
                 </div>
               )}
-              {data.files.map((file) => (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between p-3 rounded-lg border group"
-                >
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm">{file.name}</span>
-                    <span className="text-sm text-gray-500">({file.size})</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleRemoveFile(file.id)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+              {data?.otherSources.map((dataSource) => {
+                if (dataSource.type == "file") {
+                  return (
+                    <div
+                      key={dataSource.id}
+                      className="flex items-center justify-between p-3 rounded-lg border group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">{dataSource.source}</span>
+                        {/* <span className="text-sm text-gray-500">
+                          ({dataSource.size})
+                        </span> */}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleRemoveFile(dataSource.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  );
+                }
+              })}
             </div>
           )}
         </CardContent>
@@ -420,8 +482,8 @@ export function KnowledgeBaseTab() {
               <div className="flex items-center justify-between text-sm">
                 <span>Character Usage</span>
                 <span className="text-blue-600">
-                  {data.characterCount.toLocaleString()} /{" "}
-                  {data.characterLimit.toLocaleString()}
+                  {selectedAssistant?.charactersUsed!} /{" "}
+                  {charactersLimit.toLocaleString()}
                 </span>
               </div>
               <Progress value={percentage} className="h-1" />

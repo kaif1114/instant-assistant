@@ -1,12 +1,10 @@
-import Navbar from "./components/navbar";
-import HeroSection from "./components/hero-section";
-import SocialProof from "./components/social-proof";
-import BenefitsSection from "./components/HowItWorks";
-import Testimonials from "./components/testimonials";
-import FAQ from "./components/faq";
-import CTASection from "./components/cta-section";
-import Footer from "./components/footer";
 import Benefits from "./components/Benefits/benefits";
+import CTASection from "./components/cta-section";
+import FAQ from "./components/faq";
+import Footer from "./components/footer";
+import HeroSection from "./components/hero-section";
+import BenefitsSection from "./components/HowItWorks";
+import Navbar from "./components/navbar";
 
 export default function LandingPage() {
   return (
