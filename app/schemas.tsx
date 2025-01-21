@@ -116,6 +116,7 @@ export interface SelectedWebsite {
   characterCount?: number;
 
 }
+
 export interface Document {
   pageContent: string;
   metadata: {
@@ -125,3 +126,22 @@ export interface Document {
     [key: string]: string | undefined;
   };
 }
+
+const DocumentMetadataSchema = z.object({
+  url: z.string(),
+  title: z.string(),
+  description: z.string(),
+}).catchall(z.any());
+
+export const DocumentSchema = z.object({
+  pageContent: z.string(),
+  metadata: DocumentMetadataSchema,
+});
+
+export const saveWebsiteContextRequestSchema = z.object({
+  assistantId: z.string(),
+  documents: z.array(z.object({
+    pageContent: z.string(),
+    metadata: DocumentMetadataSchema,
+  }))
+});

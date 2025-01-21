@@ -22,13 +22,19 @@ export async function POST(request: NextRequest) {
     mode: body.mode,
   });
   const docs = await loader.load();
+  console.log("Original docs:", docs); // Debug log
 
-  // Apply the filter to each document's content
-  const filteredDocs = docs.map((doc, index) => ({
-    ...doc,
-    id: `${body.url}-${index}`,
-    pageContent: removeImageLinks(doc.pageContent),
-  }));
+  // Apply the filter to each document's content with explicit index
+  const filteredDocs = docs.map((doc, i) => {
+    console.log(`Processing doc ${i}:`, doc); // Debug log
+    return {
+      ...doc,
+      id: `${body.url}-${i}`,
+      pageContent: removeImageLinks(doc.pageContent),
+    };
+  });
+
+  console.log("Filtered docs:", filteredDocs); // Debug log
 
   return NextResponse.json({ docs: filteredDocs }, { status: 200 });
 }

@@ -145,13 +145,14 @@ export default function AssistantTrainingPage() {
           ids: true,
         });
       }
-      const websitesScraped: { source: string, type: string, assistantId: string, characterCount: number }[] = []
-      for (const content of scrapedContent) {
-        websitesScraped.push({ source: content.metadata.url, type: "url", assistantId, characterCount: content.pageContent.length })
-      }
+      // const websitesScraped: { source: string, type: string, assistantId: string, characterCount: number }[] = []
+      // for (const content of scrapedContent) {
+      //   websitesScraped.push({ source: content.metadata.url, type: "url", assistantId, characterCount: content.pageContent.length })
+      // }
+      console.log("scrapedContent: ", scrapedContent);
       await axios.post("/api/savecontext/website", {
         assistantId,
-        websites: websitesScraped,
+        documents: scrapedContent,
       });
 
 
@@ -159,7 +160,7 @@ export default function AssistantTrainingPage() {
 
       setIsSuccess(true);
     } catch (error) {
-      console.error(error);
+      console.log(error);
       // Handle error (show error message to user)
     } finally {
       setIsLoading(false);

@@ -12,18 +12,9 @@ import { BookText, FileText, Globe, Plus, Sparkles, X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { pricingPlanContext } from "../../pricingPlanContext";
 import { useSelectedAssistantStore } from "../store";
+import MarkdownPreview from '@uiw/react-markdown-preview';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface ManualInput {
-  id: string;
-  title: string;
-  description: string;
-  content: string;
-}
-
-interface Website {
-  id: string;
-  url: string;
-}
 
 interface File {
   id: string;
@@ -49,32 +40,6 @@ interface Data {
   };
 }
 
-const initialData = {
-  textFieldsData: [
-    {
-      id: "1",
-      title: "Company Overview",
-      description: "Basic information about our company",
-      content: "We are a technology company focused on AI solutions...",
-      new: false,
-    },
-  ],
-  websites: [
-    {
-      id: "1",
-      url: "https://example.com/docs",
-      new: false,
-    },
-  ],
-  files: [
-    {
-      id: "1",
-      name: "product-manual.pdf",
-      size: "2.5 MB",
-      new: false,
-    },
-  ],
-};
 
 type KnowledgeType = "manual" | "websites" | "files";
 
@@ -119,7 +84,7 @@ export function KnowledgeBaseTab() {
         (acc, input) => acc + input.text.length,
         0
       );
-      setData((prev) => ({ ...prev!, charactersUsed: totalCharacters }));
+      // Don't update state during render, just check the limit
       setError(
         totalCharacters > charactersLimit ? "Character limit exceeded" : null
       );
@@ -248,13 +213,13 @@ export function KnowledgeBaseTab() {
       type: "websites",
       label: "Websites",
       icon: Globe,
-      count: data?.otherSources.length,
+      count: data?.otherSources.filter((source) => source.type == "url").length,
     },
     {
       type: "files",
       label: "Files",
       icon: FileText,
-      count: data?.otherSources.length,
+      count: data?.otherSources.filter((source) => source.type == "file").length,
     },
   ] as const;
 
@@ -367,24 +332,36 @@ export function KnowledgeBaseTab() {
                 </div>
               )}
               {data?.textFieldsData.map((input) => (
-                <div
-                  key={input.id}
-                  className="p-4 rounded-lg border group relative"
-                >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleRemoveManualInput(input.id)}
+                <ScrollArea className="h-max w-full rounded-md border p-4">
+                  <div
+                    key={input.id}
+                    className="relative group mb-4 pb-4 border-b last:border-b-0"
                   >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  <div className="space-y-2">
-                    <h3 className="font-medium">{input.title}</h3>
-                    <p className="text-sm text-gray-500">{input.description}</p>
-                    <p className="text-sm">{input.text}</p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute -right-0 -top-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleRemoveManualInput(input.id)}
+                    >
+                      <X className="h-4 w-4 " />
+                    </Button>
+                    <h3 className="text-lg font-semibold">
+                      {input.title}
+                    </h3>
+
+                    <p className="text-sm mb-2">
+                      {input.description}
+                    </p>
+                    <details>
+                      <summary className="cursor-pointer text-sm font-medium">
+                        View Content
+                      </summary>
+                      <pre className="mt-2 whitespace-pre-wrap text-sm">
+                        {input.text}
+                      </pre>
+                    </details>
                   </div>
-                </div>
+                </ScrollArea>
               ))}
             </div>
           )}
@@ -402,7 +379,7 @@ export function KnowledgeBaseTab() {
                 </div>
               )}
               {data?.otherSources.map((dataSource) => {
-                if (dataSource.type == "website") {
+                if (dataSource.type == "url") {
                   return (
                     <div
                       key={dataSource.id}

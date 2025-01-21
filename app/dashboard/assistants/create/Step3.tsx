@@ -114,25 +114,25 @@ const Step3 = ({
 
       onSetScrapedContent((prev: Document[]) => [...prev, ...result.docs]);
 
-      const newDataFields = result.docs.map((doc: Document) => ({
-        pageContent: doc.pageContent,
-        metadata: {
-          title: doc.metadata.title,
-          description: doc.metadata.description,
-          url: doc.metadata.url,
-        },
-      }));
-      if (newDataFields.length === 0) {
-        newDataFields.push({
-          pageContent: "",
-          metadata: { title: "", description: "" },
-        });
-      }
-      data.dataFields.length <= 1
-        ? setData({ dataFields: newDataFields })
-        : setData({
-          dataFields: [...data.dataFields, ...newDataFields],
-        });
+      // const newDataFields = result.docs.map((doc: Document) => ({
+      //   pageContent: doc.pageContent,
+      //   metadata: {
+      //     title: doc.metadata.title,
+      //     description: doc.metadata.description,
+      //     url: doc.metadata.url,
+      //   },
+      // }));
+      // if (newDataFields.length === 0) {
+      //   newDataFields.push({
+      //     pageContent: "",
+      //     metadata: { title: "", description: "" },
+      //   });
+      // }
+      // data.dataFields.length <= 1
+      //   ? setData({ dataFields: newDataFields })
+      //   : setData({
+      //     dataFields: [...data.dataFields, ...newDataFields],
+      //   });
     } catch (error) {
       console.error(
         `Error ${websiteMode === "scrape" ? "scraping" : "crawling"} site:`,

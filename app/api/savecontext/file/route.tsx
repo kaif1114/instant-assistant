@@ -78,8 +78,7 @@ export async function POST(request: NextRequest) {
         namespace: assistantId as string,
         ids,
       });
-      console.log(assistantId as string);
-      console.log(fileName);
+
       await prisma.knowledgeSource.create({
         data: {
           assistantId: assistantId as string,
