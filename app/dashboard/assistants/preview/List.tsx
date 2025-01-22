@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Assistants } from "@prisma/client";
 import { motion } from "framer-motion";
-import { Search, Filter, ChevronRight } from "lucide-react";
+import { ChevronRight, Filter, Search } from "lucide-react";
+import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,6 @@ import AssistantPage from "./AssistantPage";
 import { useSelectedAssistantStore } from "./store";
 
 export function AssistantList({ assistants }: { assistants: Assistants[] }) {
-  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const { selectedAssistant, setSelectedAssistant } =
@@ -117,7 +115,7 @@ export function AssistantList({ assistants }: { assistants: Assistants[] }) {
                   <Button
                     variant="ghost"
                     className="w-full justify-between"
-                    onClick={(e) => {
+                    onClick={() => {
                       setSelectedAssistant(assistant);
                     }}
                   >

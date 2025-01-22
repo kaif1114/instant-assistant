@@ -23,7 +23,6 @@ import { auth } from "@clerk/nextjs/server";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
 import AssistantsList from "./AssistantsList";
-import PricingPlanContextProvider from "./PricingPlanContextProvider";
 
 export default async function Page() {
   const { userId } = await auth();

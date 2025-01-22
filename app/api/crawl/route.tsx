@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
   // Apply the filter to each document's content with explicit index
   const filteredDocs = docs.map((doc, i) => {
-    console.log(`Processing doc ${i}:`, doc); // Debug log
+    // console.log(`Processing doc ${i}:`, doc); // Debug log
     return {
       ...doc,
       id: `${body.url}-${i}`,

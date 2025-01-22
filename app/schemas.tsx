@@ -129,8 +129,8 @@ export interface Document {
 
 const DocumentMetadataSchema = z.object({
   url: z.string(),
-  title: z.string(),
-  description: z.string(),
+  title: z.string().optional(),
+  description: z.string().optional(),
 }).catchall(z.any());
 
 export const DocumentSchema = z.object({

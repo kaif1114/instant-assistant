@@ -1,14 +1,12 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { CustomTabs } from "./custom-tabs";
 import { AppearanceTab } from "./appearance-tab";
+import { CustomTabs } from "./custom-tabs";
 import { InstallTab } from "./install-tab";
-import { PreviewTab } from "./preview-tab";
-import { Assistants } from "@prisma/client";
 import { KnowledgeBaseTab } from "./KnowledgeBase/KnowledgeBaseTab";
-import { useSelectedAssistantStore } from "./store";
+import { PreviewTab } from "./preview-tab";
 
 const tabs = [
   { id: "appearance", label: "Appearance" },
@@ -36,8 +34,7 @@ const tabVariants = {
 
 const AssistantPage = () => {
   const [activeTab, setActiveTab] = useState("appearance");
-  const { selectedAssistant, setSelectedAssistant } =
-    useSelectedAssistantStore();
+
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">

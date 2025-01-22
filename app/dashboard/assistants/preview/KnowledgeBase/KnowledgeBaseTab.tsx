@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import axios from "axios";
@@ -12,8 +13,6 @@ import { BookText, FileText, Globe, Plus, Sparkles, X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { pricingPlanContext } from "../../pricingPlanContext";
 import { useSelectedAssistantStore } from "../store";
-import MarkdownPreview from '@uiw/react-markdown-preview';
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 interface File {
@@ -59,22 +58,28 @@ export function KnowledgeBaseTab() {
   const [showAddForm, setShowAddForm] = useState<KnowledgeType | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function getKnowledgeBase() {
       if (selectedAssistant) {
+
         const response = await axios.get(
           `/api/getcontext?assistantId=${selectedAssistant?.assistantId}`
         );
-        return response.data;
+
+        setData(response.data);
+        setIsLoading(false);
       }
     }
-    getKnowledgeBase().then((data) => {
-      if (data) {
-        console.log("Data: ", data);
-        setData(data);
-      }
-    });
+    getKnowledgeBase();
+
+    // setIsLoading(true);
+    // getKnowledgeBase().then((data) => {
+    //   if (data) {
+    //     setData(data);
+    //   }
+    // }).finally(() => setIsLoading(false));
   }, [selectedAssistant]);
 
   useEffect(() => {
@@ -84,10 +89,11 @@ export function KnowledgeBaseTab() {
         (acc, input) => acc + input.text.length,
         0
       );
-      // Don't update state during render, just check the limit
-      setError(
-        totalCharacters > charactersLimit ? "Character limit exceeded" : null
-      );
+      if (totalCharacters > charactersLimit) {
+        setError("Character limit exceeded");
+      } else {
+        setError(null);
+      }
     }
   }, [data?.textFieldsData, charactersLimit]);
 
@@ -223,6 +229,55 @@ export function KnowledgeBaseTab() {
     },
   ] as const;
 
+  if (isLoading) {
+    return (
+      <div className="flex gap-6 h-[calc(100vh-200px)]">
+        <Card className="w-60 flex-shrink-0">
+          <CardContent className="p-4">
+            <div className="space-y-2 animate-pulse">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-10 bg-gray-200 rounded-lg w-full"
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="flex-1">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center mb-4">
+                <div className="h-6 bg-gray-200 rounded w-32 animate-pulse" />
+                <div className="h-9 bg-gray-200 rounded w-24 animate-pulse" />
+              </div>
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-24 bg-gray-200 rounded-lg w-full animate-pulse"
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="w-60 flex-shrink-0 space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
+                <div className="h-2 bg-gray-200 rounded w-full animate-pulse" />
+                <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
+              </div>
+            </CardContent>
+          </Card>
+          <div className="h-10 bg-gray-200 rounded w-full animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex gap-6 h-[calc(100vh-200px)]">
       {/* Left Navigation */}
@@ -332,9 +387,8 @@ export function KnowledgeBaseTab() {
                 </div>
               )}
               {data?.textFieldsData.map((input) => (
-                <ScrollArea className="h-max w-full rounded-md border p-4">
+                <ScrollArea key={input.id} className="h-max w-full rounded-md border p-4">
                   <div
-                    key={input.id}
                     className="relative group mb-4 pb-4 border-b last:border-b-0"
                   >
                     <Button
@@ -429,9 +483,6 @@ export function KnowledgeBaseTab() {
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-gray-500" />
                         <span className="text-sm">{dataSource.source}</span>
-                        {/* <span className="text-sm text-gray-500">
-                          ({dataSource.size})
-                        </span> */}
                       </div>
                       <Button
                         variant="ghost"
