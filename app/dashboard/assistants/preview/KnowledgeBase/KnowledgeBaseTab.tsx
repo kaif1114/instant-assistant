@@ -13,6 +13,7 @@ import { BookText, FileText, Globe, Plus, Sparkles, X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { pricingPlanContext } from "../../pricingPlanContext";
 import { useSelectedAssistantStore } from "../store";
+import { useQuery } from "@tanstack/react-query";
 
 
 interface File {
@@ -45,7 +46,7 @@ type KnowledgeType = "manual" | "websites" | "files";
 export function KnowledgeBaseTab() {
   const charactersLimit = useContext(pricingPlanContext);
   const { selectedAssistant } = useSelectedAssistantStore();
-  const [data, setData] = useState<Data | null>(null);
+
   const [selectedType, setSelectedType] = useState<KnowledgeType>("manual");
   const [isRetraining, setIsRetraining] = useState(false);
   const [newManualInput, setNewManualInput] = useState({
@@ -58,34 +59,38 @@ export function KnowledgeBaseTab() {
   const [showAddForm, setShowAddForm] = useState<KnowledgeType | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
+  async function getKnowledgeBase(assistantId: string) {
+    const response = await axios.get(
+      `/api/getcontext?assistantId=${assistantId}`
+    );
+    return response.data
+
+  }
+
+  const { data, isLoading, isError } = useQuery<Data>({
+    queryKey: ['knowledgeBase', selectedAssistant?.assistantId],
+    queryFn: () => getKnowledgeBase(selectedAssistant?.assistantId!)
+  })
+
+  const [knowledgeBase, setKnowledgeBase] = useState<Data | undefined>(data);
   useEffect(() => {
-    async function getKnowledgeBase() {
-      if (selectedAssistant) {
 
-        const response = await axios.get(
-          `/api/getcontext?assistantId=${selectedAssistant?.assistantId}`
-        );
-
-        setData(response.data);
-        setIsLoading(false);
-      }
-    }
-    getKnowledgeBase();
+    setKnowledgeBase(data)
 
     // setIsLoading(true);
     // getKnowledgeBase().then((data) => {
     //   if (data) {
-    //     setData(data);
+    //     setKnowledgeBase(data);
     //   }
     // }).finally(() => setIsLoading(false));
-  }, [selectedAssistant]);
+  }, [selectedAssistant, data]);
 
   useEffect(() => {
-    if (data != null && data.textFieldsData.length > 0) {
-      console.log("Data: ", data);
-      const totalCharacters = data.textFieldsData.reduce(
+    if (knowledgeBase && knowledgeBase.textFieldsData.length > 0) {
+
+      const totalCharacters = knowledgeBase.textFieldsData.reduce(
         (acc, input) => acc + input.text.length,
         0
       );
@@ -95,7 +100,7 @@ export function KnowledgeBaseTab() {
         setError(null);
       }
     }
-  }, [data?.textFieldsData, charactersLimit]);
+  }, [knowledgeBase?.textFieldsData, charactersLimit]);
 
   const handleAddManualInput = () => {
     if (
@@ -109,7 +114,7 @@ export function KnowledgeBaseTab() {
         ...newManualInput,
       };
       if (data) {
-        setData((prev) => ({
+        setKnowledgeBase((prev) => ({
           ...prev!,
           textFieldsData: [...prev!.textFieldsData, newInput],
         }));
@@ -128,7 +133,7 @@ export function KnowledgeBaseTab() {
         type: "website",
         source: newWebsite,
       };
-      setData((prev) => ({
+      setKnowledgeBase((prev) => ({
         ...prev!,
         otherSources: [...prev!.otherSources, newSite],
       }));
@@ -148,7 +153,7 @@ export function KnowledgeBaseTab() {
         type: "file",
         // size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
       };
-      setData((prev) => ({
+      setKnowledgeBase((prev) => ({
         ...prev!,
         otherSources: [...prev!.otherSources, newFileEntry],
       }));
@@ -160,7 +165,7 @@ export function KnowledgeBaseTab() {
   };
 
   const handleRemoveManualInput = (id: string) => {
-    setData((prev) => ({
+    setKnowledgeBase((prev) => ({
       ...prev!,
       textFieldsData: prev!.textFieldsData.filter((input) => input.id !== id),
     }));
@@ -168,7 +173,7 @@ export function KnowledgeBaseTab() {
   };
 
   const handleRemoveWebsite = (id: string) => {
-    setData((prev) => ({
+    setKnowledgeBase((prev) => ({
       ...prev!,
       otherSources: prev!.otherSources.filter((website) => website.id !== id),
     }));
@@ -176,7 +181,7 @@ export function KnowledgeBaseTab() {
   };
 
   const handleRemoveFile = (id: string) => {
-    setData((prev) => ({
+    setKnowledgeBase((prev) => ({
       ...prev!,
       otherSources: prev!.otherSources.filter((file) => file.id !== id),
     }));
@@ -186,7 +191,7 @@ export function KnowledgeBaseTab() {
   const handleRetrain = async () => {
     setIsRetraining(true);
 
-    for (const key in data) {
+    for (const key in knowledgeBase) {
       let newData: {
         title: string;
         description: string;
@@ -195,7 +200,7 @@ export function KnowledgeBaseTab() {
         new?: boolean;
       }[] = [];
       if (key === "textFieldsData") {
-        newData = data[key].filter((input) => input.new);
+        newData = knowledgeBase[key].filter((input) => input.new);
       }
       console.log(newData);
     }
@@ -213,19 +218,19 @@ export function KnowledgeBaseTab() {
       type: "manual",
       label: "Manual Input",
       icon: BookText,
-      count: data?.textFieldsData.length,
+      count: knowledgeBase?.textFieldsData.length,
     },
     {
       type: "websites",
       label: "Websites",
       icon: Globe,
-      count: data?.otherSources.filter((source) => source.type == "url").length,
+      count: knowledgeBase?.otherSources.filter((source) => source.type == "url").length,
     },
     {
       type: "files",
       label: "Files",
       icon: FileText,
-      count: data?.otherSources.filter((source) => source.type == "file").length,
+      count: knowledgeBase?.otherSources.filter((source) => source.type == "file").length,
     },
   ] as const;
 
@@ -386,7 +391,7 @@ export function KnowledgeBaseTab() {
                   </Button>
                 </div>
               )}
-              {data?.textFieldsData.map((input) => (
+              {knowledgeBase?.textFieldsData.map((input) => (
                 <ScrollArea key={input.id} className="h-max w-full rounded-md border p-4">
                   <div
                     className="relative group mb-4 pb-4 border-b last:border-b-0"
@@ -432,7 +437,7 @@ export function KnowledgeBaseTab() {
                   <Button onClick={handleAddWebsite}>Add Website</Button>
                 </div>
               )}
-              {data?.otherSources.map((dataSource) => {
+              {knowledgeBase?.otherSources.map((dataSource) => {
                 if (dataSource.type == "url") {
                   return (
                     <div
@@ -473,7 +478,7 @@ export function KnowledgeBaseTab() {
                   />
                 </div>
               )}
-              {data?.otherSources.map((dataSource) => {
+              {knowledgeBase?.otherSources.map((dataSource) => {
                 if (dataSource.type == "file") {
                   return (
                     <div
