@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter_Tight } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import QueryProvider from "./dashboard/QueryProvider";
 
 const interTight = Inter_Tight({
   subsets: ["latin"],
@@ -36,22 +37,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body
-          className={`${interTight.variable} ${satoshi.variable} font-sans antialiased`}
-        >
-          {/* <header>
-            <SignedOut>
-              <SignInButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </header> */}
-          <main>{children}</main>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body
+        className={`${interTight.variable} ${satoshi.variable} font-sans antialiased`}
+      >
+        <QueryProvider>
+          <ClerkProvider>
+
+            <main>{children}</main>
+
+          </ClerkProvider>
+        </QueryProvider>
+      </body>
+    </html>
   );
 }

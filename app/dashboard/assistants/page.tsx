@@ -25,11 +25,11 @@ import Link from "next/link";
 import AssistantsList from "./AssistantsList";
 
 export default async function Page() {
-  const { userId } = await auth();
-  const assistants = await prisma.assistants.findMany({
-    where: { userId: userId! },
-  });
-  console.log(userId);
+  // const { userId } = await auth();
+  // const assistants = await prisma.assistants.findMany({
+  //   where: { userId: userId! },
+  // });
+  // console.log(userId);
 
   return (
     <>
@@ -67,7 +67,7 @@ export default async function Page() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <AssistantsList assistants={assistants} />
+            <AssistantsList />
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button variant="outline">Export Data</Button>

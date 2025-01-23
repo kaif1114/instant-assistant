@@ -1,4 +1,5 @@
 "use client";
+import { useAssistants } from "@/app/hooks/useAssistants";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,14 +34,25 @@ import axios from "axios";
 import { MoreHorizontal, Power, PowerOff } from "lucide-react";
 import { useState } from "react";
 import { RotatingLines } from "react-loader-spinner";
+import { useUser } from "@clerk/nextjs";
+
 interface Props {
   assistants: Assistants[];
 }
 
-const AssistantsList = ({ assistants: initialAssistants }: Props) => {
+const AssistantsList = () => {
+  const { user } = useUser();
+  console.log("[AssistantsList] Rendering with userId:", user?.id);
+  const { data: assistants, isError, isLoading, error } = useAssistants(user?.id!);
   const [loadingId, setLoading] = useState<String | null>(null);
-  const [assistants, setAssistants] = useState(initialAssistants);
+  // const [assistants, setAssistants] = useState(initialAssistants);
 
+  if (isLoading) {
+    return <div>loading...</div>
+  }
+  if (isError) {
+    return <div>{error.message}</div>
+  }
   return (
     <>
       <Table>
@@ -53,7 +65,7 @@ const AssistantsList = ({ assistants: initialAssistants }: Props) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {assistants.map((assistant) => (
+          {assistants?.map((assistant) => (
             <TableRow key={assistant.id}>
               <TableCell className="font-medium flex items-center gap-4">
                 {loadingId == assistant.assistantId && (
@@ -104,19 +116,19 @@ const AssistantsList = ({ assistants: initialAssistants }: Props) => {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={async () => {
-                              setLoading(assistant.assistantId);
-                              await axios.delete(
-                                `/api/assistants/${assistant.assistantId}`
-                              );
-                              setAssistants((prev) =>
-                                prev.filter(
-                                  (obj) =>
-                                    obj.assistantId != assistant.assistantId
-                                )
-                              );
-                              setLoading(null);
-                            }}
+                          // onClick={async () => {
+                          //   setLoading(assistant.assistantId);
+                          //   await axios.delete(
+                          //     `/api/assistants/${assistant.assistantId}`
+                          //   );
+                          //   setAssistants((prev) =>
+                          //     prev.filter(
+                          //       (obj) =>
+                          //         obj.assistantId != assistant.assistantId
+                          //     )
+                          //   );
+                          //   setLoading(null);
+                          // }}
                           >
                             Delete
                           </AlertDialogAction>

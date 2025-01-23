@@ -19,14 +19,20 @@ import {
 } from "@/components/ui/select";
 import AssistantPage from "./AssistantPage";
 import { useSelectedAssistantStore } from "./store";
+import { useAssistants } from "@/app/hooks/useAssistants";
+import { useUser } from "@clerk/nextjs";
 
-export function AssistantList({ assistants }: { assistants: Assistants[] }) {
+export function AssistantList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const { selectedAssistant, setSelectedAssistant } =
     useSelectedAssistantStore();
+  const { user } = useUser();
+  console.log("[AssistantList] Rendering with userId:", user?.id);
 
-  const filteredAssistants = assistants.filter((assistant) => {
+  const { data: assistants, isError, error } = useAssistants(user?.id!);
+
+  const filteredAssistants = assistants?.filter((assistant) => {
     const matchesSearch =
       assistant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       assistant.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -40,6 +46,9 @@ export function AssistantList({ assistants }: { assistants: Assistants[] }) {
   };
   if (selectedAssistant) {
     return <AssistantPage />;
+  }
+  if (isError) {
+    return <div>{error.message}</div>
   }
   return (
     <div className="container mx-auto p-4 max-w-5xl">
@@ -72,7 +81,7 @@ export function AssistantList({ assistants }: { assistants: Assistants[] }) {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredAssistants.map((assistant, index) => (
+          {filteredAssistants?.map((assistant, index) => (
             <motion.div
               key={assistant.id}
               variants={cardVariants}
@@ -128,7 +137,7 @@ export function AssistantList({ assistants }: { assistants: Assistants[] }) {
           ))}
         </div>
 
-        {filteredAssistants.length === 0 && (
+        {filteredAssistants?.length === 0 && (
           <div className="text-center py-10">
             <p className="text-xl font-semibold text-gray-600">
               No assistants found
