@@ -43,9 +43,7 @@ export default function RootLayout({
       >
         <QueryProvider>
           <ClerkProvider>
-
             <main>{children}</main>
-
           </ClerkProvider>
         </QueryProvider>
       </body>

@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,8 +10,8 @@ import { cn } from "@/lib/utils";
 import axios from "axios";
 import { BookText, FileText, Globe, Plus, Sparkles, X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
-import { pricingPlanContext } from "../../pricingPlanContext";
-import { useSelectedAssistantStore } from "../store";
+import { pricingPlanContext } from "../../../pricingPlanContext";
+import { useSelectedAssistantStore } from "../../store";
 import { useQuery } from "@tanstack/react-query";
 
 
@@ -71,7 +70,11 @@ export function KnowledgeBaseTab() {
 
   const { data, isLoading, isError } = useQuery<Data>({
     queryKey: ['knowledgeBase', selectedAssistant?.assistantId],
-    queryFn: () => getKnowledgeBase(selectedAssistant?.assistantId!)
+    queryFn: () => getKnowledgeBase(selectedAssistant?.assistantId!),
+    staleTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+
   })
 
   const [knowledgeBase, setKnowledgeBase] = useState<Data | undefined>(data);

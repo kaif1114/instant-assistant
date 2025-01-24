@@ -20,13 +20,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Assistants } from "@prisma/client";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { CldUploadWidget, getCldImageUrl } from "next-cloudinary";
 import { useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
-import { useSelectedAssistantStore } from "./store";
+import { useSelectedAssistantStore } from "../store";
 
 export function AppearanceTab() {
   const { selectedAssistant, setSelectedAssistant } =

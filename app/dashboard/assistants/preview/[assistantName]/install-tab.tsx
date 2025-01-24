@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
-import { useSelectedAssistantStore } from "./store";
+import { useSelectedAssistantStore } from "../store";
 
 export function InstallTab() {
   const { selectedAssistant, setSelectedAssistant } =

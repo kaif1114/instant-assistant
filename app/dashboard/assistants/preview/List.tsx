@@ -17,18 +17,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import AssistantPage from "./AssistantPage";
+
 import { useSelectedAssistantStore } from "./store";
-import { useAssistants } from "@/app/hooks/useAssistants";
+import { useAssistants } from "@/hooks/useAssistants";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export function AssistantList() {
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const router = useRouter();
+
   const { selectedAssistant, setSelectedAssistant } =
     useSelectedAssistantStore();
+
   const { user } = useUser();
-  console.log("[AssistantList] Rendering with userId:", user?.id);
 
   const { data: assistants, isError, error } = useAssistants(user?.id!);
 
@@ -44,9 +48,7 @@ export function AssistantList() {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
-  if (selectedAssistant) {
-    return <AssistantPage />;
-  }
+
   if (isError) {
     return <div>{error.message}</div>
   }
@@ -91,7 +93,10 @@ export function AssistantList() {
             >
               <Card
                 className="cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-                onClick={() => setSelectedAssistant(assistant)}
+                onClick={() => {
+                  setSelectedAssistant(assistant)
+                  router.push(`/dashboard/assistants/preview/${assistant.name}`)
+                }}
               >
                 <CardHeader className="flex flex-row items-center gap-4">
                   <Avatar className="h-14 w-14">

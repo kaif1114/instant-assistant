@@ -1,5 +1,5 @@
 "use client";
-import { useAssistants } from "@/app/hooks/useAssistants";
+import { useAssistants } from "@/hooks/useAssistants";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,7 +42,6 @@ interface Props {
 
 const AssistantsList = () => {
   const { user } = useUser();
-  console.log("[AssistantsList] Rendering with userId:", user?.id);
   const { data: assistants, isError, isLoading, error } = useAssistants(user?.id!);
   const [loadingId, setLoading] = useState<String | null>(null);
   // const [assistants, setAssistants] = useState(initialAssistants);

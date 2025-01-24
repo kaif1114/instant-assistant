@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Assistants } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
-import { useSelectedAssistantStore } from "./store";
+import { useSelectedAssistantStore } from "../store";
 
 const sessionId = uuidv4();
 export function PreviewTab() {

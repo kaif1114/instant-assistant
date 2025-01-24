@@ -51,7 +51,7 @@ export default async function page() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      {<AssistantList assistants={assistants} />}
+      {<AssistantList />}
     </PricingPlanContextProvider>
   );
 }
