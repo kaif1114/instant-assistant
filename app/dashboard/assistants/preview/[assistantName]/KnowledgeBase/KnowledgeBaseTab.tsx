@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import axios from "axios";
 import { BookText, FileText, Globe, Plus, Sparkles, X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
-import { pricingPlanContext } from "../../../pricingPlanContext";
+import { pricingPlanContext } from "../../../../../providers/pricingPlanContext";
 import { useSelectedAssistantStore } from "../../store";
 import { useQuery } from "@tanstack/react-query";
 
@@ -39,10 +39,18 @@ interface Data {
   };
 }
 
+async function getKnowledgeBase(assistantId: string) {
+  const response = await axios.get(
+    `/api/getcontext?assistantId=${assistantId}`
+  );
+  return response.data
+
+}
 
 type KnowledgeType = "manual" | "websites" | "files";
 
 export function KnowledgeBaseTab() {
+
   const charactersLimit = useContext(pricingPlanContext);
   const { selectedAssistant } = useSelectedAssistantStore();
 
@@ -60,13 +68,7 @@ export function KnowledgeBaseTab() {
   const [error, setError] = useState<string | null>(null);
   // const [isLoading, setIsLoading] = useState(true);
 
-  async function getKnowledgeBase(assistantId: string) {
-    const response = await axios.get(
-      `/api/getcontext?assistantId=${assistantId}`
-    );
-    return response.data
 
-  }
 
   const { data, isLoading, isError } = useQuery<Data>({
     queryKey: ['knowledgeBase', selectedAssistant?.assistantId],
@@ -79,15 +81,7 @@ export function KnowledgeBaseTab() {
 
   const [knowledgeBase, setKnowledgeBase] = useState<Data | undefined>(data);
   useEffect(() => {
-
     setKnowledgeBase(data)
-
-    // setIsLoading(true);
-    // getKnowledgeBase().then((data) => {
-    //   if (data) {
-    //     setKnowledgeBase(data);
-    //   }
-    // }).finally(() => setIsLoading(false));
   }, [selectedAssistant, data]);
 
   useEffect(() => {

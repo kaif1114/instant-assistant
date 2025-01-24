@@ -2,8 +2,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Inter_Tight } from "next/font/google";
 import localFont from "next/font/local";
+import QueryProvider from "./providers/QueryProvider";
 import "./globals.css";
-import QueryProvider from "./dashboard/QueryProvider";
 
 const interTight = Inter_Tight({
   subsets: ["latin"],
@@ -15,16 +15,16 @@ const satoshi = localFont({
   variable: "--font-satoshi",
 });
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+// const geistSans = localFont({
+//   src: "./fonts/GeistVF.woff",
+//   variable: "--font-geist-sans",
+//   weight: "100 900",
+// });
+// const geistMono = localFont({
+//   src: "./fonts/GeistMonoVF.woff",
+//   variable: "--font-geist-mono",
+//   weight: "100 900",
+// });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -43,7 +43,9 @@ export default function RootLayout({
       >
         <QueryProvider>
           <ClerkProvider>
+
             <main>{children}</main>
+
           </ClerkProvider>
         </QueryProvider>
       </body>

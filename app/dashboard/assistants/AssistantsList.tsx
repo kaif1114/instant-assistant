@@ -1,5 +1,4 @@
 "use client";
-import { useAssistants } from "@/hooks/useAssistants";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,22 +28,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Assistants } from "@prisma/client";
-import axios from "axios";
+import { useAssistants } from "@/hooks/useAssistants";
+import { useUser } from "@clerk/nextjs";
 import { MoreHorizontal, Power, PowerOff } from "lucide-react";
 import { useState } from "react";
 import { RotatingLines } from "react-loader-spinner";
-import { useUser } from "@clerk/nextjs";
 
-interface Props {
-  assistants: Assistants[];
-}
 
 const AssistantsList = () => {
   const { user } = useUser();
   const { data: assistants, isError, isLoading, error } = useAssistants(user?.id!);
   const [loadingId, setLoading] = useState<String | null>(null);
-  // const [assistants, setAssistants] = useState(initialAssistants);
 
   if (isLoading) {
     return <div>loading...</div>

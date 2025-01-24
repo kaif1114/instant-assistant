@@ -1,12 +1,14 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppearanceTab } from "./appearance-tab";
 import { CustomTabs } from "./custom-tabs";
 import { InstallTab } from "./install-tab";
 import { KnowledgeBaseTab } from "./KnowledgeBase/KnowledgeBaseTab";
 import { PreviewTab } from "./preview-tab";
+import { useSelectedAssistantStore } from "../store";
+import { useRouter } from "next/navigation";
 
 const tabs = [
   { id: "appearance", label: "Appearance" },
@@ -34,8 +36,20 @@ const tabVariants = {
 
 const AssistantPage = () => {
   const [activeTab, setActiveTab] = useState("appearance");
+  const { selectedAssistant } = useSelectedAssistantStore();
+  const router = useRouter();
 
 
+  useEffect(() => {
+    if (!selectedAssistant) {
+      router.push('/dashboard/assistants/preview')
+    }
+  }, [selectedAssistant])
+  if (!selectedAssistant) {
+    return <><div>
+      <p>Error occured</p>
+    </div></>
+  }
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <div className="flex items-center justify-between">

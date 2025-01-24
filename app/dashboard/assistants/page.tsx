@@ -18,19 +18,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import prisma from "@/prisma/client";
-import { auth } from "@clerk/nextjs/server";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
 import AssistantsList from "./AssistantsList";
 
 export default async function Page() {
-  // const { userId } = await auth();
-  // const assistants = await prisma.assistants.findMany({
-  //   where: { userId: userId! },
-  // });
-  // console.log(userId);
-
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2">
