@@ -11,9 +11,9 @@ function removeImageLinks(content: string) {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  if (!body.url || !body.mode) {
+  if (!body.url || !body.mode || (body.mode != "scrape" && body.mode != "crawl")) {
     return NextResponse.json(
-      { error: "No url found in request body" },
+      { error: "Invalid request body" },
       { status: 400 }
     );
   }
@@ -22,11 +22,10 @@ export async function POST(request: NextRequest) {
     mode: body.mode,
   });
   const docs = await loader.load();
-  console.log("Original docs:", docs); // Debug log
 
   // Apply the filter to each document's content with explicit index
   const filteredDocs = docs.map((doc, i) => {
-    // console.log(`Processing doc ${i}:`, doc); // Debug log
+
     return {
       ...doc,
       id: `${body.url}-${i}`,
@@ -34,7 +33,7 @@ export async function POST(request: NextRequest) {
     };
   });
 
-  console.log("Filtered docs:", filteredDocs); // Debug log
+
 
   return NextResponse.json({ docs: filteredDocs }, { status: 200 });
 }

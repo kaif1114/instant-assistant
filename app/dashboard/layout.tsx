@@ -16,7 +16,7 @@ const layout = async ({ children }: PropsWithChildren) => {
       select: { PricingPlans: true },
     });
     plan = user?.PricingPlans || null;
-    console.log(plan);
+
   } catch (error) {
     console.log(error);
   }

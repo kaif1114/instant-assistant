@@ -13,6 +13,7 @@ const MetadataSchema = z
   .catchall(z.any());
 
 const DocumentsSchema = z.object({
+  id: z.string().optional(),
   pageContent: z.string(),
   metadata: MetadataSchema,
 });
@@ -118,9 +119,9 @@ export interface SelectedWebsite {
 }
 
 export interface Document {
+
   pageContent: string;
   metadata: {
-    url: string;
     title: string;
     description: string;
     [key: string]: string | undefined;
@@ -145,3 +146,27 @@ export const saveWebsiteContextRequestSchema = z.object({
     metadata: DocumentMetadataSchema,
   }))
 });
+
+export interface IOtherSource {
+  source: string;
+  type: "url" | "file";
+  id: string;
+  new?: boolean;
+  file?: globalThis.File
+}
+export interface ITextFieldsData {
+  id: string;
+  text: string;
+  description: string;
+  title: string;
+  new?: boolean;
+
+}
+export interface Data {
+  textFieldsData: ITextFieldsData[];
+  otherSources: IOtherSource[];
+  characterCount: {
+    charactersUsed: number;
+  };
+}
+

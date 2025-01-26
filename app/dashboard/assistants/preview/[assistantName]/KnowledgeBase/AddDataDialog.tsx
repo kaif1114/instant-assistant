@@ -32,14 +32,18 @@ export function AddDataDialog({
   onAddFile,
   initialTab = "manual",
 }: AddDataDialogProps) {
+
   const [open, setOpen] = useState(false);
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [manualInput, setManualInput] = useState({
     title: "",
     description: "",
     content: "",
   });
-  const [websiteUrl, setWebsiteUrl] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+
 
   const handleManualInputSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,11 +108,13 @@ export function AddDataDialog({
                 <Input
                   id="description"
                   value={manualInput.description}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    console.log(e.target.value)
                     setManualInput((prev) => ({
                       ...prev,
                       description: e.target.value,
                     }))
+                  }
                   }
                   required
                 />
@@ -118,11 +124,13 @@ export function AddDataDialog({
                 <Textarea
                   id="content"
                   value={manualInput.content}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    console.log(e.target.value);
                     setManualInput((prev) => ({
                       ...prev,
                       content: e.target.value,
                     }))
+                  }
                   }
                   required
                 />

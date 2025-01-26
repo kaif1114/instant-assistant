@@ -1,4 +1,5 @@
 "use client";
+import { Data, IOtherSource } from "@/app/schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,37 +7,22 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import { AddUrlMutation } from "@/hooks/AddUrlMutation";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { BookText, FileText, Globe, Plus, Sparkles, X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { pricingPlanContext } from "../../../../../providers/pricingPlanContext";
 import { useSelectedAssistantStore } from "../../store";
-import { useQuery } from "@tanstack/react-query";
+import { AddTextFieldMutation } from "@/hooks/AddTextFieldMutation";
+import { AddFileMutation } from "@/hooks/AddFileMutation";
 
 
 interface File {
   id: string;
   name: string;
   size: string;
-}
-interface Data {
-  textFieldsData: {
-    id: string;
-    text: string;
-    description: string;
-    title: string;
-    new?: boolean;
-  }[];
-  otherSources: {
-    source: string;
-    type: string;
-    id: string;
-    new?: boolean;
-  }[];
-  characterCount: {
-    charactersUsed: number;
-  };
 }
 
 async function getKnowledgeBase(assistantId: string) {
@@ -47,7 +33,7 @@ async function getKnowledgeBase(assistantId: string) {
 
 }
 
-type KnowledgeType = "manual" | "websites" | "files";
+type KnowledgeType = "manual" | "url" | "file";
 
 export function KnowledgeBaseTab() {
 
@@ -61,14 +47,16 @@ export function KnowledgeBaseTab() {
     description: "",
     text: "",
   });
-  const [newWebsite, setNewWebsite] = useState("");
+  const [newurl, setNewurl] = useState("");
   const [newFile, setNewFile] = useState<File | null>(null);
   const [showAddForm, setShowAddForm] = useState<KnowledgeType | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // const [isLoading, setIsLoading] = useState(true);
 
-
+  const { mutate: mutateTextFields, isError: isTextFieldMutationError, error: textFieldMutationError } = AddTextFieldMutation()
+  const { mutate: mutateUrl, isError: isUrlMutationError, error: urlMutationError } = AddUrlMutation()
+  const { mutate: mutateFile, isError: isFileMutationError, error: fileMutationError } = AddFileMutation()
 
   const { data, isLoading, isError } = useQuery<Data>({
     queryKey: ['knowledgeBase', selectedAssistant?.assistantId],
@@ -106,7 +94,7 @@ export function KnowledgeBaseTab() {
       newManualInput.text
     ) {
       const newInput = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: (knowledgeBase!.textFieldsData.length + 1).toString(),
         new: true,
         ...newManualInput,
       };
@@ -120,34 +108,44 @@ export function KnowledgeBaseTab() {
       setShowAddForm(null);
       setHasChanges(true);
     }
+    else {
+      //handle missing data error
+    }
   };
 
-  const handleAddWebsite = () => {
-    if (newWebsite) {
-      const newSite = {
-        id: Math.random().toString(36).substr(2, 9),
+  const handleAddurl = () => {
+    if (newurl) {
+      const newSite: IOtherSource = {
+        id: `${newurl}-${knowledgeBase!.otherSources.length + 1}`,
         new: true,
-        type: "website",
-        source: newWebsite,
+        type: "url",
+        source: newurl,
       };
       setKnowledgeBase((prev) => ({
         ...prev!,
         otherSources: [...prev!.otherSources, newSite],
       }));
-      setNewWebsite("");
+      setNewurl("");
       setShowAddForm(null);
       setHasChanges(true);
     }
+    else {
+      //handle missing data error
+    }
+
+
   };
 
   const handleAddFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const newFileEntry = {
-        id: Math.random().toString(36).substr(2, 9),
+
+      const newFileEntry: IOtherSource = {
+        id: `${file.name}-${knowledgeBase!.otherSources.length + 1}`,
         source: file.name,
         new: true,
         type: "file",
+        file
         // size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
       };
       setKnowledgeBase((prev) => ({
@@ -169,10 +167,10 @@ export function KnowledgeBaseTab() {
     setHasChanges(true);
   };
 
-  const handleRemoveWebsite = (id: string) => {
+  const handleRemoveurl = (id: string) => {
     setKnowledgeBase((prev) => ({
       ...prev!,
-      otherSources: prev!.otherSources.filter((website) => website.id !== id),
+      otherSources: prev!.otherSources.filter((url) => url.id !== id),
     }));
     setHasChanges(true);
   };
@@ -187,20 +185,49 @@ export function KnowledgeBaseTab() {
 
   const handleRetrain = async () => {
     setIsRetraining(true);
+    let newTextFieldDocument: {
 
-    for (const key in knowledgeBase) {
-      let newData: {
-        title: string;
-        description: string;
-        id: string;
-        text: string;
-        new?: boolean;
-      }[] = [];
-      if (key === "textFieldsData") {
-        newData = knowledgeBase[key].filter((input) => input.new);
+      metadata: { id: string, title: string, description: string }
+      pageContent: string;
+
+    }[] = [];
+
+
+
+    knowledgeBase?.textFieldsData.forEach(textField => {
+      if (textField.new) {
+        textField.new = false;
+        newTextFieldDocument.push({ pageContent: textField.text, metadata: { id: textField.id, title: textField.title, description: textField.description } });
       }
-      console.log(newData);
+    })
+
+    if (newTextFieldDocument.length > 0) {
+      console.log("newTextFieldsData: ", newTextFieldDocument);
+      mutateTextFields({ textFieldDocuments: newTextFieldDocument, assistantId: selectedAssistant?.assistantId!, ids: true })
+      if (isTextFieldMutationError) {
+        textFieldMutationError.message
+      }
     }
+
+    knowledgeBase?.otherSources.forEach(otherSource => {
+      if (otherSource.type == "url" && otherSource.new) {
+        mutateUrl({ url: otherSource.source, assistantId: selectedAssistant?.assistantId! })
+        if (isUrlMutationError) {
+          console.log(urlMutationError.message)
+        }
+        otherSource.new = false;
+      }
+      else if (otherSource.type == "file" && otherSource.new) {
+        mutateFile({ file: otherSource.file!, assistantId: selectedAssistant?.assistantId!, sourceName: otherSource.source })
+        if (isFileMutationError) {
+          console.log(fileMutationError.message)
+        }
+        otherSource.file = undefined;
+        otherSource.new = false;
+      }
+
+    })
+    console.log("KnowledgeBase OtherSources:", knowledgeBase?.otherSources)
 
     setIsRetraining(false);
     setHasChanges(false);
@@ -218,13 +245,13 @@ export function KnowledgeBaseTab() {
       count: knowledgeBase?.textFieldsData.length,
     },
     {
-      type: "websites",
-      label: "Websites",
+      type: "url",
+      label: "urls",
       icon: Globe,
       count: knowledgeBase?.otherSources.filter((source) => source.type == "url").length,
     },
     {
-      type: "files",
+      type: "file",
       label: "Files",
       icon: FileText,
       count: knowledgeBase?.otherSources.filter((source) => source.type == "file").length,
@@ -328,8 +355,8 @@ export function KnowledgeBaseTab() {
               Add{" "}
               {selectedType === "manual"
                 ? "Manual Input"
-                : selectedType === "websites"
-                  ? "Website"
+                : selectedType === "url"
+                  ? "url"
                   : "File"}
             </Button>
           </div>
@@ -373,11 +400,13 @@ export function KnowledgeBaseTab() {
                     <Textarea
                       id="content"
                       value={newManualInput.text}
-                      onChange={(e) =>
+                      onChange={(e) => {
+
                         setNewManualInput((prev) => ({
                           ...prev,
-                          content: e.target.value,
+                          text: e.target.value,
                         }))
+                      }
                       }
                       placeholder="Enter main text"
                       rows={4}
@@ -422,16 +451,16 @@ export function KnowledgeBaseTab() {
             </div>
           )}
 
-          {selectedType === "websites" && (
+          {selectedType === "url" && (
             <div className="space-y-4">
-              {showAddForm === "websites" && (
+              {showAddForm === "url" && (
                 <div className="flex gap-2 border-b pb-4">
                   <Input
-                    value={newWebsite}
-                    onChange={(e) => setNewWebsite(e.target.value)}
-                    placeholder="Enter website URL"
+                    value={newurl}
+                    onChange={(e) => setNewurl(e.target.value)}
+                    placeholder="Enter url URL"
                   />
-                  <Button onClick={handleAddWebsite}>Add Website</Button>
+                  <Button onClick={handleAddurl}>Add url</Button>
                 </div>
               )}
               {knowledgeBase?.otherSources.map((dataSource) => {
@@ -449,7 +478,7 @@ export function KnowledgeBaseTab() {
                         variant="ghost"
                         size="icon"
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleRemoveWebsite(dataSource.id)}
+                        onClick={() => handleRemoveurl(dataSource.id)}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -460,9 +489,9 @@ export function KnowledgeBaseTab() {
             </div>
           )}
 
-          {selectedType === "files" && (
+          {selectedType === "file" && (
             <div className="space-y-4">
-              {showAddForm === "files" && (
+              {showAddForm === "file" && (
                 <div className="border-b pb-4">
                   <Label htmlFor="file-upload" className="block mb-2">
                     Upload File
