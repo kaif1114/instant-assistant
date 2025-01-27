@@ -1,4 +1,3 @@
-import { IOtherSource } from "@/app/schemas";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 

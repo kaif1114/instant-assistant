@@ -17,6 +17,7 @@ import { pricingPlanContext } from "../../../../../providers/pricingPlanContext"
 import { useSelectedAssistantStore } from "../../store";
 import { AddTextFieldMutation } from "@/hooks/AddTextFieldMutation";
 import { AddFileMutation } from "@/hooks/AddFileMutation";
+import { LoadingOverlay } from "./LoadingOverlay";
 
 
 interface File {
@@ -54,9 +55,9 @@ export function KnowledgeBaseTab() {
   const [error, setError] = useState<string | null>(null);
   // const [isLoading, setIsLoading] = useState(true);
 
-  const { mutate: mutateTextFields, isError: isTextFieldMutationError, error: textFieldMutationError } = AddTextFieldMutation()
-  const { mutate: mutateUrl, isError: isUrlMutationError, error: urlMutationError } = AddUrlMutation()
-  const { mutate: mutateFile, isError: isFileMutationError, error: fileMutationError } = AddFileMutation()
+  const { mutateAsync: mutateTextFields, isError: isTextFieldMutationError, error: textFieldMutationError, isPending: isTextFieldPending, isSuccess: isTextFieldSuccess } = AddTextFieldMutation()
+  const { mutateAsync: mutateUrl, isError: isUrlMutationError, error: urlMutationError, isPending: isUrlPending, isSuccess: isUrlSuccess } = AddUrlMutation()
+  const { mutateAsync: mutateFile, isError: isFileMutationError, error: fileMutationError, isPending: isFilePending, isSuccess: isFileSuccess } = AddFileMutation()
 
   const { data, isLoading, isError } = useQuery<Data>({
     queryKey: ['knowledgeBase', selectedAssistant?.assistantId],
@@ -203,25 +204,19 @@ export function KnowledgeBaseTab() {
 
     if (newTextFieldDocument.length > 0) {
       console.log("newTextFieldsData: ", newTextFieldDocument);
-      mutateTextFields({ textFieldDocuments: newTextFieldDocument, assistantId: selectedAssistant?.assistantId!, ids: true })
-      if (isTextFieldMutationError) {
-        textFieldMutationError.message
-      }
+      await mutateTextFields({ textFieldDocuments: newTextFieldDocument, assistantId: selectedAssistant?.assistantId!, ids: true })
+
     }
 
-    knowledgeBase?.otherSources.forEach(otherSource => {
+    knowledgeBase?.otherSources.forEach(async otherSource => {
       if (otherSource.type == "url" && otherSource.new) {
-        mutateUrl({ url: otherSource.source, assistantId: selectedAssistant?.assistantId! })
-        if (isUrlMutationError) {
-          console.log(urlMutationError.message)
-        }
+        await mutateUrl({ url: otherSource.source, assistantId: selectedAssistant?.assistantId! })
+
         otherSource.new = false;
       }
       else if (otherSource.type == "file" && otherSource.new) {
-        mutateFile({ file: otherSource.file!, assistantId: selectedAssistant?.assistantId!, sourceName: otherSource.source })
-        if (isFileMutationError) {
-          console.log(fileMutationError.message)
-        }
+        await mutateFile({ file: otherSource.file!, assistantId: selectedAssistant?.assistantId!, sourceName: otherSource.source })
+
         otherSource.file = undefined;
         otherSource.new = false;
       }
@@ -308,270 +303,293 @@ export function KnowledgeBaseTab() {
   }
 
   return (
-    <div className="flex gap-6 h-[calc(100vh-200px)]">
-      {/* Left Navigation */}
-      <Card className="w-60 flex-shrink-0">
-        <CardContent className="p-4">
-          <nav className="space-y-2">
-            {navigationItems.map((item) => (
-              <button
-                key={item.type}
-                onClick={() => setSelectedType(item.type)}
-                className={cn(
-                  "flex items-center justify-between w-full px-3 py-2 text-sm rounded-lg transition-colors",
-                  selectedType === item.type
-                    ? "bg-black text-white"
-                    : "hover:bg-gray-100 text-gray-900"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.label}</span>
-                </div>
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                  {item.count}
-                </span>
-              </button>
-            ))}
-          </nav>
-        </CardContent>
-      </Card>
-
-      {/* Middle Content */}
-      <Card className="flex-1 overflow-auto">
-        <CardContent className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">
-              {
-                navigationItems.find((item) => item.type === selectedType)
-                  ?.label
-              }
-            </h2>
-            <Button
-              onClick={() => setShowAddForm(selectedType)}
-              disabled={showAddForm === selectedType}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add{" "}
-              {selectedType === "manual"
-                ? "Manual Input"
-                : selectedType === "url"
-                  ? "url"
-                  : "File"}
-            </Button>
-          </div>
-
-          {selectedType === "manual" && (
-            <div className="space-y-4">
-              {showAddForm === "manual" && (
-                <div className="space-y-4 border-b pb-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="title">Title</Label>
-                      <Input
-                        id="title"
-                        value={newManualInput.title}
-                        onChange={(e) =>
-                          setNewManualInput((prev) => ({
-                            ...prev,
-                            title: e.target.value,
-                          }))
-                        }
-                        placeholder="Enter title"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Input
-                        id="description"
-                        value={newManualInput.description}
-                        onChange={(e) =>
-                          setNewManualInput((prev) => ({
-                            ...prev,
-                            description: e.target.value,
-                          }))
-                        }
-                        placeholder="Enter description"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="content">Content</Label>
-                    <Textarea
-                      id="content"
-                      value={newManualInput.text}
-                      onChange={(e) => {
-
-                        setNewManualInput((prev) => ({
-                          ...prev,
-                          text: e.target.value,
-                        }))
-                      }
-                      }
-                      placeholder="Enter main text"
-                      rows={4}
-                    />
-                  </div>
-                  <Button onClick={handleAddManualInput} className="w-full">
-                    Add Manual Input
-                  </Button>
-                </div>
-              )}
-              {knowledgeBase?.textFieldsData.map((input) => (
-                <ScrollArea key={input.id} className="h-max w-full rounded-md border p-4">
-                  <div
-                    className="relative group mb-4 pb-4 border-b last:border-b-0"
-                  >
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute -right-0 -top-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => handleRemoveManualInput(input.id)}
-                    >
-                      <X className="h-4 w-4 " />
-                    </Button>
-                    <h3 className="text-lg font-semibold">
-                      {input.title}
-                    </h3>
-
-                    <p className="text-sm mb-2">
-                      {input.description}
-                    </p>
-                    <details>
-                      <summary className="cursor-pointer text-sm font-medium">
-                        View Content
-                      </summary>
-                      <pre className="mt-2 whitespace-pre-wrap text-sm">
-                        {input.text}
-                      </pre>
-                    </details>
-                  </div>
-                </ScrollArea>
-              ))}
-            </div>
-          )}
-
-          {selectedType === "url" && (
-            <div className="space-y-4">
-              {showAddForm === "url" && (
-                <div className="flex gap-2 border-b pb-4">
-                  <Input
-                    value={newurl}
-                    onChange={(e) => setNewurl(e.target.value)}
-                    placeholder="Enter url URL"
-                  />
-                  <Button onClick={handleAddurl}>Add url</Button>
-                </div>
-              )}
-              {knowledgeBase?.otherSources.map((dataSource) => {
-                if (dataSource.type == "url") {
-                  return (
-                    <div
-                      key={dataSource.id}
-                      className="flex items-center justify-between p-3 rounded-lg border group"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm">{dataSource.source}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleRemoveurl(dataSource.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  );
-                }
-              })}
-            </div>
-          )}
-
-          {selectedType === "file" && (
-            <div className="space-y-4">
-              {showAddForm === "file" && (
-                <div className="border-b pb-4">
-                  <Label htmlFor="file-upload" className="block mb-2">
-                    Upload File
-                  </Label>
-                  <Input
-                    id="file-upload"
-                    type="file"
-                    onChange={handleAddFile}
-                    accept=".pdf,.doc,.docx,.txt"
-                  />
-                </div>
-              )}
-              {knowledgeBase?.otherSources.map((dataSource) => {
-                if (dataSource.type == "file") {
-                  return (
-                    <div
-                      key={dataSource.id}
-                      className="flex items-center justify-between p-3 rounded-lg border group"
-                    >
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm">{dataSource.source}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleRemoveFile(dataSource.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  );
-                }
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Right Side */}
-      <div className="w-60 flex-shrink-0 space-y-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Character Usage</span>
-                <span className="text-blue-600">
-                  {selectedAssistant?.charactersUsed!} /{" "}
-                  {charactersLimit.toLocaleString()}
-                </span>
-              </div>
-              <Progress value={percentage} className="h-1" />
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">
-                  {remaining.toLocaleString()} remaining
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 text-blue-600 hover:text-blue-700"
+    <>
+      <LoadingOverlay
+        isVisible={isTextFieldPending || isUrlPending || isFilePending}
+        files={{
+          isProcessing: isFilePending,
+          isSuccess: isFileSuccess,
+          isError: isFileMutationError,
+          errorMessage: fileMutationError?.message
+        }}
+        websites={{
+          isProcessing: isUrlPending,
+          isSuccess: isUrlSuccess,
+          isError: isUrlMutationError,
+          errorMessage: urlMutationError?.message
+        }}
+        manualInputs={{
+          isProcessing: isTextFieldPending,
+          isSuccess: isTextFieldSuccess,
+          isError: isTextFieldMutationError,
+          errorMessage: textFieldMutationError?.message
+        }}
+      />
+      <div className="flex gap-6 h-[calc(100vh-200px)]">
+        {/* Left Navigation */}
+        <Card className="w-60 flex-shrink-0">
+          <CardContent className="p-4">
+            <nav className="space-y-2">
+              {navigationItems.map((item) => (
+                <button
+                  key={item.type}
+                  onClick={() => setSelectedType(item.type)}
+                  className={cn(
+                    "flex items-center justify-between w-full px-3 py-2 text-sm rounded-lg transition-colors",
+                    selectedType === item.type
+                      ? "bg-black text-white"
+                      : "hover:bg-gray-100 text-gray-900"
+                  )}
                 >
-                  <Sparkles className="h-3 w-3 mr-2" />
-                  Upgrade
-                </Button>
-              </div>
-            </div>
+                  <div className="flex items-center gap-2">
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                  </div>
+                  <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                    {item.count}
+                  </span>
+                </button>
+              ))}
+            </nav>
           </CardContent>
         </Card>
 
-        {error && <div className="text-red-500 text-sm">{error}</div>}
+        {/* Middle Content */}
+        <Card className="flex-1 overflow-auto">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">
+                {
+                  navigationItems.find((item) => item.type === selectedType)
+                    ?.label
+                }
+              </h2>
+              <Button
+                onClick={() => setShowAddForm(selectedType)}
+                disabled={showAddForm === selectedType}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add{" "}
+                {selectedType === "manual"
+                  ? "Manual Input"
+                  : selectedType === "url"
+                    ? "url"
+                    : "File"}
+              </Button>
+            </div>
 
-        <Button
-          onClick={handleRetrain}
-          disabled={isRetraining || !hasChanges || !!error}
-          className="w-full bg-black text-white hover:bg-black/90"
-        >
-          {isRetraining ? "Retraining..." : "Retrain Assistant"}
-        </Button>
+            {selectedType === "manual" && (
+              <div className="space-y-4">
+                {showAddForm === "manual" && (
+                  <div className="space-y-4 border-b pb-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="title">Title</Label>
+                        <Input
+                          id="title"
+                          value={newManualInput.title}
+                          onChange={(e) =>
+                            setNewManualInput((prev) => ({
+                              ...prev,
+                              title: e.target.value,
+                            }))
+                          }
+                          placeholder="Enter title"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Input
+                          id="description"
+                          value={newManualInput.description}
+                          onChange={(e) =>
+                            setNewManualInput((prev) => ({
+                              ...prev,
+                              description: e.target.value,
+                            }))
+                          }
+                          placeholder="Enter description"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="content">Content</Label>
+                      <Textarea
+                        id="content"
+                        value={newManualInput.text}
+                        onChange={(e) => {
+
+                          setNewManualInput((prev) => ({
+                            ...prev,
+                            text: e.target.value,
+                          }))
+                        }
+                        }
+                        placeholder="Enter main text"
+                        rows={4}
+                      />
+                    </div>
+                    <Button onClick={handleAddManualInput} className="w-full">
+                      Add Manual Input
+                    </Button>
+                  </div>
+                )}
+                {knowledgeBase?.textFieldsData.map((input) => (
+                  <ScrollArea key={input.id} className="h-max w-full rounded-md border p-4">
+                    <div
+                      className="relative group mb-4 pb-4 border-b last:border-b-0"
+                    >
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute -right-0 -top-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleRemoveManualInput(input.id)}
+                      >
+                        <X className="h-4 w-4 " />
+                      </Button>
+                      <h3 className="text-lg font-semibold">
+                        {input.title}
+                      </h3>
+
+                      <p className="text-sm mb-2">
+                        {input.description}
+                      </p>
+                      <details>
+                        <summary className="cursor-pointer text-sm font-medium">
+                          View Content
+                        </summary>
+                        <pre className="mt-2 whitespace-pre-wrap text-sm">
+                          {input.text}
+                        </pre>
+                      </details>
+                    </div>
+                  </ScrollArea>
+                ))}
+              </div>
+            )}
+
+            {selectedType === "url" && (
+              <div className="space-y-4">
+                {showAddForm === "url" && (
+                  <div className="flex gap-2 border-b pb-4">
+                    <Input
+                      value={newurl}
+                      onChange={(e) => setNewurl(e.target.value)}
+                      placeholder="Enter url URL"
+                    />
+                    <Button onClick={handleAddurl}>Add url</Button>
+                  </div>
+                )}
+                {knowledgeBase?.otherSources.map((dataSource) => {
+                  if (dataSource.type == "url") {
+                    return (
+                      <div
+                        key={dataSource.id}
+                        className="flex items-center justify-between p-3 rounded-lg border group"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm">{dataSource.source}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handleRemoveurl(dataSource.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            )}
+
+            {selectedType === "file" && (
+              <div className="space-y-4">
+                {showAddForm === "file" && (
+                  <div className="border-b pb-4">
+                    <Label htmlFor="file-upload" className="block mb-2">
+                      Upload File
+                    </Label>
+                    <Input
+                      id="file-upload"
+                      type="file"
+                      onChange={handleAddFile}
+                      accept=".pdf,.doc,.docx,.txt"
+                    />
+                  </div>
+                )}
+                {knowledgeBase?.otherSources.map((dataSource) => {
+                  if (dataSource.type == "file") {
+                    return (
+                      <div
+                        key={dataSource.id}
+                        className="flex items-center justify-between p-3 rounded-lg border group"
+                      >
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm">{dataSource.source}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handleRemoveFile(dataSource.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Right Side */}
+        <div className="w-60 flex-shrink-0 space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Character Usage</span>
+                  <span className="text-blue-600">
+                    {selectedAssistant?.charactersUsed!} /{" "}
+                    {charactersLimit.toLocaleString()}
+                  </span>
+                </div>
+                <Progress value={percentage} className="h-1" />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">
+                    {remaining.toLocaleString()} remaining
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-blue-600 hover:text-blue-700"
+                  >
+                    <Sparkles className="h-3 w-3 mr-2" />
+                    Upgrade
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {error && <div className="text-red-500 text-sm">{error}</div>}
+
+          <Button
+            onClick={handleRetrain}
+            disabled={isRetraining || !hasChanges || !!error}
+            className="w-full bg-black text-white hover:bg-black/90"
+          >
+            {isRetraining ? "Retraining..." : "Retrain Assistant"}
+          </Button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
