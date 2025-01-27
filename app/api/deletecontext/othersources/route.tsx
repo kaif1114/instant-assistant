@@ -9,19 +9,19 @@ import { NextRequest, NextResponse } from "next/server";
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const assistantId = searchParams.get("assistantId");
-  const fileName = searchParams.get("fileName");
-  if (assistantId && fileName) {
+  const source = searchParams.get("source");
+  if (assistantId && source) {
     const pineconeNamespace = pineconeIndex.namespace(assistantId);
     try {
       const result = await pineconeNamespace.listPaginated({
-        prefix: fileName,
+        prefix: source,
       });
       const vectorIds = result.vectors?.map((vector) => vector.id);
       if (vectorIds?.length && vectorIds?.length > 0) {
         await prisma.knowledgeSource.deleteMany({
           where: {
             assistantId: assistantId,
-            source: fileName,
+            source: source,
           },
         });
         await pineconeNamespace.deleteMany(vectorIds);

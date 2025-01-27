@@ -36,6 +36,16 @@ async function getKnowledgeBase(assistantId: string) {
 
 type KnowledgeType = "manual" | "url" | "file";
 
+interface NewInputState {
+  manual: {
+    title: string;
+    description: string;
+    text: string;
+  };
+  url: string;
+  file: File | null;
+}
+
 export function KnowledgeBaseTab() {
 
   const charactersLimit = useContext(pricingPlanContext);
@@ -43,17 +53,19 @@ export function KnowledgeBaseTab() {
 
   const [selectedType, setSelectedType] = useState<KnowledgeType>("manual");
   const [isRetraining, setIsRetraining] = useState(false);
-  const [newManualInput, setNewManualInput] = useState({
-    title: "",
-    description: "",
-    text: "",
+  const [newInput, setNewInput] = useState<NewInputState>({
+    manual: {
+      title: "",
+      description: "",
+      text: "",
+    },
+    url: "",
+    file: null
   });
-  const [newurl, setNewurl] = useState("");
-  const [newFile, setNewFile] = useState<File | null>(null);
   const [showAddForm, setShowAddForm] = useState<KnowledgeType | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // const [isLoading, setIsLoading] = useState(true);
+
 
   const { mutateAsync: mutateTextFields, isError: isTextFieldMutationError, error: textFieldMutationError, isPending: isTextFieldPending, isSuccess: isTextFieldSuccess } = AddTextFieldMutation()
   const { mutateAsync: mutateUrl, isError: isUrlMutationError, error: urlMutationError, isPending: isUrlPending, isSuccess: isUrlSuccess } = AddUrlMutation()
@@ -90,70 +102,63 @@ export function KnowledgeBaseTab() {
 
   const handleAddManualInput = () => {
     if (
-      newManualInput.title &&
-      newManualInput.description &&
-      newManualInput.text
+      newInput.manual.title &&
+      newInput.manual.description &&
+      newInput.manual.text
     ) {
-      const newInput = {
+      const newInputData = {
         id: (knowledgeBase!.textFieldsData.length + 1).toString(),
         new: true,
-        ...newManualInput,
+        ...newInput.manual,
       };
       if (data) {
         setKnowledgeBase((prev) => ({
           ...prev!,
-          textFieldsData: [...prev!.textFieldsData, newInput],
+          textFieldsData: [...prev!.textFieldsData, newInputData],
         }));
       }
-      setNewManualInput({ title: "", description: "", text: "" });
+      setNewInput(prev => ({
+        ...prev,
+        manual: { title: "", description: "", text: "" }
+      }));
       setShowAddForm(null);
       setHasChanges(true);
-    }
-    else {
-      //handle missing data error
     }
   };
 
   const handleAddurl = () => {
-    if (newurl) {
+    if (newInput.url) {
       const newSite: IOtherSource = {
-        id: `${newurl}-${knowledgeBase!.otherSources.length + 1}`,
+        id: `${newInput.url}-${knowledgeBase!.otherSources.length + 1}`,
         new: true,
         type: "url",
-        source: newurl,
+        source: newInput.url,
       };
       setKnowledgeBase((prev) => ({
         ...prev!,
         otherSources: [...prev!.otherSources, newSite],
       }));
-      setNewurl("");
+      setNewInput(prev => ({ ...prev, url: "" }));
       setShowAddForm(null);
       setHasChanges(true);
     }
-    else {
-      //handle missing data error
-    }
-
-
   };
 
   const handleAddFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-
       const newFileEntry: IOtherSource = {
         id: `${file.name}-${knowledgeBase!.otherSources.length + 1}`,
         source: file.name,
         new: true,
         type: "file",
         file
-        // size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
       };
       setKnowledgeBase((prev) => ({
         ...prev!,
         otherSources: [...prev!.otherSources, newFileEntry],
       }));
-      setNewFile(null);
+      setNewInput(prev => ({ ...prev, file: null }));
       setShowAddForm(null);
       setHasChanges(true);
       event.target.value = "";
@@ -305,7 +310,7 @@ export function KnowledgeBaseTab() {
   return (
     <>
       <LoadingOverlay
-        isVisible={isTextFieldPending || isUrlPending || isFilePending}
+        isVisible={isRetraining}
         files={{
           isProcessing: isFilePending,
           isSuccess: isFileSuccess,
@@ -387,11 +392,11 @@ export function KnowledgeBaseTab() {
                         <Label htmlFor="title">Title</Label>
                         <Input
                           id="title"
-                          value={newManualInput.title}
+                          value={newInput.manual.title}
                           onChange={(e) =>
-                            setNewManualInput((prev) => ({
+                            setNewInput(prev => ({
                               ...prev,
-                              title: e.target.value,
+                              manual: { ...prev.manual, title: e.target.value }
                             }))
                           }
                           placeholder="Enter title"
@@ -401,11 +406,11 @@ export function KnowledgeBaseTab() {
                         <Label htmlFor="description">Description</Label>
                         <Input
                           id="description"
-                          value={newManualInput.description}
+                          value={newInput.manual.description}
                           onChange={(e) =>
-                            setNewManualInput((prev) => ({
+                            setNewInput(prev => ({
                               ...prev,
-                              description: e.target.value,
+                              manual: { ...prev.manual, description: e.target.value }
                             }))
                           }
                           placeholder="Enter description"
@@ -416,14 +421,12 @@ export function KnowledgeBaseTab() {
                       <Label htmlFor="content">Content</Label>
                       <Textarea
                         id="content"
-                        value={newManualInput.text}
-                        onChange={(e) => {
-
-                          setNewManualInput((prev) => ({
+                        value={newInput.manual.text}
+                        onChange={(e) =>
+                          setNewInput(prev => ({
                             ...prev,
-                            text: e.target.value,
+                            manual: { ...prev.manual, text: e.target.value }
                           }))
-                        }
                         }
                         placeholder="Enter main text"
                         rows={4}
@@ -473,11 +476,11 @@ export function KnowledgeBaseTab() {
                 {showAddForm === "url" && (
                   <div className="flex gap-2 border-b pb-4">
                     <Input
-                      value={newurl}
-                      onChange={(e) => setNewurl(e.target.value)}
-                      placeholder="Enter url URL"
+                      value={newInput.url}
+                      onChange={(e) => setNewInput(prev => ({ ...prev, url: e.target.value }))}
+                      placeholder="Enter URL"
                     />
-                    <Button onClick={handleAddurl}>Add url</Button>
+                    <Button onClick={handleAddurl}>Add URL</Button>
                   </div>
                 )}
                 {knowledgeBase?.otherSources.map((dataSource) => {
