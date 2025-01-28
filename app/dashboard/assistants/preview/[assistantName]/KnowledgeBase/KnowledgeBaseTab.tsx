@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { AddUrlMutation } from "@/hooks/AddUrlMutation";
+
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -15,9 +15,11 @@ import { BookText, FileText, Globe, Plus, Sparkles, X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { pricingPlanContext } from "../../../../../providers/pricingPlanContext";
 import { useSelectedAssistantStore } from "../../store";
-import { AddTextFieldMutation } from "@/hooks/AddTextFieldMutation";
-import { AddFileMutation } from "@/hooks/AddFileMutation";
+
 import { LoadingOverlay } from "./LoadingOverlay";
+import { TextFieldMutation } from "@/hooks/TextFieldMutation";
+import { UrlMutation } from "@/hooks/UrlMutation";
+import { FileMutation } from "@/hooks/FileMutation";
 
 
 interface File {
@@ -46,6 +48,12 @@ interface NewInputState {
   file: File | null;
 }
 
+interface IContextToRemove {
+  textfields: string[],
+  urls: string[],
+  files: string[]
+}
+
 export function KnowledgeBaseTab() {
 
   const charactersLimit = useContext(pricingPlanContext);
@@ -62,14 +70,15 @@ export function KnowledgeBaseTab() {
     url: "",
     file: null
   });
+  const [contextToRemove, setContextToRemove] = useState<IContextToRemove>({ textfields: [], urls: [], files: [] })
   const [showAddForm, setShowAddForm] = useState<KnowledgeType | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
 
-  const { mutateAsync: mutateTextFields, isError: isTextFieldMutationError, error: textFieldMutationError, isPending: isTextFieldPending, isSuccess: isTextFieldSuccess } = AddTextFieldMutation()
-  const { mutateAsync: mutateUrl, isError: isUrlMutationError, error: urlMutationError, isPending: isUrlPending, isSuccess: isUrlSuccess } = AddUrlMutation()
-  const { mutateAsync: mutateFile, isError: isFileMutationError, error: fileMutationError, isPending: isFilePending, isSuccess: isFileSuccess } = AddFileMutation()
+  const { mutateAsync: mutateTextFields, isError: isTextFieldMutationError, error: textFieldMutationError, isPending: isTextFieldPending, isSuccess: isTextFieldSuccess } = TextFieldMutation()
+  const { mutateAsync: mutateUrl, isError: isUrlMutationError, error: urlMutationError, isPending: isUrlPending, isSuccess: isUrlSuccess } = UrlMutation()
+  const { mutateAsync: mutateFile, isError: isFileMutationError, error: fileMutationError, isPending: isFilePending, isSuccess: isFileSuccess } = FileMutation()
 
   const { data, isLoading, isError } = useQuery<Data>({
     queryKey: ['knowledgeBase', selectedAssistant?.assistantId],
@@ -107,7 +116,7 @@ export function KnowledgeBaseTab() {
       newInput.manual.text
     ) {
       const newInputData = {
-        id: (knowledgeBase!.textFieldsData.length + 1).toString(),
+        id: Date.now().toString(),
         new: true,
         ...newInput.manual,
       };
@@ -166,6 +175,7 @@ export function KnowledgeBaseTab() {
   };
 
   const handleRemoveManualInput = (id: string) => {
+    setContextToRemove((prev) => { return { ...prev, textfields: [...prev.textfields, `textfield-${id}`] } })
     setKnowledgeBase((prev) => ({
       ...prev!,
       textFieldsData: prev!.textFieldsData.filter((input) => input.id !== id),
@@ -173,64 +183,83 @@ export function KnowledgeBaseTab() {
     setHasChanges(true);
   };
 
-  const handleRemoveurl = (id: string) => {
+  const handleRemoveurl = (otherSource: IOtherSource) => {
+
+    setContextToRemove((prev) => { return { ...prev, urls: [...prev.urls, otherSource.source] } });
     setKnowledgeBase((prev) => ({
       ...prev!,
-      otherSources: prev!.otherSources.filter((url) => url.id !== id),
+      otherSources: prev!.otherSources.filter((url) => url.id !== otherSource.id),
     }));
     setHasChanges(true);
   };
 
-  const handleRemoveFile = (id: string) => {
+  const handleRemoveFile = (otherSource: IOtherSource) => {
+
+    setContextToRemove((prev) => { return { ...prev, files: [...prev.files, otherSource.source] } });
     setKnowledgeBase((prev) => ({
       ...prev!,
-      otherSources: prev!.otherSources.filter((file) => file.id !== id),
+      otherSources: prev!.otherSources.filter((file) => file.id !== otherSource.id),
     }));
     setHasChanges(true);
   };
 
   const handleRetrain = async () => {
     setIsRetraining(true);
-    let newTextFieldDocument: {
+    try {
+      const newTextFields = knowledgeBase?.textFieldsData
+        .filter(textField => textField.new)
+        .map(textField => ({
+          pageContent: textField.text,
+          metadata: {
+            id: textField.id,
+            title: textField.title,
+            description: textField.description
+          }
+        }));
+      console.log("newTextFields: ", newTextFields)
+      console.log("textFieldsToRemove: ", contextToRemove.textfields)
+      await mutateTextFields({
+        textFieldDocuments: newTextFields,
+        assistantId: selectedAssistant?.assistantId!,
+        ids: true,
+        textFieldsToRemove: contextToRemove.textfields
+      });
 
-      metadata: { id: string, title: string, description: string }
-      pageContent: string;
+      const newUrls = knowledgeBase?.otherSources
+        .filter(source => source.type === "url" && source.new)
+        .map(sourceObj => sourceObj.source);
 
-    }[] = [];
+      console.log("Urls to remove: ", contextToRemove.urls)
+      await mutateUrl({ assistantId: selectedAssistant?.assistantId!, urls: newUrls, urlsToRemove: contextToRemove.urls })
 
 
+      const newFiles = knowledgeBase?.otherSources
+        .filter(source => source.type === "file" && source.new && source.file);
 
-    knowledgeBase?.textFieldsData.forEach(textField => {
-      if (textField.new) {
-        textField.new = false;
-        newTextFieldDocument.push({ pageContent: textField.text, metadata: { id: textField.id, title: textField.title, description: textField.description } });
-      }
-    })
+      mutateFile({
+        files: newFiles,
+        assistantId: selectedAssistant?.assistantId!,
+        filesToRemove: contextToRemove.files
+      })
 
-    if (newTextFieldDocument.length > 0) {
-      console.log("newTextFieldsData: ", newTextFieldDocument);
-      await mutateTextFields({ textFieldDocuments: newTextFieldDocument, assistantId: selectedAssistant?.assistantId!, ids: true })
+      // Update local state after successful operations
+      setKnowledgeBase(prev => ({
+        ...prev!,
+        textFieldsData: prev!.textFieldsData.map(field => ({ ...field, new: false })),
+        otherSources: prev!.otherSources.map(source => ({
+          ...source,
+          new: false,
+          file: undefined
+        }))
+      }));
 
+      setContextToRemove({ textfields: [], urls: [], files: [] });
+      setHasChanges(false);
+    } catch (error) {
+      console.error('Error during retraining:', error);
+    } finally {
+      setIsRetraining(false);
     }
-
-    knowledgeBase?.otherSources.forEach(async otherSource => {
-      if (otherSource.type == "url" && otherSource.new) {
-        await mutateUrl({ url: otherSource.source, assistantId: selectedAssistant?.assistantId! })
-
-        otherSource.new = false;
-      }
-      else if (otherSource.type == "file" && otherSource.new) {
-        await mutateFile({ file: otherSource.file!, assistantId: selectedAssistant?.assistantId!, sourceName: otherSource.source })
-
-        otherSource.file = undefined;
-        otherSource.new = false;
-      }
-
-    })
-    console.log("KnowledgeBase OtherSources:", knowledgeBase?.otherSources)
-
-    setIsRetraining(false);
-    setHasChanges(false);
   };
 
   const percentage =
@@ -498,7 +527,7 @@ export function KnowledgeBaseTab() {
                           variant="ghost"
                           size="icon"
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleRemoveurl(dataSource.id)}
+                          onClick={() => handleRemoveurl(dataSource)}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -539,7 +568,7 @@ export function KnowledgeBaseTab() {
                           variant="ghost"
                           size="icon"
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleRemoveFile(dataSource.id)}
+                          onClick={() => handleRemoveFile(dataSource)}
                         >
                           <X className="h-4 w-4" />
                         </Button>

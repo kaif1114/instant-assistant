@@ -170,3 +170,9 @@ export interface Data {
   };
 }
 
+export const DeleteContextSchema = z.object({
+  sourceType: z.enum(["files", "urls", "textfields"]),
+  assistantId: z.string(),
+  source: z.array(z.string())
+});
+
