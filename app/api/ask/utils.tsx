@@ -1,9 +1,7 @@
-import { ChatGroq } from "@langchain/groq";
 import {
-  ChatPromptTemplate,
-  MessagesPlaceholder,
-  PromptTemplate,
+  PromptTemplate
 } from "@langchain/core/prompts";
+import { ChatGroq } from "@langchain/groq";
 import { Document } from "langchain/document";
 
 export const llm = new ChatGroq({

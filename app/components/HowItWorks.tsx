@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Mic, Pencil, Download } from "lucide-react";
+import Image from "next/image";
 
 function HowItWorks() {
   const benefits = [
@@ -44,7 +45,7 @@ function HowItWorks() {
               <div key={index} className="flex flex-col">
                 <Card className="border rounded-xl overflow-hidden bg-white shadow-sm mb-6">
                   <div className="aspect-video relative bg-gray-100 w-full overflow-hidden">
-                    <img
+                    <Image
                       src={benefit.image}
                       alt={`${benefit.title} illustration`}
                       className="object-cover w-full h-full"

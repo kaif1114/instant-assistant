@@ -96,10 +96,14 @@ export interface pdfLoaderDocument {
   metadata: {
     source: string;
     blobType: string;
-    pdf: any;
-    loc: any;
+    pdf: Record<string, unknown>;
+    loc: {
+      pageNumber?: number;
+      lineNumber?: number;
+      [key: string]: unknown;
+    };
   };
-  id?: string | Number;
+  id?: string | number;
 }
 
 export type AssistantWithSessionDetails = Prisma.AssistantsGetPayload<{
@@ -132,7 +136,7 @@ const DocumentMetadataSchema = z.object({
   url: z.string(),
   title: z.string().optional(),
   description: z.string().optional(),
-}).catchall(z.any());
+}).catchall(z.unknown());
 
 export const DocumentSchema = z.object({
   pageContent: z.string(),

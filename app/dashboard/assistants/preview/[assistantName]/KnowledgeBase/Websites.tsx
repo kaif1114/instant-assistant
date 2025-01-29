@@ -57,7 +57,7 @@ export function Websites({ data, onUpdate }: WebsitesProps) {
 
         {websites.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No websites added. Click 'Add Website' to get started.
+            No websites added. Click &apos;Add Website&apos; to get started.
           </div>
         ) : (
           <ScrollArea className="h-[200px]">

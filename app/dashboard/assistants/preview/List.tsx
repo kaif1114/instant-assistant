@@ -1,6 +1,5 @@
 "use client";
 
-import { Assistants } from "@prisma/client";
 import { motion } from "framer-motion";
 import { ChevronRight, Filter, Search } from "lucide-react";
 import { useState } from "react";
@@ -18,24 +17,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { useSelectedAssistantStore } from "./store";
 import { useAssistants } from "@/hooks/useAssistants";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Loading from "./loading";
+import { useSelectedAssistantStore } from "./store";
 
 export function AssistantList() {
-
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const router = useRouter();
 
-  const { selectedAssistant, setSelectedAssistant } =
-    useSelectedAssistantStore();
-
+  const { setSelectedAssistant } = useSelectedAssistantStore();
   const { user } = useUser();
 
-  const { data: assistants, isError, error, isLoading } = useAssistants(user?.id!);
+  const { data: assistants, isError, error, isLoading } = useAssistants(
+    user ? user.id : undefined
+  );
 
   const filteredAssistants = assistants?.filter((assistant) => {
     const matchesSearch =
@@ -50,12 +48,22 @@ export function AssistantList() {
     visible: { opacity: 1, y: 0 },
   };
 
-  if (isLoading)
+  if (!user) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-lg text-gray-600">Please sign in to view assistants</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
     return <Loading />
+  }
 
   if (isError) {
     return <div>{error.message}</div>
   }
+
   return (
     <div className="container mx-auto p-4 max-w-5xl">
       <div className="space-y-6">

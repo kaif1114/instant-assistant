@@ -30,12 +30,22 @@ import { useSelectedAssistantStore } from "../store";
 export function AppearanceTab() {
   const { selectedAssistant, setSelectedAssistant } =
     useSelectedAssistantStore();
-  const [data, setData] = useState(selectedAssistant!);
+  const [data, setData] = useState(selectedAssistant ?? {
+    name: '',
+    description: '',
+    Type: '',
+    functionality: '',
+    primaryColor: '#478ACD',
+    secondaryColor: '#0A0A15',
+    startingMessage: '',
+    avatarUrl: '',
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const hasChanges = () => {
+    if (!selectedAssistant) return false;
     return Object.keys(data).some((key) => {
-      // @ts-ignore - we know these keys exist
+      // @ts-expect-error - Dynamic key access to objects with different shapes
       return data[key] !== selectedAssistant[key];
     });
   };
@@ -159,7 +169,7 @@ export function AppearanceTab() {
           <CardHeader>
             <CardTitle>Appearance</CardTitle>
             <CardDescription>
-              Customize how your assistant's chat interface looks
+              Customize how your assistant&apos;s chat interface looks
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -228,7 +238,7 @@ export function AppearanceTab() {
                       <SelectValue placeholder="Select avatar" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={selectedAssistant?.avatarUrl!}>
+                      <SelectItem value={selectedAssistant?.avatarUrl || ''}>
                         Custom Avatar
                       </SelectItem>
                       {[1, 2, 3].map((num) => (

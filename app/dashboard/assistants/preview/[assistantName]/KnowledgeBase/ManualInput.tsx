@@ -63,7 +63,7 @@ export function ManualInput({ data, onUpdate }: ManualInputProps) {
 
         {inputs.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No manual input data. Click 'Add New' to get started.
+            No manual input data. Click &apos;Add New&apos; to get started.
           </div>
         ) : (
           <ScrollArea className="h-[calc(100vh-300px)] pr-4">

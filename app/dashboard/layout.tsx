@@ -1,30 +1,37 @@
-import React, { PropsWithChildren } from "react";
-import Aside from "./Aside";
-import PricingPlanContextProvider from "../providers/PricingPlanContextProvider";
 import prisma from "@/prisma/client";
 import { auth } from "@clerk/nextjs/server";
-import { PricingPlans } from "@prisma/client";
+import { PropsWithChildren } from "react";
+import PricingPlanContextProvider from "../providers/PricingPlanContextProvider";
+import Aside from "./Aside";
 
+const DEFAULT_CHARACTER_LIMIT = 100000; // Define a default limit
 
 const layout = async ({ children }: PropsWithChildren) => {
-  let plan: PricingPlans | null = null;
+  let characterLimit = DEFAULT_CHARACTER_LIMIT;
 
   const { userId } = await auth();
-  try {
-    const user = await prisma.user.findUnique({
-      where: { userId: userId! },
-      select: { PricingPlans: true },
-    });
-    plan = user?.PricingPlans || null;
+  if (userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { userId },
+        select: { PricingPlans: true },
+      });
 
-  } catch (error) {
-    console.log(error);
+      // Use the plan's character limit if it exists, otherwise use default
+      characterLimit = user?.PricingPlans?.charactersLimit ?? DEFAULT_CHARACTER_LIMIT;
+
+    } catch (error) {
+      console.log(error);
+      // On error, fall back to default limit
+    }
   }
 
   return (
-
-    <Aside> <PricingPlanContextProvider plan={plan?.charactersLimit!}>{children}</PricingPlanContextProvider></Aside>
-
+    <Aside>
+      <PricingPlanContextProvider plan={characterLimit}>
+        {children}
+      </PricingPlanContextProvider>
+    </Aside>
   );
 };
 

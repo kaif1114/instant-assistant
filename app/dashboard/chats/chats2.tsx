@@ -44,15 +44,11 @@ interface Message {
 }
 
 export default function AssistantChatsPage({ Assistants }: Props) {
-  const [selectedChat, setSelectedChat] = useState<session_details | null>(
-    null
-  );
+  const [selectedChat, setSelectedChat] = useState<session_details | null>(null);
   const [selectedAssistant, setSelectedAssistant] =
     useState<AssistantWithSessionDetails | null>(Assistants[0]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const handleAssistantSelect = (assistantId: string) => {
     const assistant = Assistants.find((a) => a.assistantId === assistantId);
@@ -66,8 +62,6 @@ export default function AssistantChatsPage({ Assistants }: Props) {
     session: session_details
   ) => {
     setIsLoading(true);
-    setLoadingSessionId(session.session_id);
-    setError(null);
     try {
       const response = await axios.get(`/api/session/chat`, {
         params: { sessionId: session.session_id },
@@ -77,12 +71,8 @@ export default function AssistantChatsPage({ Assistants }: Props) {
       setSelectedChat(session);
     } catch (error) {
       console.log(error);
-      setError(
-        "We encountered an issue while retrieving your messages. Please try again later."
-      );
     } finally {
       setIsLoading(false);
-      setLoadingSessionId(null);
     }
   };
 
@@ -214,8 +204,8 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                         <div
                           key={messageObj.id}
                           className={`flex items-start space-x-2 mb-4 ${messageObj.message.type === "ai"
-                              ? "justify-start"
-                              : "justify-end"
+                            ? "justify-start"
+                            : "justify-end"
                             }`}
                         >
                           {messageObj.message.type === "ai" && (
@@ -231,8 +221,8 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                           )}
                           <div
                             className={`rounded-lg p-3 max-w-[70%] ${messageObj.message.type === "ai"
-                                ? "bg-secondary text-secondary-foreground"
-                                : "bg-primary text-primary-foreground"
+                              ? "bg-secondary text-secondary-foreground"
+                              : "bg-primary text-primary-foreground"
                               }`}
                           >
                             <p>{messageObj.message.content}</p>

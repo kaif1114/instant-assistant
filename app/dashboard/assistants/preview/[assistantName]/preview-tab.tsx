@@ -3,13 +3,12 @@
 import Chat from "@/app/chat/[assistantId]/Chat";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Assistants } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import { useSelectedAssistantStore } from "../store";
 
 const sessionId = uuidv4();
 export function PreviewTab() {
-  const { selectedAssistant, setSelectedAssistant } =
+  const { selectedAssistant } =
     useSelectedAssistantStore();
   return (
     <div className="space-y-6">

@@ -11,7 +11,7 @@ export const embeddings = new OpenAIEmbeddings({
 export const pinecone = new PineconeClient();
 
 export const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!);
-const asd = pineconeIndex.namespace("123");
+
 
 export const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
   pineconeIndex,

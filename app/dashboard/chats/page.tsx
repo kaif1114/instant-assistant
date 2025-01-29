@@ -1,19 +1,17 @@
-import React from "react";
-import Chats from "./chats2";
-import prisma from "@/prisma/client";
-import { auth } from "@clerk/nextjs/server";
-import { Assistants, Prisma } from "@prisma/client";
 import { AssistantWithSessionDetails } from "@/app/schemas";
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
+  BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import prisma from "@/prisma/client";
+import { auth } from "@clerk/nextjs/server";
+import Chats from "./chats2";
 
 const page = async () => {
   const { userId } = await auth();

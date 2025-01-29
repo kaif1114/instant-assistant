@@ -13,7 +13,7 @@ import { useState } from "react";
 import { useSelectedAssistantStore } from "../store";
 
 export function InstallTab() {
-  const { selectedAssistant, setSelectedAssistant } =
+  const { selectedAssistant } =
     useSelectedAssistantStore();
   const assistantId = selectedAssistant?.id;
   const [copied, setCopied] = useState(false);
@@ -81,7 +81,7 @@ export function InstallTab() {
           <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
             <li>Copy the installation script above</li>
             <li>
-              Paste it into your website's HTML, just before the closing{" "}
+              Paste it into your website&apos;s HTML, just before the closing{" "}
               {"</body>"} tag
             </li>
             <li>Save and deploy your changes</li>

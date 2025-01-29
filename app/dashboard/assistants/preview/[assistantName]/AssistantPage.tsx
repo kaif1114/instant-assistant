@@ -44,7 +44,7 @@ const AssistantPage = () => {
     if (!selectedAssistant) {
       router.push('/dashboard/assistants/preview')
     }
-  }, [selectedAssistant])
+  }, [selectedAssistant, router])
   if (!selectedAssistant) {
     return <><div>
       <p>Error occured</p>

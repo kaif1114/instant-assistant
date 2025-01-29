@@ -34,12 +34,25 @@ import { MoreHorizontal, Power, PowerOff } from "lucide-react";
 import { useState } from "react";
 import { RotatingLines } from "react-loader-spinner";
 import Loading from "./loading";
+import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 const AssistantsList = () => {
   const { user } = useUser();
-  const { data: assistants, isError, isLoading, error } = useAssistants(user?.id!);
-  const [loadingId, setLoading] = useState<String | null>(null);
+  const queryClient = useQueryClient();
+  const { data: assistants, isError, isLoading, error } = useAssistants(
+    user ? user.id : undefined
+  );
+  const [loadingId, setLoading] = useState<string | null>(null);
+
+  if (!user) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-lg text-gray-600">Please sign in to view assistants</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <Loading />
@@ -62,7 +75,7 @@ const AssistantsList = () => {
           {assistants?.map((assistant) => (
             <TableRow key={assistant.id}>
               <TableCell className="font-medium flex items-center gap-4">
-                {loadingId == assistant.assistantId && (
+                {loadingId === assistant.assistantId && (
                   <RotatingLines
                     visible={true}
                     width="20"
@@ -139,8 +152,36 @@ const AssistantsList = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction>
-                        Delete
+                      <AlertDialogAction
+                        onClick={async () => {
+                          try {
+                            setLoading(assistant.assistantId);
+                            await axios.delete(
+                              `/api/assistants/${assistant.assistantId}`
+                            );
+                            // Invalidate and refetch assistants query
+                            await queryClient.invalidateQueries({
+                              queryKey: ['assistants', user?.id]
+                            });
+                          } catch (error) {
+                            console.error('Failed to delete assistant:', error);
+                          } finally {
+                            setLoading(null);
+                          }
+                        }}
+                      >
+                        {loadingId === assistant.assistantId ? (
+                          <div className="flex items-center gap-2">
+                            <RotatingLines
+                              strokeColor="white"
+                              strokeWidth="4"
+                              width="16"
+                            />
+                            <span>Deleting...</span>
+                          </div>
+                        ) : (
+                          "Delete"
+                        )}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

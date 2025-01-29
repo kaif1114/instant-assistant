@@ -31,8 +31,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { session_details } from "@prisma/client";
 import axios from "axios";
 
-interface Props {
-  Assistants: AssistantWithSessionDetails[];
+interface ToolCall {
+  id: string;
+  type: string;
+  function: {
+    name: string;
+    arguments: string;
+  };
 }
 
 interface Message {
@@ -43,9 +48,13 @@ interface Message {
     content: string;
     additional_kwargs: Record<string, unknown>;
     response_metadata: Record<string, unknown>;
-    tool_calls?: any[];
-    invalid_tool_calls?: any[];
+    tool_calls?: ToolCall[];
+    invalid_tool_calls?: ToolCall[];
   };
+}
+
+interface Props {
+  Assistants: AssistantWithSessionDetails[];
 }
 
 export default function AssistantChatsPage({ Assistants }: Props) {
@@ -211,11 +220,10 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                       messages.map((messageObj) => (
                         <div
                           key={messageObj.id}
-                          className={`flex items-start space-x-2 mb-4 ${
-                            messageObj.message.type === "ai"
+                          className={`flex items-start space-x-2 mb-4 ${messageObj.message.type === "ai"
                               ? "justify-start"
                               : "justify-end"
-                          }`}
+                            }`}
                         >
                           {messageObj.message.type === "ai" && (
                             <Avatar className="h-8 w-8">
@@ -229,11 +237,10 @@ export default function AssistantChatsPage({ Assistants }: Props) {
                             </Avatar>
                           )}
                           <div
-                            className={`rounded-lg p-3 max-w-[70%] ${
-                              messageObj.message.type === "ai"
+                            className={`rounded-lg p-3 max-w-[70%] ${messageObj.message.type === "ai"
                                 ? "bg-secondary text-secondary-foreground"
                                 : "bg-primary text-primary-foreground"
-                            }`}
+                              }`}
                           >
                             <p>{messageObj.message.content}</p>
                           </div>
