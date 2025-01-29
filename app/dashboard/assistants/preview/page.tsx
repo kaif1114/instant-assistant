@@ -6,9 +6,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import prisma from "@/prisma/client";
-import { auth } from "@clerk/nextjs/server";
-import { PricingPlans } from "@prisma/client";
 import { AssistantList } from "./List";
 
 export default async function page() {

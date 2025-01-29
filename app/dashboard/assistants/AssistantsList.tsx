@@ -33,6 +33,7 @@ import { useUser } from "@clerk/nextjs";
 import { MoreHorizontal, Power, PowerOff } from "lucide-react";
 import { useState } from "react";
 import { RotatingLines } from "react-loader-spinner";
+import Loading from "./loading";
 
 
 const AssistantsList = () => {
@@ -41,7 +42,7 @@ const AssistantsList = () => {
   const [loadingId, setLoading] = useState<String | null>(null);
 
   if (isLoading) {
-    return <div>loading...</div>
+    return <Loading />
   }
   if (isError) {
     return <div>{error.message}</div>
@@ -94,40 +95,14 @@ const AssistantsList = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <AlertDialogTrigger>Delete</AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Are you absolutely sure?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete your assistant and
-                            remove its data. This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                          // onClick={async () => {
-                          //   setLoading(assistant.assistantId);
-                          //   await axios.delete(
-                          //     `/api/assistants/${assistant.assistantId}`
-                          //   );
-                          //   setAssistants((prev) =>
-                          //     prev.filter(
-                          //       (obj) =>
-                          //         obj.assistantId != assistant.assistantId
-                          //     )
-                          //   );
-                          //   setLoading(null);
-                          // }}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
+                      <DropdownMenuItem className="cursor-pointer">Edit</DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <AlertDialogTrigger className="w-full text-left">
+                          Delete
+                        </AlertDialogTrigger>
+                      </DropdownMenuItem>
                       <DropdownMenuItem
+                        className="cursor-pointer"
                         onClick={async () => {
                           await navigator.clipboard.writeText(
                             `http://${process.env.NEXT_PUBLIC_DOMAIN}/chat/${assistant.assistantId}`
@@ -137,7 +112,7 @@ const AssistantsList = () => {
                         Copy Link
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer">
                         {assistant.Status === "active" ? (
                           <>
                             <PowerOff className="mr-2 h-4 w-4" />
@@ -152,6 +127,23 @@ const AssistantsList = () => {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete your assistant and
+                        remove its data. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
                 </AlertDialog>
               </TableCell>
             </TableRow>

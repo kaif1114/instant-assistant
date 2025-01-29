@@ -20,6 +20,7 @@ import { LoadingOverlay } from "./LoadingOverlay";
 import { TextFieldMutation } from "@/hooks/TextFieldMutation";
 import { UrlMutation } from "@/hooks/UrlMutation";
 import { FileMutation } from "@/hooks/FileMutation";
+import { Assistants } from "@prisma/client";
 
 
 interface File {
@@ -57,7 +58,7 @@ interface IContextToRemove {
 export function KnowledgeBaseTab() {
 
   const charactersLimit = useContext(pricingPlanContext);
-  const { selectedAssistant } = useSelectedAssistantStore();
+  const { selectedAssistant, setSelectedAssistant } = useSelectedAssistantStore();
 
   const [selectedType, setSelectedType] = useState<KnowledgeType>("manual");
   const [isRetraining, setIsRetraining] = useState(false);
@@ -74,7 +75,6 @@ export function KnowledgeBaseTab() {
   const [showAddForm, setShowAddForm] = useState<KnowledgeType | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
 
   const { mutateAsync: mutateTextFields, isError: isTextFieldMutationError, error: textFieldMutationError, isPending: isTextFieldPending, isSuccess: isTextFieldSuccess } = TextFieldMutation()
   const { mutateAsync: mutateUrl, isError: isUrlMutationError, error: urlMutationError, isPending: isUrlPending, isSuccess: isUrlSuccess } = UrlMutation()
@@ -125,6 +125,7 @@ export function KnowledgeBaseTab() {
           ...prev!,
           textFieldsData: [...prev!.textFieldsData, newInputData],
         }));
+        setSelectedAssistant((prev: Assistants) => ({ ...prev, charactersUsed: prev.charactersUsed + newInput.manual.text.length }));
       }
       setNewInput(prev => ({
         ...prev,

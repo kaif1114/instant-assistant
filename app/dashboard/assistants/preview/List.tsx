@@ -22,6 +22,7 @@ import { useSelectedAssistantStore } from "./store";
 import { useAssistants } from "@/hooks/useAssistants";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import Loading from "./loading";
 
 export function AssistantList() {
 
@@ -34,7 +35,7 @@ export function AssistantList() {
 
   const { user } = useUser();
 
-  const { data: assistants, isError, error } = useAssistants(user?.id!);
+  const { data: assistants, isError, error, isLoading } = useAssistants(user?.id!);
 
   const filteredAssistants = assistants?.filter((assistant) => {
     const matchesSearch =
@@ -48,6 +49,9 @@ export function AssistantList() {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
+
+  if (isLoading)
+    return <Loading />
 
   if (isError) {
     return <div>{error.message}</div>
