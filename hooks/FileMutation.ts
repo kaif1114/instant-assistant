@@ -14,11 +14,11 @@ export function FileMutation() {
         mutationFn: async ({ assistantId, files, filesToRemove }: Params) => {
             let deleteResponse, addResponse
             if (filesToRemove?.length! > 0) {
-
-                deleteResponse = await axios.post(`/api/deletecontext`, { assistantId, sourceType: "files", filesToRemove })
+                console.log(filesToRemove)
+                deleteResponse = await axios.post(`/api/deletecontext`, { assistantId, sourceType: "files", source: filesToRemove })
             }
             if (files?.length! > 0) {
-                const filePromises = files?.map(({ file, source }, index) => {
+                const filePromises = files?.map(({ file, source }) => {
                     const formData = new FormData();
                     formData.append("file", file!);
                     formData.append("fileName", source);

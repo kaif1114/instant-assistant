@@ -216,7 +216,7 @@ export function KnowledgeBaseTab() {
             description: textField.description
           }
         }));
-      console.log("newTextFields: ", newTextFields)
+
       console.log("textFieldsToRemove: ", contextToRemove.textfields)
       await mutateTextFields({
         textFieldDocuments: newTextFields,
@@ -235,14 +235,12 @@ export function KnowledgeBaseTab() {
 
       const newFiles = knowledgeBase?.otherSources
         .filter(source => source.type === "file" && source.new && source.file);
-
-      mutateFile({
+      console.log("files to remove: ", contextToRemove.files)
+      await mutateFile({
         files: newFiles,
         assistantId: selectedAssistant?.assistantId!,
         filesToRemove: contextToRemove.files
       })
-
-      // Update local state after successful operations
       setKnowledgeBase(prev => ({
         ...prev!,
         textFieldsData: prev!.textFieldsData.map(field => ({ ...field, new: false })),

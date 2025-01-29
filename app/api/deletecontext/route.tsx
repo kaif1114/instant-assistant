@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const validation = DeleteContextSchema.safeParse(body)
   if (!validation.success) {
-    return NextResponse.json({ error: validation.error.message }, { status: 400 })
+    return NextResponse.json(validation.error, { status: 400 })
   }
   const pineconeNamespace = pineconeIndex.namespace(body.assistantId);
 
@@ -46,7 +46,6 @@ export async function POST(request: NextRequest) {
     else if (body.sourceType == "textfields")
       ids = body.source
 
-    console.log("ids: ", ids)
     await pineconeNamespace.deleteMany(ids);
     return NextResponse.json(
       { message: "Context deleted successfully" },
