@@ -48,15 +48,9 @@ export function AssistantList() {
     visible: { opacity: 1, y: 0 },
   };
 
-  if (!user) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-lg text-gray-600">Please sign in to view assistants</p>
-      </div>
-    );
-  }
 
-  if (isLoading) {
+
+  if (isLoading || !user) {
     return <Loading />
   }
 

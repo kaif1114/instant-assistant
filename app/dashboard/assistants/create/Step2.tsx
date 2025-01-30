@@ -95,7 +95,6 @@ const Step2 = () => {
             <div className="space-y-2">
               <Select
                 value={data.avatarUrl}
-                defaultValue="https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg"
                 onValueChange={(value) => setData({ avatarUrl: value })}
               >
                 <SelectTrigger className="w-[200px]">
@@ -127,10 +126,10 @@ const Step2 = () => {
                     const url = getCldImageUrl({
                       src: result.info.public_id,
                     });
+                    setAvatars(prev => [...prev, { label: "Custom Avatar", source: url }]);
                     setData({
                       avatarUrl: url,
                     });
-                    setAvatars(prev => [...prev, { label: "Custom Avatar", source: url }])
                   }
                 }}
               >
