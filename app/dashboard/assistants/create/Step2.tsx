@@ -16,9 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CldUploadWidget, getCldImageUrl } from "next-cloudinary";
+import { CldUploadWidget, CloudinaryUploadWidgetResults, getCldImageUrl } from "next-cloudinary";
+import { useState } from "react";
 import { useNewAssistantStore } from "./store";
-import { useState, useEffect } from "react";
 
 const Step2 = () => {
   const { data, setData } = useNewAssistantStore();
@@ -28,10 +28,7 @@ const Step2 = () => {
     { label: "Avatar 3", source: "https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg" }
   ]);
 
-  useEffect(() => {
-    console.log("Current avatars:", avatars);
-    console.log("Current Avatar: ", data.avatarUrl)
-  }, [avatars]);
+
 
   return (
     <Card>
@@ -121,8 +118,8 @@ const Step2 = () => {
                   clientAllowedFormats: ['image'],
                   maxImageFileSize: 2000000,
                 }}
-                onSuccess={(result: any) => {
-                  if (result.info && typeof result.info !== "string") {
+                onSuccess={(result: CloudinaryUploadWidgetResults) => {
+                  if (result.info && typeof result.info === "object") {
                     const url = getCldImageUrl({
                       src: result.info.public_id,
                     });
