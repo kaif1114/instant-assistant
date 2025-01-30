@@ -4,7 +4,7 @@ import { Inter_Tight } from "next/font/google";
 import localFont from "next/font/local";
 import QueryProvider from "./providers/QueryProvider";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/react"
+// import { Analytics } from "@vercel/analytics/react"
 
 const interTight = Inter_Tight({
   subsets: ["latin"],
@@ -44,7 +44,7 @@ export default function RootLayout({
       >
         <QueryProvider>
           <ClerkProvider>
-            <Analytics />
+            {/* <Analytics /> */}
             <main>{children}</main>
 
           </ClerkProvider>

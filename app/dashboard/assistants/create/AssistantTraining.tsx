@@ -25,6 +25,7 @@ import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import { useNewAssistantStore } from "./store";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface DataFieldEntry {
   pageContent: string;
@@ -71,6 +72,7 @@ export default function AssistantTrainingPage() {
   const [scrapedContent, setScrapedContent] = useState<Document[]>([]);
   const { user } = useUser();
 
+  const queryClient = useQueryClient();
 
 
   const handleFileSubmit = async () => {
@@ -153,7 +155,8 @@ export default function AssistantTrainingPage() {
       });
 
 
-      handleFileSubmit();
+      await handleFileSubmit();
+      queryClient.invalidateQueries({ queryKey: ['assistants', user?.id] })
 
       setIsSuccess(true);
     } catch (error) {
