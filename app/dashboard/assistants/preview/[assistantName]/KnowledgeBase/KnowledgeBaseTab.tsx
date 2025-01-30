@@ -616,7 +616,7 @@ export function KnowledgeBaseTab() {
                 <div className="flex items-center justify-between text-sm">
                   <span>Character Usage</span>
                   <span className="text-blue-600">
-                    {selectedAssistant?.charactersUsed!} /{" "}
+                    {selectedAssistant?.charactersUsed} /{" "}
                     {charactersLimit.toLocaleString()}
                   </span>
                 </div>

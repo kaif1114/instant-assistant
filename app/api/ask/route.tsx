@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
   const assistant = await prisma.assistants.findUnique({
     where: { assistantId: body.assistantId },
   });
+  const sessionDetails = await prisma.session_details.findUnique({ where: { session_id: body.sessionId } })
 
   const promptWithChatHistory = ChatPromptTemplate.fromMessages([
     [
@@ -53,6 +54,9 @@ export async function POST(request: NextRequest) {
       Description: ${assistant?.description}
       Functionality: ${assistant?.functionality}
       Type: ${assistant?.Type}
+      User Details
+      Name: ${sessionDetails?.userName}
+      Email: ${sessionDetails?.userEmail}
       `,
     ],
     new MessagesPlaceholder("chat_history"),

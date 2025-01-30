@@ -18,9 +18,21 @@ import {
 } from "@/components/ui/select";
 import { CldUploadWidget, getCldImageUrl } from "next-cloudinary";
 import { useNewAssistantStore } from "./store";
+import { useState, useEffect } from "react";
 
 const Step2 = () => {
   const { data, setData } = useNewAssistantStore();
+  const [avatars, setAvatars] = useState([
+    { label: "Avatar 1", source: "https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar1.jpg" },
+    { label: "Avatar 2", source: "https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar2.jpg" },
+    { label: "Avatar 3", source: "https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg" }
+  ]);
+
+  useEffect(() => {
+    console.log("Current avatars:", avatars);
+    console.log("Current Avatar: ", data.avatarUrl)
+  }, [avatars]);
+
   return (
     <Card>
       <CardHeader>
@@ -82,6 +94,7 @@ const Step2 = () => {
             </Avatar>
             <div className="space-y-2">
               <Select
+                value={data.avatarUrl}
                 defaultValue="https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg"
                 onValueChange={(value) => setData({ avatarUrl: value })}
               >
@@ -89,34 +102,45 @@ const Step2 = () => {
                   <SelectValue placeholder="Select avatar" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar1.jpg">
-                    Avatar 1
-                  </SelectItem>
-                  <SelectItem value="https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar2.jpg">
-                    Avatar 2
-                  </SelectItem>
-                  <SelectItem value="https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg">
-                    Avatar 3
-                  </SelectItem>
+                  {avatars.map((avatar, index) => (
+                    <SelectItem key={`${avatar.label}-${index}`} value={avatar.source}>
+                      {avatar.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <CldUploadWidget
                 uploadPreset="ml_default"
-                onSuccess={(result) => {
-                  console.log(result);
+                options={{
+                  sources: ['local', 'url', 'camera'],
+                  multiple: false,
+                  maxFiles: 1,
+                  showAdvancedOptions: false,
+                  cropping: true,
+                  showSkipCropButton: false,
+                  croppingAspectRatio: 1,
+                  clientAllowedFormats: ['image'],
+                  maxImageFileSize: 2000000,
+                }}
+                onSuccess={(result: any) => {
                   if (result.info && typeof result.info !== "string") {
-                    console.log(data);
                     const url = getCldImageUrl({
                       src: result.info.public_id,
                     });
                     setData({
                       avatarUrl: url,
                     });
+                    setAvatars(prev => [...prev, { label: "Custom Avatar", source: url }])
                   }
                 }}
               >
                 {({ open }) => {
-                  return <Button onClick={() => open()}>Upload Avatar</Button>;
+                  function handleOnClick(e: React.MouseEvent<HTMLButtonElement>) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    open();
+                  }
+                  return <Button onClick={handleOnClick}>Upload Avatar</Button>;
                 }}
               </CldUploadWidget>
             </div>
