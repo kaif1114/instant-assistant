@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   AlertCircle,
+  ChevronLeft,
   Globe,
   Loader2,
   PlusCircle,
@@ -25,33 +26,37 @@ import {
 import React, { useEffect, useState } from "react";
 import SelectedFilesList from "./SelectedFilesList";
 import { useNewAssistantStore } from "./store";
-
-
+import { KindOtterButton } from "@/components/ui/KindOtterButton";
+import AnimatedTextLoader from "@/components/ui/AnimatedTextLoader";
 
 interface Props {
+  onPrevStep: () => void;
   totalCharacterCount: number;
   onUpdateCharacterCount: (count: number) => void;
   assistantId: string;
   selectedFiles: SelectedFile[];
   onSetSelectedFiles: (files: SelectedFile[]) => void;
   scrapedContent: Document[];
-  onSetScrapedContent: (prev: Document[] | ((prev: Document[]) => Document[])) => void;
-  isButtonDisabled: boolean
-  onSubmit: () => void
+  onSetScrapedContent: (
+    prev: Document[] | ((prev: Document[]) => Document[])
+  ) => void;
+  isButtonDisabled: boolean;
+  onSubmit: () => void;
 }
 
 const Step3 = ({
+  onPrevStep,
   onUpdateCharacterCount,
   selectedFiles,
   onSetSelectedFiles,
   scrapedContent,
   onSetScrapedContent,
   isButtonDisabled,
-  onSubmit
+  onSubmit,
 }: Props) => {
   const { data, setData } = useNewAssistantStore();
   const [siteUrl, setSiteUrl] = useState("");
-  // const [scrapedContent, setScrapedContent] = useState<Document[]>([]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [websiteMode, setWebsiteMode] = useState<"scrape" | "crawl">("scrape");
   const [error, setError] = useState<string | null>(null);
@@ -117,15 +122,14 @@ const Step3 = ({
       }
 
       onSetScrapedContent((prev: Document[]) => [...prev, ...result.docs]);
-
-
     } catch (error) {
       console.error(
         `Error ${websiteMode === "scrape" ? "scraping" : "crawling"} site:`,
         error
       );
       setError(
-        `Failed to ${websiteMode === "scrape" ? "scrape" : "crawl"
+        `Failed to ${
+          websiteMode === "scrape" ? "scrape" : "crawl"
         } the website. Please try again.`
       );
     } finally {
@@ -306,8 +310,8 @@ const Step3 = ({
                       ? "Scraping..."
                       : "Crawling..."
                     : websiteMode === "scrape"
-                      ? "Scrape Page"
-                      : "Crawl Website"}
+                    ? "Scrape Page"
+                    : "Crawl Website"}
                 </Button>
                 {error && (
                   <Alert variant="destructive">
@@ -366,18 +370,7 @@ const Step3 = ({
                   uploaded={false}
                   onRemove={removeSelectedFile}
                 />
-                {/* <Button
-                  type="button"
-                  onClick={handleFileSubmit}
-                  disabled={isLoading || selectedFiles.length === 0}
-                >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Upload className="mr-2 h-4 w-4" />
-                  )}
-                  {isLoading ? "Uploading..." : "Upload Files"}
-                </Button> */}
+
                 {error && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
@@ -389,6 +382,24 @@ const Step3 = ({
             </TabsContent>
           </Tabs>
         </CardContent>
+        <div className="flex justify-between items-center p-6 border-t">
+          <Button
+            type="button"
+            onClick={onPrevStep}
+            variant="outline"
+            className="h-10 px-4 py-2 w-[110px]"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Previous
+          </Button>
+
+          <KindOtterButton
+            text="Create Assistant"
+            disabled={isButtonDisabled}
+            onClick={onSubmit}
+            className="h-10 px-4 py-2 w-[140px]"
+          />
+        </div>
       </Card>
     </>
   );

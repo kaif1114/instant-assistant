@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "PricingPlans" ADD COLUMN     "fileLimit" INTEGER NOT NULL DEFAULT 2,
+ADD COLUMN     "messageCreditsLimit" INTEGER NOT NULL DEFAULT 100,
+ADD COLUMN     "urlLimit" INTEGER NOT NULL DEFAULT 4;

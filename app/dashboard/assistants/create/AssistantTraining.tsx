@@ -74,7 +74,6 @@ export default function AssistantTrainingPage() {
 
   const queryClient = useQueryClient();
 
-
   const handleFileSubmit = async () => {
     setIsLoading(true);
 
@@ -154,9 +153,8 @@ export default function AssistantTrainingPage() {
         documents: scrapedContent,
       });
 
-
       await handleFileSubmit();
-      queryClient.invalidateQueries({ queryKey: ['assistants', user?.id] })
+      queryClient.invalidateQueries({ queryKey: ["assistants", user?.id] });
 
       setIsSuccess(true);
     } catch (error) {
@@ -170,13 +168,20 @@ export default function AssistantTrainingPage() {
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <Step1 onNextStep={nextStep} />;
+        return (
+          <Step1
+            onNextStep={nextStep}
+            onPreviousStep={prevStep}
+            isPrevButtonDisabled={step == 1}
+          />
+        );
       case 2:
-        return <Step2 onNextStep={nextStep} />;
+        return <Step2 onNextStep={nextStep} onPreviousStep={prevStep} />;
       case 3:
         return (
           <>
             <Step3
+              onPrevStep={prevStep}
               scrapedContent={scrapedContent}
               onSetScrapedContent={setScrapedContent}
               totalCharacterCount={totalCharacterCount}
@@ -331,10 +336,6 @@ export default function AssistantTrainingPage() {
               </div>
             )}
             <div className="flex justify-between items-center">
-              <Button type="button" onClick={prevStep} disabled={step === 1}>
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Previous
-              </Button>
               {/* {step < 3 ? (
                 <Button type="button" onClick={nextStep}>
                   Next
@@ -367,8 +368,9 @@ export default function AssistantTrainingPage() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className={`w-2 h-2 rounded-full ${i === step ? "bg-primary" : "bg-gray-300"
-              }`}
+            className={`w-2 h-2 rounded-full ${
+              i === step ? "bg-primary" : "bg-gray-300"
+            }`}
           />
         ))}
       </div>

@@ -29,6 +29,9 @@ model PricingPlans {
   price           String
   charactersLimit Int
   assistantsLimit Int
+  urlLimit        Int @default(4)
+  fileLimit       Int @default(2)
+  messageCreditsLimit Int @default(100)
   User            User[]
 }
 
@@ -55,6 +58,8 @@ model Assistants {
   secondaryColor  String            @default("#f2f2f2")
   avatarUrl       String
   charactersUsed  Int               @default(0)
+  fileLimitUsed   Int     @default(0)
+  urlLimitused    Int @default(0)
   startingMessage String            @default("Hello! How may I help you?")
   user            User              @relation(fields: [userId], references: [userId])
   session_details session_details[]

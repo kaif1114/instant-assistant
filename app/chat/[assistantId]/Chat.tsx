@@ -265,10 +265,10 @@ export default function Chat({
                           msg.sender === "user"
                             ? "justify-end"
                             : "justify-start"
-                        }`}
+                        } mb-2 items-end`}
                       >
                         {msg.sender === "support" && (
-                          <Avatar className="h-8 w-8 mr-2 mt-3">
+                          <Avatar className="h-8 w-8 mr-2">
                             <AvatarImage src={assistant.avatarUrl} alt="Bot" />
                             <AvatarFallback>AI</AvatarFallback>
                           </Avatar>
@@ -276,29 +276,41 @@ export default function Chat({
                         {msg.type === "text" && (
                           <MarkdownPreview
                             source={msg.text}
-                            className={`max-w-[75%] p-3 rounded-lg `}
+                            className={`max-w-[75%] py-2 px-3 rounded-2xl ${
+                              msg.sender === "user"
+                                ? "rounded-br-sm"
+                                : "rounded-bl-sm"
+                            }`}
                             style={{
                               backgroundColor:
                                 msg.sender === "user"
                                   ? assistant.primaryColor
-                                  : assistant.secondaryColor,
+                                  : "rgb(243, 243, 243)",
                               color: msg.sender === "user" ? "white" : "black",
+                              border:
+                                msg.sender === "user"
+                                  ? "none"
+                                  : "1px solid rgb(229, 229, 229)",
+                              lineHeight: "1.4",
+                              fontSize: "15px",
                             }}
                           />
                         )}
                         {msg.type === "input" && msg.sender === "support" && (
                           <div
-                            className={`max-w-[75%] p-3 rounded-lg `}
+                            className={`max-w-[75%] py-2 px-3 rounded-2xl rounded-bl-sm`}
                             style={{
-                              backgroundColor: assistant.secondaryColor,
+                              backgroundColor: "rgb(243, 243, 243)",
+                              border: "1px solid rgb(229, 229, 229)",
+                              fontSize: "15px",
                             }}
                           >
-                            <p>{msg.text}</p>
+                            <p style={{ fontSize: "15px" }}>{msg.text}</p>
                             <form
                               onSubmit={(e) =>
                                 handleInputSubmit(e, msg.inputType!)
                               }
-                              className="mt-2 flex"
+                              className="mt-2 relative"
                             >
                               <Input2
                                 type="text"
@@ -309,17 +321,17 @@ export default function Chat({
                                     : "Your Email"
                                 }
                                 required
-                                className="flex-grow px-2 py-1 rounded-md border"
+                                className="w-full rounded-full pr-12 pl-4"
                               />
                               <Button
                                 type="submit"
                                 size="icon"
-                                className="ml-2"
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full text-white"
                                 style={{
                                   backgroundColor: assistant.primaryColor,
                                 }}
                               >
-                                <Send className="h-4 w-4" />
+                                <Send className="h-5 w-5" />
                                 <span className="sr-only">Submit</span>
                               </Button>
                             </form>
@@ -328,18 +340,19 @@ export default function Chat({
                       </div>
                     ))}
                     {isLoading && (
-                      <div className="flex justify-start">
-                        <Avatar className="h-8 w-8 mr-2 mt-3">
+                      <div className="flex justify-start mb-2 items-end">
+                        <Avatar className="h-8 w-8 mr-2">
                           <AvatarImage src={assistant.avatarUrl} alt="Bot" />
                           <AvatarFallback>AI</AvatarFallback>
                         </Avatar>
                         <div
-                          className="max-w-[75%] p-3 rounded-lg "
+                          className="max-w-[75%] py-2 px-3 rounded-2xl rounded-bl-sm"
                           style={{
-                            backgroundColor: assistant.secondaryColor,
+                            backgroundColor: "rgb(243, 243, 243)",
+                            border: "1px solid rgb(229, 229, 229)",
+                            fontSize: "15px",
                           }}
                         >
-                          {" "}
                           <TypingIndicator />
                         </div>
                       </div>
@@ -364,16 +377,15 @@ export default function Chat({
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type your message..."
                     className="w-full rounded-full pr-12 pl-4 shadow-sm"
-                    style={{ paddingRight: "4rem" }}
                   />
                   <Button
                     type="submit"
                     size="icon"
                     disabled={isLoading || nextStep !== "chat"}
-                    className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full text-white"
                     style={{ backgroundColor: assistant.primaryColor }}
                   >
-                    <Send className="h-4 w-4" />
+                    <Send className="h-5 w-5" />
                     <span className="sr-only">Send message</span>
                   </Button>
                 </form>
