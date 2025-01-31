@@ -36,6 +36,8 @@ interface Props {
   onSetSelectedFiles: (files: SelectedFile[]) => void;
   scrapedContent: Document[];
   onSetScrapedContent: (prev: Document[] | ((prev: Document[]) => Document[])) => void;
+  isButtonDisabled: boolean
+  onSubmit: () => void
 }
 
 const Step3 = ({
@@ -44,6 +46,8 @@ const Step3 = ({
   onSetSelectedFiles,
   scrapedContent,
   onSetScrapedContent,
+  isButtonDisabled,
+  onSubmit
 }: Props) => {
   const { data, setData } = useNewAssistantStore();
   const [siteUrl, setSiteUrl] = useState("");

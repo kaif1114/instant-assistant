@@ -170,9 +170,9 @@ export default function AssistantTrainingPage() {
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <Step1 />;
+        return <Step1 onNextStep={nextStep} />;
       case 2:
-        return <Step2 />;
+        return <Step2 onNextStep={nextStep} />;
       case 3:
         return (
           <>
@@ -184,6 +184,8 @@ export default function AssistantTrainingPage() {
               assistantId={assistantId}
               selectedFiles={selectedFiles}
               onSetSelectedFiles={setSelectedFiles}
+              isButtonDisabled={isLoading}
+              onSubmit={handleSubmit}
             />
           </>
         );
@@ -290,7 +292,7 @@ export default function AssistantTrainingPage() {
       </div>
       <div className="flex flex-col lg:flex-row lg:justify-around gap-6 min-h-[800px]">
         <div className="w-full lg:w-1/2">
-          <form className="space-y-6 h-[700px] flex flex-col">
+          <div className="space-y-6 h-[700px] flex flex-col">
             <ScrollArea className="flex-grow">
               <AnimatePresence mode="wait" custom={direction} initial={false}>
                 <motion.div
@@ -333,7 +335,7 @@ export default function AssistantTrainingPage() {
                 <ChevronLeft className="mr-2 h-4 w-4" />
                 Previous
               </Button>
-              {step < 3 ? (
+              {/* {step < 3 ? (
                 <Button type="button" onClick={nextStep}>
                   Next
                   <ChevronRight className="ml-2 h-4 w-4" />
@@ -346,9 +348,9 @@ export default function AssistantTrainingPage() {
                 >
                   {isLoading ? "Creating..." : "Create Assistant"}
                 </Button>
-              )}
+              )} */}
             </div>
-          </form>
+          </div>
         </div>
         <div className="w-full lg:w-[30%] lg:sticky lg:top-6 h-[550px]">
           <ChatPreview
