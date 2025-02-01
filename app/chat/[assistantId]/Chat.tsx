@@ -293,6 +293,8 @@ export default function Chat({
                                   : "1px solid rgb(229, 229, 229)",
                               lineHeight: "1.4",
                               fontSize: "15px",
+                              wordBreak: "break-word",
+                              whiteSpace: "pre-wrap",
                             }}
                           />
                         )}
@@ -382,10 +384,10 @@ export default function Chat({
                     type="submit"
                     size="icon"
                     disabled={isLoading || nextStep !== "chat"}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full text-white"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 w-8 h-8 text-white rounded-full"
                     style={{ backgroundColor: assistant.primaryColor }}
                   >
-                    <Send className="h-5 w-5" />
+                    <Send className="h-4 w-4" />
                     <span className="sr-only">Send message</span>
                   </Button>
                 </form>

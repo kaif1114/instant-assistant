@@ -86,20 +86,32 @@ export default function ChatPreview({
                   key={index}
                   className={`flex ${
                     msg.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  } mb-2 items-end`}
                 >
                   {msg.sender === "assistant" && (
-                    <Avatar className="h-8 w-8 mr-2 mt-3">
+                    <Avatar className="h-8 w-8 mr-2">
                       <AvatarImage src={avatarUrl} alt="Bot" />
                       <AvatarFallback>AI</AvatarFallback>
                     </Avatar>
                   )}
                   <div
-                    className={`max-w-[75%] p-3 rounded-lg`}
+                    className={`max-w-[75%] py-2 px-3 rounded-2xl ${
+                      msg.sender === "user" ? "rounded-br-sm" : "rounded-bl-sm"
+                    }`}
                     style={{
                       backgroundColor:
-                        msg.sender === "user" ? primaryColor : secondaryColor,
+                        msg.sender === "user"
+                          ? primaryColor
+                          : "rgb(243, 243, 243)",
                       color: msg.sender === "user" ? "white" : "black",
+                      border:
+                        msg.sender === "user"
+                          ? "none"
+                          : "1px solid rgb(229, 229, 229)",
+                      lineHeight: "1.4",
+                      fontSize: "15px",
+                      wordBreak: "break-word",
+                      whiteSpace: "pre-wrap",
                     }}
                   >
                     {msg.text}
@@ -119,16 +131,15 @@ export default function ChatPreview({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message..."
-              className="w-full rounded-full pr-12 pl-4"
-              style={{ paddingRight: "4rem" }}
+              className="w-full rounded-full pr-12 pl-4 shadow-sm"
             />
             <Button
               type="submit"
               size="icon"
-              className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 text-white rounded-full"
               style={{ backgroundColor: primaryColor }}
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
               <span className="sr-only">Send message</span>
             </Button>
           </form>
