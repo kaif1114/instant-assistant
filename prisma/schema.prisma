@@ -54,7 +54,7 @@ model Assistants {
   Status          String            @default("active")
   userId          String
   functionality   String
-  primaryColor    String            @default("#478ACD")
+  primaryColor    String            @default("#000000")
   secondaryColor  String            @default("#f2f2f2")
   avatarUrl       String
   charactersUsed  Int               @default(0)

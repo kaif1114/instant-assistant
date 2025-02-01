@@ -20,12 +20,14 @@ export const useNewAssistantStore = create(
           { pageContent: "", metadata: { title: "", description: "", id: 0 } },
         ],
         startingMessage: "",
-        primaryColor: "#478ACD",
+        primaryColor: "#000000",
         secondaryColor: "#f2f2f2",
         charactersUsed: 0,
-        avatarUrl: "https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg",
+        avatarUrl:
+          "https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg",
       },
-      setData: (newData) => set((prev) => ({ data: { ...prev.data, ...newData } })),
+      setData: (newData) =>
+        set((prev) => ({ data: { ...prev.data, ...newData } })),
     }),
     {
       name: "assistant-storage",

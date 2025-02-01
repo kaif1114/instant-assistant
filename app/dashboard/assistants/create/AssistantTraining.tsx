@@ -13,9 +13,11 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUser } from "@clerk/nextjs";
+import { Assistants } from "@prisma/client";
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -25,7 +27,6 @@ import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import { useNewAssistantStore } from "./store";
-import { useQueryClient } from "@tanstack/react-query";
 
 export interface DataFieldEntry {
   pageContent: string;
@@ -121,7 +122,7 @@ export default function AssistantTrainingPage() {
     console.log(data);
     console.log(assistantId);
     try {
-      await axios.post("/api/assistants/create", {
+      const response = await axios.post<Assistants>("/api/assistants/create", {
         assistantId,
         name: data.name,
         description: data.description,
@@ -154,6 +155,8 @@ export default function AssistantTrainingPage() {
       });
 
       await handleFileSubmit();
+      console.log(response.data);
+
       queryClient.invalidateQueries({ queryKey: ["assistants", user?.id] });
 
       setIsSuccess(true);
@@ -212,11 +215,11 @@ export default function AssistantTrainingPage() {
 
   if (isLoading) {
     return (
-      <Card className="w-full max-w-md mx-auto mt-8">
-        <CardContent className="h-[400px]">
+      <div className="w-full max-w-md mx-auto mt-8">
+        <div className="h-[400px]">
           <LoadingAnimation />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -264,7 +267,7 @@ export default function AssistantTrainingPage() {
                 ],
                 startingMessage: "",
                 primaryColor: "#000000",
-                secondaryColor: "#ffffff",
+                secondaryColor: "#f2f2f2",
                 avatarUrl: "/placeholder.svg",
               });
               setIsSuccess(false);
@@ -274,7 +277,7 @@ export default function AssistantTrainingPage() {
           </Button>
           <Button
             onClick={() => {
-              router.push(`/dashboard/assistants/preview/${assistantId}`);
+              router.push(`/dashboard/assistants/preview`);
             }}
             variant="outline"
           >
@@ -335,22 +338,6 @@ export default function AssistantTrainingPage() {
                 </Alert>
               </div>
             )}
-            <div className="flex justify-between items-center">
-              {/* {step < 3 ? (
-                <Button type="button" onClick={nextStep}>
-                  Next
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Creating..." : "Create Assistant"}
-                </Button>
-              )} */}
-            </div>
           </div>
         </div>
         <div className="w-full lg:w-[30%] lg:sticky lg:top-6 h-[550px]">

@@ -85,8 +85,8 @@ const Step2 = ({
   } = useForm<FormData>({
     resolver: zodResolver(zodSchema),
     defaultValues: {
-      primaryColor: data.primaryColor || "#ffffff",
-      secondaryColor: data.secondaryColor || "#0A0A15",
+      primaryColor: data.primaryColor || "#000000",
+      secondaryColor: data.secondaryColor || "#f2f2f2",
       startingMessage: data.startingMessage || "",
       avatarUrl: data.avatarUrl || "",
     },
@@ -120,7 +120,14 @@ const Step2 = ({
                   setData({ primaryColor: e.target.value });
                 }}
               />
-              <Input {...register("primaryColor")} placeholder="#478ACD" />
+              <Input
+                {...register("primaryColor")}
+                onChange={(e) => {
+                  setValue("primaryColor", e.target.value);
+                  setData({ primaryColor: e.target.value });
+                }}
+                placeholder="#000000"
+              />
             </div>
             {errors.primaryColor && (
               <p className="text-red-600">{errors.primaryColor.message}</p>
@@ -139,7 +146,14 @@ const Step2 = ({
                 }}
                 className="w-12 h-12 p-1"
               />
-              <Input {...register("secondaryColor")} placeholder="#0A0A15" />
+              <Input
+                {...register("secondaryColor")}
+                onChange={(e) => {
+                  setValue("secondaryColor", e.target.value);
+                  setData({ secondaryColor: e.target.value });
+                }}
+                placeholder="#f2f2f2"
+              />
             </div>
             {errors.secondaryColor && (
               <p className="text-red-600">{errors.secondaryColor.message}</p>
@@ -150,6 +164,10 @@ const Step2 = ({
             <Label htmlFor="startingMessage">Starting Message</Label>
             <Input
               {...register("startingMessage")}
+              onChange={(e) => {
+                setValue("startingMessage", e.target.value);
+                setData({ startingMessage: e.target.value });
+              }}
               placeholder="Enter starting message"
             />
             {errors.startingMessage && (
@@ -166,7 +184,10 @@ const Step2 = ({
               </Avatar>
               <div className="space-y-2">
                 <Select
-                  onValueChange={(value) => setValue("avatarUrl", value)}
+                  onValueChange={(value) => {
+                    setValue("avatarUrl", value);
+                    setData({ avatarUrl: value });
+                  }}
                   defaultValue={data.avatarUrl}
                 >
                   <SelectTrigger className="w-[200px]">
@@ -206,6 +227,7 @@ const Step2 = ({
                         { label: "Custom Avatar", source: url },
                       ]);
                       setValue("avatarUrl", url);
+                      setData({ avatarUrl: url });
                     }
                   }}
                 >
