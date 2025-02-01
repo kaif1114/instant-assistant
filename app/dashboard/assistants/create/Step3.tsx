@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { KindOtterButton } from "@/components/ui/KindOtterButton";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,8 +27,6 @@ import {
 import React, { useEffect, useState } from "react";
 import SelectedFilesList from "./SelectedFilesList";
 import { useNewAssistantStore } from "./store";
-import { KindOtterButton } from "@/components/ui/KindOtterButton";
-import AnimatedTextLoader from "@/components/ui/AnimatedTextLoader";
 
 interface Props {
   onPrevStep: () => void;

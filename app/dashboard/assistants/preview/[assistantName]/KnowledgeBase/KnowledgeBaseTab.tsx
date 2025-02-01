@@ -21,7 +21,6 @@ import { TextFieldMutation } from "@/hooks/TextFieldMutation";
 import { UrlMutation } from "@/hooks/UrlMutation";
 import { LoadingOverlay } from "./LoadingOverlay";
 
-
 interface File {
   id: string;
   name: string;
@@ -32,8 +31,7 @@ async function getKnowledgeBase(assistantId: string) {
   const response = await axios.get(
     `/api/getcontext?assistantId=${assistantId}`
   );
-  return response.data
-
+  return response.data;
 }
 
 type KnowledgeType = "manual" | "url" | "file";
@@ -49,15 +47,15 @@ interface NewInputState {
 }
 
 interface IContextToRemove {
-  textfields: string[],
-  urls: string[],
-  files: string[]
+  textfields: string[];
+  urls: string[];
+  files: string[];
 }
 
 export function KnowledgeBaseTab() {
-
-  const charactersLimit = useContext(pricingPlanContext);
-  const { selectedAssistant, setSelectedAssistant } = useSelectedAssistantStore();
+  const pricingPlan = useContext(pricingPlanContext);
+  const { selectedAssistant, setSelectedAssistant } =
+    useSelectedAssistantStore();
 
   const [selectedType, setSelectedType] = useState<KnowledgeType>("manual");
   const [isRetraining, setIsRetraining] = useState(false);
@@ -68,22 +66,44 @@ export function KnowledgeBaseTab() {
       text: "",
     },
     url: "",
-    file: null
+    file: null,
   });
-  const [contextToRemove, setContextToRemove] = useState<IContextToRemove>({ textfields: [], urls: [], files: [] })
+  const [contextToRemove, setContextToRemove] = useState<IContextToRemove>({
+    textfields: [],
+    urls: [],
+    files: [],
+  });
   const [showAddForm, setShowAddForm] = useState<KnowledgeType | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { mutateAsync: mutateTextFields, isError: isTextFieldMutationError, error: textFieldMutationError, isPending: isTextFieldPending, isSuccess: isTextFieldSuccess } = TextFieldMutation()
-  const { mutateAsync: mutateUrl, isError: isUrlMutationError, error: urlMutationError, isPending: isUrlPending, isSuccess: isUrlSuccess } = UrlMutation()
-  const { mutateAsync: mutateFile, isError: isFileMutationError, error: fileMutationError, isPending: isFilePending, isSuccess: isFileSuccess } = FileMutation()
+  const {
+    mutateAsync: mutateTextFields,
+    isError: isTextFieldMutationError,
+    error: textFieldMutationError,
+    isPending: isTextFieldPending,
+    isSuccess: isTextFieldSuccess,
+  } = TextFieldMutation();
+  const {
+    mutateAsync: mutateUrl,
+    isError: isUrlMutationError,
+    error: urlMutationError,
+    isPending: isUrlPending,
+    isSuccess: isUrlSuccess,
+  } = UrlMutation();
+  const {
+    mutateAsync: mutateFile,
+    isError: isFileMutationError,
+    error: fileMutationError,
+    isPending: isFilePending,
+    isSuccess: isFileSuccess,
+  } = FileMutation();
 
   const { data, isLoading, isFetching } = useQuery<Data>({
-    queryKey: ['knowledgeBase', selectedAssistant?.assistantId],
+    queryKey: ["knowledgeBase", selectedAssistant?.assistantId],
     queryFn: async () => {
       if (!selectedAssistant?.assistantId) {
-        throw new Error('No assistant selected');
+        throw new Error("No assistant selected");
       }
       return getKnowledgeBase(selectedAssistant.assistantId);
     },
@@ -102,21 +122,28 @@ export function KnowledgeBaseTab() {
     }
   }, [data, hasChanges]);
 
-  useEffect(() => { console.log(knowledgeBase?.textFieldsData) }, [knowledgeBase])
-
   useEffect(() => {
-    if (knowledgeBase?.textFieldsData.length && selectedAssistant?.charactersUsed) {
+    if (
+      knowledgeBase?.textFieldsData.length &&
+      selectedAssistant?.charactersUsed &&
+      pricingPlan
+    ) {
       const totalCharacters = knowledgeBase.textFieldsData.reduce(
         (acc, input) => acc + input.text.length,
         0
       );
-      if (totalCharacters > charactersLimit) {
+      if (totalCharacters > pricingPlan.charactersLimit) {
         setError("Character limit exceeded");
       } else {
         setError(null);
       }
     }
-  }, [knowledgeBase?.textFieldsData, charactersLimit, selectedAssistant?.charactersUsed]);
+  }, [
+    knowledgeBase?.textFieldsData,
+    pricingPlan?.charactersLimit,
+    selectedAssistant?.charactersUsed,
+    pricingPlan,
+  ]);
 
   const handleAddManualInput = () => {
     if (
@@ -130,7 +157,7 @@ export function KnowledgeBaseTab() {
         new: true,
         ...newInput.manual,
       };
-      console.log("NewInputData: ", newInputData)
+      console.log("NewInputData: ", newInputData);
       setKnowledgeBase((prev) => {
         if (!prev) return prev;
         return {
@@ -141,12 +168,13 @@ export function KnowledgeBaseTab() {
       if (selectedAssistant) {
         setSelectedAssistant({
           ...selectedAssistant,
-          charactersUsed: selectedAssistant.charactersUsed + newInput.manual.text.length
+          charactersUsed:
+            selectedAssistant.charactersUsed + newInput.manual.text.length,
         });
       }
-      setNewInput(prev => ({
+      setNewInput((prev) => ({
         ...prev,
-        manual: { title: "", description: "", text: "" }
+        manual: { title: "", description: "", text: "" },
       }));
       setShowAddForm(null);
       setHasChanges(true);
@@ -168,7 +196,7 @@ export function KnowledgeBaseTab() {
           otherSources: [...prev.otherSources, newSite],
         };
       });
-      setNewInput(prev => ({ ...prev, url: "" }));
+      setNewInput((prev) => ({ ...prev, url: "" }));
       setShowAddForm(null);
       setHasChanges(true);
     }
@@ -182,13 +210,13 @@ export function KnowledgeBaseTab() {
         source: file.name,
         new: true,
         type: "file",
-        file
+        file,
       };
       setKnowledgeBase((prev) => ({
         ...prev!,
         otherSources: [...prev!.otherSources, newFileEntry],
       }));
-      setNewInput(prev => ({ ...prev, file: null }));
+      setNewInput((prev) => ({ ...prev, file: null }));
       setShowAddForm(null);
       setHasChanges(true);
       event.target.value = "";
@@ -196,7 +224,9 @@ export function KnowledgeBaseTab() {
   };
 
   const handleRemoveManualInput = (id: string) => {
-    setContextToRemove((prev) => { return { ...prev, textfields: [...prev.textfields, `textfield-${id}`] } })
+    setContextToRemove((prev) => {
+      return { ...prev, textfields: [...prev.textfields, `textfield-${id}`] };
+    });
     setKnowledgeBase((prev) => ({
       ...prev!,
       textFieldsData: prev!.textFieldsData.filter((input) => input.id !== id),
@@ -205,21 +235,27 @@ export function KnowledgeBaseTab() {
   };
 
   const handleRemoveurl = (otherSource: IOtherSource) => {
-
-    setContextToRemove((prev) => { return { ...prev, urls: [...prev.urls, otherSource.source] } });
+    setContextToRemove((prev) => {
+      return { ...prev, urls: [...prev.urls, otherSource.source] };
+    });
     setKnowledgeBase((prev) => ({
       ...prev!,
-      otherSources: prev!.otherSources.filter((url) => url.id !== otherSource.id),
+      otherSources: prev!.otherSources.filter(
+        (url) => url.id !== otherSource.id
+      ),
     }));
     setHasChanges(true);
   };
 
   const handleRemoveFile = (otherSource: IOtherSource) => {
-
-    setContextToRemove((prev) => { return { ...prev, files: [...prev.files, otherSource.source] } });
+    setContextToRemove((prev) => {
+      return { ...prev, files: [...prev.files, otherSource.source] };
+    });
     setKnowledgeBase((prev) => ({
       ...prev!,
-      otherSources: prev!.otherSources.filter((file) => file.id !== otherSource.id),
+      otherSources: prev!.otherSources.filter(
+        (file) => file.id !== otherSource.id
+      ),
     }));
     setHasChanges(true);
   };
@@ -230,68 +266,78 @@ export function KnowledgeBaseTab() {
     setIsRetraining(true);
     try {
       const newTextFields = knowledgeBase.textFieldsData
-        .filter(textField => textField.new)
-        .map(textField => ({
+        .filter((textField) => textField.new)
+        .map((textField) => ({
           pageContent: textField.text,
           metadata: {
             id: textField.id,
             title: textField.title,
-            description: textField.description
-          }
+            description: textField.description,
+          },
         }));
 
-      console.log("textFieldsToRemove: ", contextToRemove.textfields)
-      console.log("textFieldsToAdd: ", newTextFields)
+      console.log("textFieldsToRemove: ", contextToRemove.textfields);
+      console.log("textFieldsToAdd: ", newTextFields);
       await mutateTextFields({
         textFieldDocuments: newTextFields,
         assistantId: selectedAssistant.assistantId,
         ids: true,
-        textFieldsToRemove: contextToRemove.textfields
+        textFieldsToRemove: contextToRemove.textfields,
       });
 
       const newUrls = knowledgeBase.otherSources
-        .filter(source => source.type === "url" && source.new)
-        .map(sourceObj => sourceObj.source);
+        .filter((source) => source.type === "url" && source.new)
+        .map((sourceObj) => sourceObj.source);
 
-      console.log("Urls to remove: ", contextToRemove.urls)
-      await mutateUrl({ assistantId: selectedAssistant.assistantId, urls: newUrls, urlsToRemove: contextToRemove.urls })
+      console.log("Urls to remove: ", contextToRemove.urls);
+      await mutateUrl({
+        assistantId: selectedAssistant.assistantId,
+        urls: newUrls,
+        urlsToRemove: contextToRemove.urls,
+      });
 
-
-      const newFiles = knowledgeBase.otherSources
-        .filter(source => source.type === "file" && source.new && source.file);
-      console.log("files to remove: ", contextToRemove.files)
+      const newFiles = knowledgeBase.otherSources.filter(
+        (source) => source.type === "file" && source.new && source.file
+      );
+      console.log("files to remove: ", contextToRemove.files);
       await mutateFile({
         files: newFiles,
         assistantId: selectedAssistant.assistantId,
-        filesToRemove: contextToRemove.files
-      })
-      setKnowledgeBase(prev => ({
+        filesToRemove: contextToRemove.files,
+      });
+      setKnowledgeBase((prev) => ({
         ...prev!,
-        textFieldsData: prev!.textFieldsData.map(field => ({ ...field, new: false })),
-        otherSources: prev!.otherSources.map(source => ({
+        textFieldsData: prev!.textFieldsData.map((field) => ({
+          ...field,
+          new: false,
+        })),
+        otherSources: prev!.otherSources.map((source) => ({
           ...source,
           new: false,
-          file: undefined
-        }))
+          file: undefined,
+        })),
       }));
 
-
-      queryClient.invalidateQueries({ queryKey: ['knowledgeBase', selectedAssistant.assistantId] })
+      queryClient.invalidateQueries({
+        queryKey: ["knowledgeBase", selectedAssistant.assistantId],
+      });
       setContextToRemove({ textfields: [], urls: [], files: [] });
       setHasChanges(false);
     } catch (error) {
-      console.error('Error during retraining:', error);
+      console.error("Error during retraining:", error);
     } finally {
       setIsRetraining(false);
     }
   };
 
-  const percentage = selectedAssistant?.charactersUsed && charactersLimit
-    ? (selectedAssistant.charactersUsed / charactersLimit) * 100
-    : 0;
-  const remaining = selectedAssistant?.charactersUsed && charactersLimit
-    ? charactersLimit - selectedAssistant.charactersUsed
-    : charactersLimit;
+  const percentage =
+    selectedAssistant?.charactersUsed && pricingPlan
+      ? (selectedAssistant.charactersUsed / pricingPlan.charactersLimit) * 100
+      : 0;
+  const remaining =
+    selectedAssistant?.charactersUsed && pricingPlan
+      ? pricingPlan.charactersLimit - selectedAssistant.charactersUsed
+      : 0;
 
   const navigationItems = [
     {
@@ -304,13 +350,17 @@ export function KnowledgeBaseTab() {
       type: "url",
       label: "urls",
       icon: Globe,
-      count: knowledgeBase?.otherSources.filter((source) => source.type == "url").length,
+      count: knowledgeBase?.otherSources.filter(
+        (source) => source.type == "url"
+      ).length,
     },
     {
       type: "file",
       label: "Files",
       icon: FileText,
-      count: knowledgeBase?.otherSources.filter((source) => source.type == "file").length,
+      count: knowledgeBase?.otherSources.filter(
+        (source) => source.type == "file"
+      ).length,
     },
   ] as const;
 
@@ -321,10 +371,7 @@ export function KnowledgeBaseTab() {
           <CardContent className="p-4">
             <div className="space-y-2 animate-pulse">
               {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-10 bg-gray-200 rounded-lg w-full"
-                />
+                <div key={i} className="h-10 bg-gray-200 rounded-lg w-full" />
               ))}
             </div>
           </CardContent>
@@ -371,19 +418,19 @@ export function KnowledgeBaseTab() {
           isProcessing: isFilePending,
           isSuccess: isFileSuccess,
           isError: isFileMutationError,
-          errorMessage: fileMutationError?.message
+          errorMessage: fileMutationError?.message,
         }}
         websites={{
           isProcessing: isUrlPending,
           isSuccess: isUrlSuccess,
           isError: isUrlMutationError,
-          errorMessage: urlMutationError?.message
+          errorMessage: urlMutationError?.message,
         }}
         manualInputs={{
           isProcessing: isTextFieldPending,
           isSuccess: isTextFieldSuccess,
           isError: isTextFieldMutationError,
-          errorMessage: textFieldMutationError?.message
+          errorMessage: textFieldMutationError?.message,
         }}
       />
       <div className="flex gap-6 h-[calc(100vh-200px)]">
@@ -434,8 +481,8 @@ export function KnowledgeBaseTab() {
                 {selectedType === "manual"
                   ? "Manual Input"
                   : selectedType === "url"
-                    ? "url"
-                    : "File"}
+                  ? "url"
+                  : "File"}
               </Button>
             </div>
 
@@ -450,9 +497,9 @@ export function KnowledgeBaseTab() {
                           id="title"
                           value={newInput.manual.title}
                           onChange={(e) =>
-                            setNewInput(prev => ({
+                            setNewInput((prev) => ({
                               ...prev,
-                              manual: { ...prev.manual, title: e.target.value }
+                              manual: { ...prev.manual, title: e.target.value },
                             }))
                           }
                           placeholder="Enter title"
@@ -464,9 +511,12 @@ export function KnowledgeBaseTab() {
                           id="description"
                           value={newInput.manual.description}
                           onChange={(e) =>
-                            setNewInput(prev => ({
+                            setNewInput((prev) => ({
                               ...prev,
-                              manual: { ...prev.manual, description: e.target.value }
+                              manual: {
+                                ...prev.manual,
+                                description: e.target.value,
+                              },
                             }))
                           }
                           placeholder="Enter description"
@@ -479,9 +529,9 @@ export function KnowledgeBaseTab() {
                         id="content"
                         value={newInput.manual.text}
                         onChange={(e) =>
-                          setNewInput(prev => ({
+                          setNewInput((prev) => ({
                             ...prev,
-                            manual: { ...prev.manual, text: e.target.value }
+                            manual: { ...prev.manual, text: e.target.value },
                           }))
                         }
                         placeholder="Enter main text"
@@ -494,10 +544,11 @@ export function KnowledgeBaseTab() {
                   </div>
                 )}
                 {knowledgeBase?.textFieldsData.map((input) => (
-                  <ScrollArea key={input.id} className="h-max w-full rounded-md border p-4">
-                    <div
-                      className="relative group mb-4 pb-4 border-b last:border-b-0"
-                    >
+                  <ScrollArea
+                    key={input.id}
+                    className="h-max w-full rounded-md border p-4"
+                  >
+                    <div className="relative group mb-4 pb-4 border-b last:border-b-0">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -506,13 +557,9 @@ export function KnowledgeBaseTab() {
                       >
                         <X className="h-4 w-4 " />
                       </Button>
-                      <h3 className="text-lg font-semibold">
-                        {input.title}
-                      </h3>
+                      <h3 className="text-lg font-semibold">{input.title}</h3>
 
-                      <p className="text-sm mb-2">
-                        {input.description}
-                      </p>
+                      <p className="text-sm mb-2">{input.description}</p>
                       <details>
                         <summary className="cursor-pointer text-sm font-medium">
                           View Content
@@ -533,7 +580,12 @@ export function KnowledgeBaseTab() {
                   <div className="flex gap-2 border-b pb-4">
                     <Input
                       value={newInput.url}
-                      onChange={(e) => setNewInput(prev => ({ ...prev, url: e.target.value }))}
+                      onChange={(e) =>
+                        setNewInput((prev) => ({
+                          ...prev,
+                          url: e.target.value,
+                        }))
+                      }
                       placeholder="Enter URL"
                     />
                     <Button onClick={handleAddurl}>Add URL</Button>
@@ -617,7 +669,7 @@ export function KnowledgeBaseTab() {
                   <span>Character Usage</span>
                   <span className="text-blue-600">
                     {selectedAssistant?.charactersUsed} /{" "}
-                    {charactersLimit.toLocaleString()}
+                    {pricingPlan?.charactersLimit.toLocaleString() ?? "0"}
                   </span>
                 </div>
                 <Progress value={percentage} className="h-1" />

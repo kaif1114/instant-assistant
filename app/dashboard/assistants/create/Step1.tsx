@@ -124,7 +124,7 @@ const Step1 = ({
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem
-                  onSelect={(e) => setValue("assistantType", "Custom")}
+                  onSelect={() => setValue("assistantType", "Custom")}
                   value="Custom"
                   id="custom"
                 />
