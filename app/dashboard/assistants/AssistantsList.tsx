@@ -30,27 +30,29 @@ import {
 } from "@/components/ui/table";
 import { useAssistants } from "@/hooks/useAssistants";
 import { useUser } from "@clerk/nextjs";
+import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import { MoreHorizontal, Power, PowerOff } from "lucide-react";
 import { useState } from "react";
 import { RotatingLines } from "react-loader-spinner";
 import Loading from "./loading";
-import axios from "axios";
-import { useQueryClient } from "@tanstack/react-query";
-
 
 const AssistantsList = () => {
   const { user } = useUser();
   const queryClient = useQueryClient();
-  const { data: assistants, isError, isLoading, error } = useAssistants(
-    user ? user.id : undefined
-  );
+  const {
+    data: assistants,
+    isError,
+    isLoading,
+    error,
+  } = useAssistants(user ? user.id : undefined);
   const [loadingId, setLoading] = useState<string | null>(null);
 
   if (isLoading || !user) {
-    return <Loading />
+    return <Loading />;
   }
   if (isError) {
-    return <div>{error.message}</div>
+    return <div>{error.message}</div>;
   }
   return (
     <>
@@ -100,7 +102,9 @@ const AssistantsList = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem className="cursor-pointer">Edit</DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer">
+                        Edit
+                      </DropdownMenuItem>
                       <DropdownMenuItem>
                         <AlertDialogTrigger className="w-full text-left">
                           Delete
@@ -138,8 +142,8 @@ const AssistantsList = () => {
                         Are you absolutely sure?
                       </AlertDialogTitle>
                       <AlertDialogDescription>
-                        This will permanently delete your assistant and
-                        remove its data. This action cannot be undone.
+                        This will permanently delete your assistant and remove
+                        its data. This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -153,10 +157,10 @@ const AssistantsList = () => {
                             );
                             // Invalidate and refetch assistants query
                             await queryClient.invalidateQueries({
-                              queryKey: ['assistants', user?.id]
+                              queryKey: ["assistants", user?.id],
                             });
                           } catch (error) {
-                            console.error('Failed to delete assistant:', error);
+                            console.error("Failed to delete assistant:", error);
                           } finally {
                             setLoading(null);
                           }

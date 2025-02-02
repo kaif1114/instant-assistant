@@ -43,20 +43,19 @@ export default async function Page() {
         </div>
       </header>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">Your Assistants</h2>
-          <Button>
-            <Link href="assistants/create" className="flex items-center">
-              <Plus className="mr-2 h-4 w-4" /> Create New Assistant
-            </Link>
-          </Button>
-        </div>
         <Card>
-          <CardHeader>
-            <CardTitle>Assistants Overview</CardTitle>
-            <CardDescription>
-              Manage and monitor your AI chatbots
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-12">
+            <div>
+              <CardTitle>Assistants Overview</CardTitle>
+              <CardDescription>
+                Manage and monitor your AI chatbots
+              </CardDescription>
+            </div>
+            <Button asChild>
+              <Link href="assistants/create" className="flex items-center">
+                <Plus className="mr-2 h-4 w-4" /> Create New Assistant
+              </Link>
+            </Button>
           </CardHeader>
           <CardContent>
             <AssistantsList />
