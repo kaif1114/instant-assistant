@@ -28,6 +28,7 @@ export default function ChatPreview({
   startingMessage,
   avatarUrl,
   primaryColor,
+  secondaryColor,
 }: Props) {
   const [message, setMessage] = React.useState("");
   const [chatHistory, setChatHistory] = React.useState([
@@ -101,7 +102,7 @@ export default function ChatPreview({
                       backgroundColor:
                         msg.sender === "user"
                           ? primaryColor
-                          : "rgb(243, 243, 243)",
+                          : secondaryColor || "rgb(243, 243, 243)",
                       color: msg.sender === "user" ? "white" : "black",
                       border:
                         msg.sender === "user"

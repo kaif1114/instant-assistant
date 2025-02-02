@@ -27,6 +27,16 @@ import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import { useNewAssistantStore } from "./store";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@radix-ui/react-dropdown-menu";
 
 export interface DataFieldEntry {
   pageContent: string;
@@ -289,78 +299,114 @@ export default function AssistantTrainingPage() {
   }
 
   return (
-    <div className="container py-6 px-6">
-      <div className="space-y-0.5 mb-6">
-        <h2 className="text-2xl font-bold tracking-tight">
-          Create Your AI Assistant
-        </h2>
-        <p className="text-muted-foreground">
-          Create and customize your own chatbot assistant
-        </p>
-      </div>
-      <div className="flex flex-col lg:flex-row lg:justify-around gap-6 min-h-[800px]">
-        <div className="w-full lg:w-1/2">
-          <div className="space-y-6 h-[700px] flex flex-col">
-            <ScrollArea className="flex-grow">
-              <AnimatePresence mode="wait" custom={direction} initial={false}>
-                <motion.div
-                  key={step}
-                  custom={direction}
-                  variants={stepVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 },
-                  }}
-                  className="w-full"
-                >
-                  {renderStep()}
-                </motion.div>
-              </AnimatePresence>
-            </ScrollArea>
-            {step === 3 && (
-              <div className="mt-4">
-                <Alert
-                  variant={
-                    totalCharacterCount > MAX_CHARACTERS
-                      ? "destructive"
-                      : "default"
-                  }
-                >
-                  <AlertTitle>Character Count</AlertTitle>
-                  <AlertDescription>
-                    Total characters: {totalCharacterCount} / {MAX_CHARACTERS}
-                    {totalCharacterCount > MAX_CHARACTERS &&
-                      " (Exceeded limit)"}
-                  </AlertDescription>
-                </Alert>
-              </div>
-            )}
+    <>
+      <header className="flex h-16 shrink-0 items-center gap-2">
+        <div className="flex items-center gap-2 px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard/assistants">
+                  Assistants
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Create</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      </header>
+
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        {/* Centered heading section */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold tracking-tight">
+            Create Your AI Assistant
+          </h2>
+          <p className="text-muted-foreground">
+            Create and customize your own AI assistant
+          </p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8 min-h-[700px]">
+          {/* Main content area */}
+          <div className="w-full lg:w-3/5">
+            <div className="space-y-6 h-[700px] flex flex-col">
+              <ScrollArea className="flex-grow pr-4">
+                <AnimatePresence mode="wait" custom={direction} initial={false}>
+                  <motion.div
+                    key={step}
+                    custom={direction}
+                    variants={stepVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 300, damping: 30 },
+                      opacity: { duration: 0.2 },
+                    }}
+                    className="w-full"
+                  >
+                    {renderStep()}
+                  </motion.div>
+                </AnimatePresence>
+              </ScrollArea>
+
+              {step === 3 && (
+                <div className="mt-6">
+                  <Alert
+                    variant={
+                      totalCharacterCount > MAX_CHARACTERS
+                        ? "destructive"
+                        : "default"
+                    }
+                  >
+                    <AlertTitle>Character Count</AlertTitle>
+                    <AlertDescription>
+                      Total characters: {totalCharacterCount} / {MAX_CHARACTERS}
+                      {totalCharacterCount > MAX_CHARACTERS &&
+                        " (Exceeded limit)"}
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Preview area */}
+          <div className="w-full lg:w-2/5">
+            <div className="lg:sticky lg:top-8">
+              <ChatPreview
+                name={data.name}
+                description={data.description}
+                startingMessage={data.startingMessage}
+                avatarUrl={data.avatarUrl}
+                primaryColor={data.primaryColor}
+                secondaryColor={data.secondaryColor}
+              />
+            </div>
           </div>
         </div>
-        <div className="w-full lg:w-[30%] lg:sticky lg:top-6 h-[550px]">
-          <ChatPreview
-            name={data.name}
-            description={data.description}
-            startingMessage={data.startingMessage}
-            avatarUrl={data.avatarUrl}
-            primaryColor={data.primaryColor}
-            secondaryColor={data.secondaryColor}
-          />
+
+        {/* Step indicators */}
+        <div className="flex justify-center space-x-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className={`w-2.5 h-2.5 rounded-full transition-colors duration-200 ${
+                i === step ? "bg-primary" : "bg-gray-200 dark:bg-gray-700"
+              }`}
+            />
+          ))}
         </div>
       </div>
-      <div className="flex justify-center space-x-2 ">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className={`w-2 h-2 rounded-full ${
-              i === step ? "bg-primary" : "bg-gray-300"
-            }`}
-          />
-        ))}
-      </div>
-    </div>
+    </>
   );
 }
