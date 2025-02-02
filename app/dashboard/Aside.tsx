@@ -112,8 +112,8 @@ const data = {
 export default function Aside({ children }: PropsWithChildren) {
   const { user } = useUser();
   return (
-    <SidebarProvider className="bg-gradient-to-br from-black via-gray-900 to-black text-white">
-      <Sidebar variant="inset">
+    <SidebarProvider className="bg-gradient-to-br from-black via-gray-900 to-black">
+      <Sidebar variant="inset" className="text-white">
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
@@ -133,7 +133,9 @@ export default function Aside({ children }: PropsWithChildren) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-white">
+              Platform
+            </SidebarGroupLabel>
             <SidebarMenu>
               {data.navMain.map((item) => (
                 <Collapsible
@@ -161,7 +163,7 @@ export default function Aside({ children }: PropsWithChildren) {
                             {item.items?.map((subItem) => (
                               <SidebarMenuSubItem key={subItem.title}>
                                 <SidebarMenuSubButton asChild>
-                                  <a href={subItem.url}>
+                                  <a href={subItem.url} className="text-white">
                                     <span>{subItem.title}</span>
                                   </a>
                                 </SidebarMenuSubButton>

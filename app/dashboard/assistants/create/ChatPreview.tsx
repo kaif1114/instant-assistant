@@ -1,5 +1,6 @@
 "use client";
 
+import { Input } from "@/app/chat/[assistantId]/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +9,6 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Input } from "@/app/chat/[assistantId]/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, Send } from "lucide-react";
 import * as React from "react";
@@ -28,7 +28,6 @@ export default function ChatPreview({
   startingMessage,
   avatarUrl,
   primaryColor,
-  secondaryColor,
 }: Props) {
   const [message, setMessage] = React.useState("");
   const [chatHistory, setChatHistory] = React.useState([
