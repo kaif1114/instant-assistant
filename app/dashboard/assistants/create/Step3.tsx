@@ -24,14 +24,13 @@ import {
   Scissors,
   X,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import SelectedFilesList from "./SelectedFilesList";
 import { useNewAssistantStore } from "./store";
+import { pricingPlanContext } from "@/app/providers/pricingPlanContext";
 
 interface Props {
   onPrevStep: () => void;
-  totalCharacterCount: number;
-  onUpdateCharacterCount: (count: number) => void;
   assistantId: string;
   selectedFiles: SelectedFile[];
   onSetSelectedFiles: (files: SelectedFile[]) => void;
@@ -45,7 +44,6 @@ interface Props {
 
 const Step3 = ({
   onPrevStep,
-  onUpdateCharacterCount,
   selectedFiles,
   onSetSelectedFiles,
   scrapedContent,
@@ -59,16 +57,17 @@ const Step3 = ({
   const [isLoading, setIsLoading] = useState(false);
   const [websiteMode, setWebsiteMode] = useState<"scrape" | "crawl">("scrape");
   const [error, setError] = useState<string | null>(null);
+  const [manualInputChars, setManualInputChars] = useState(0);
+
+  const plan = useContext(pricingPlanContext);
 
   useEffect(() => {
-    const newTotalCount =
-      selectedFiles.reduce((total, file) => total + file.characterCount, 0) +
-      data.dataFields.reduce(
-        (total, field) => total + field.pageContent.length,
-        0
-      );
-    onUpdateCharacterCount(newTotalCount);
-  }, [selectedFiles, data.dataFields, onUpdateCharacterCount]);
+    const manualChars = data.dataFields.reduce(
+      (total, field) => total + field.pageContent.length,
+      0
+    );
+    setManualInputChars(manualChars);
+  }, [data.dataFields]);
 
   const addDataField = (index: number) => {
     setData({
@@ -104,6 +103,12 @@ const Step3 = ({
   };
 
   const handleWebsiteAction = async () => {
+    if (plan && scrapedContent.length >= plan.urlLimit) {
+      setError(
+        `You've reached the maximum limit of ${plan.urlLimit} URLs for your plan.`
+      );
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
@@ -141,6 +146,12 @@ const Step3 = ({
   ) => {
     const files = event.target.files;
     if (files) {
+      if (plan && selectedFiles.length + files.length > plan.fileLimit) {
+        setError(
+          `You can only upload up to ${plan.fileLimit} files on your current plan.`
+        );
+        return;
+      }
       const newSelectedFiles: SelectedFile[] = [];
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -176,6 +187,22 @@ const Step3 = ({
               <TabsTrigger value="file">File Upload</TabsTrigger>
             </TabsList>
             <TabsContent value="manual">
+              {plan && (
+                <Alert
+                  variant={
+                    manualInputChars > plan.charactersLimit
+                      ? "destructive"
+                      : "default"
+                  }
+                  className="mb-4"
+                >
+                  <AlertTitle>Character Usage</AlertTitle>
+                  <AlertDescription>
+                    Using {manualInputChars.toLocaleString()} of{" "}
+                    {plan.charactersLimit.toLocaleString()} characters
+                  </AlertDescription>
+                </Alert>
+              )}
               {data.dataFields.map((field, index) => {
                 return (
                   <div key={index}>
@@ -261,6 +288,21 @@ const Step3 = ({
               })}
             </TabsContent>
             <TabsContent value="website">
+              {plan && (
+                <Alert
+                  variant={
+                    scrapedContent.length >= plan.urlLimit
+                      ? "destructive"
+                      : "default"
+                  }
+                  className="mb-4"
+                >
+                  <AlertTitle>URL Usage</AlertTitle>
+                  <AlertDescription>
+                    Using {scrapedContent.length} of {plan.urlLimit} URLs
+                  </AlertDescription>
+                </Alert>
+              )}
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Website Data Mode</Label>
@@ -353,6 +395,21 @@ const Step3 = ({
               </div>
             </TabsContent>
             <TabsContent value="file">
+              {plan && (
+                <Alert
+                  variant={
+                    selectedFiles.length >= plan.fileLimit
+                      ? "destructive"
+                      : "default"
+                  }
+                  className="mb-4"
+                >
+                  <AlertTitle>File Usage</AlertTitle>
+                  <AlertDescription>
+                    Using {selectedFiles.length} of {plan.fileLimit} files
+                  </AlertDescription>
+                </Alert>
+              )}
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="file-upload">Upload Files</Label>

@@ -1,7 +1,15 @@
 "use client";
 
+import { pricingPlanContext } from "@/app/providers/pricingPlanContext";
 import { Document, pdfLoaderDocument, SelectedFile } from "@/app/schemas";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,14 +20,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useUser } from "@clerk/nextjs";
 import { Assistants } from "@prisma/client";
+import { Separator } from "@radix-ui/react-dropdown-menu";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ChatPreview from "./ChatPreview";
 import { LoadingAnimation } from "./Loading";
@@ -27,16 +37,6 @@ import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import { useNewAssistantStore } from "./store";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@radix-ui/react-dropdown-menu";
 
 export interface DataFieldEntry {
   pageContent: string;
@@ -69,7 +69,6 @@ const stepVariants = {
   }),
 };
 const assistantId = uuidv4();
-const MAX_CHARACTERS = 1000000;
 
 export default function AssistantTrainingPage() {
   const { data, setData } = useNewAssistantStore();
@@ -78,12 +77,13 @@ export default function AssistantTrainingPage() {
   const [direction, setDirection] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [totalCharacterCount, setTotalCharacterCount] = useState(0);
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
   const [scrapedContent, setScrapedContent] = useState<Document[]>([]);
   const { user } = useUser();
+  const [error, setError] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
+  const plan = useContext(pricingPlanContext);
 
   const handleFileSubmit = async () => {
     setIsLoading(true);
@@ -123,11 +123,42 @@ export default function AssistantTrainingPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [step]);
 
+  const validateLimits = () => {
+    if (!plan) return null;
+
+    const manualInputChars = data.dataFields.reduce(
+      (total, field) => total + field.pageContent.length,
+      0
+    );
+
+    if (manualInputChars > plan.charactersLimit) {
+      return `You've exceeded the ${plan.charactersLimit.toLocaleString()} character limit for manual input.`;
+    }
+
+    if (scrapedContent.length > plan.urlLimit) {
+      return `You've exceeded the ${plan.urlLimit} URL limit for website content.`;
+    }
+
+    if (selectedFiles.length > plan.fileLimit) {
+      return `You've exceeded the ${plan.fileLimit} file upload limit.`;
+    }
+
+    return null;
+  };
+
   const handleSubmit = async () => {
     if (step < 3) {
       nextStep();
       return;
     }
+
+    const limitError = validateLimits();
+    if (limitError) {
+      setError(limitError);
+      return;
+    }
+
+    setError(null);
     setIsLoading(true);
     console.log(data);
     console.log(assistantId);
@@ -171,8 +202,8 @@ export default function AssistantTrainingPage() {
 
       setIsSuccess(true);
     } catch (error) {
-      console.log(error);
-      // Handle error (show error message to user)
+      console.error(error);
+      setError("Failed to create assistant. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -197,8 +228,6 @@ export default function AssistantTrainingPage() {
               onPrevStep={prevStep}
               scrapedContent={scrapedContent}
               onSetScrapedContent={setScrapedContent}
-              totalCharacterCount={totalCharacterCount}
-              onUpdateCharacterCount={setTotalCharacterCount}
               assistantId={assistantId}
               selectedFiles={selectedFiles}
               onSetSelectedFiles={setSelectedFiles}
@@ -230,6 +259,20 @@ export default function AssistantTrainingPage() {
           <LoadingAnimation />
         </div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="w-full max-w-md mx-auto mt-8">
+        <CardHeader>
+          <CardTitle>Error</CardTitle>
+          <CardDescription>{error}</CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Button onClick={() => setError(null)}>Try Again</Button>
+        </CardFooter>
+      </Card>
     );
   }
 
@@ -358,25 +401,6 @@ export default function AssistantTrainingPage() {
                   </motion.div>
                 </AnimatePresence>
               </ScrollArea>
-
-              {step === 3 && (
-                <div className="mt-6">
-                  <Alert
-                    variant={
-                      totalCharacterCount > MAX_CHARACTERS
-                        ? "destructive"
-                        : "default"
-                    }
-                  >
-                    <AlertTitle>Character Count</AlertTitle>
-                    <AlertDescription>
-                      Total characters: {totalCharacterCount} / {MAX_CHARACTERS}
-                      {totalCharacterCount > MAX_CHARACTERS &&
-                        " (Exceeded limit)"}
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              )}
             </div>
           </div>
 

@@ -1,5 +1,6 @@
 import Benefits from "./components/Benefits/benefits";
 import CTASection from "./components/cta-section";
+import DashboardCards from "./components/dashboard-cards";
 import FAQ from "./components/faq";
 import Footer from "./components/footer";
 import HeroSection from "./components/hero-section";
@@ -14,6 +15,7 @@ export default function LandingPage() {
         <HeroSection />
 
         <BenefitsSection />
+        <DashboardCards />
         <Benefits />
 
         <FAQ />
