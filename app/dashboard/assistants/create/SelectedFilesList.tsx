@@ -28,9 +28,7 @@ const SelectedFilesList: React.FC<SelectedFilesListProps> = ({
             key={index}
             className="flex justify-between items-center bg-secondary p-2 rounded"
           >
-            <span>
-              {file.file.name} ({file.characterCount} characters)
-            </span>
+            <span>{file.file.name}</span>
             {!uploaded && (
               <Button variant="ghost" size="sm" onClick={() => onRemove(index)}>
                 <X className="h-4 w-4" />

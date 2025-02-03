@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/sidebar";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { PropsWithChildren } from "react";
+import Image from "next/image";
 
 const data = {
   user: {
@@ -116,18 +117,16 @@ export default function Aside({ children }: PropsWithChildren) {
       <Sidebar variant="inset" className="text-white">
         <SidebarHeader>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
-                <a href="#">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <Command className="size-4" />
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Acme Inc</span>
-                    <span className="truncate text-xs">Enterprise</span>
-                  </div>
-                </a>
-              </SidebarMenuButton>
+            <SidebarMenuItem className="pt-2">
+              <div className="flex justify-center">
+                <Image
+                  src="/InstantAssistant_dark.png"
+                  alt="Instant Assistant Logo"
+                  width={130}
+                  height={60}
+                  priority
+                />
+              </div>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
