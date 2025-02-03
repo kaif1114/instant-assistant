@@ -172,19 +172,79 @@ export default function Chat({
         setChatHistory(updatedHistory);
         setMessage("");
 
-        const response = await axios.post("/api/ask", {
-          question: message,
-          assistantId,
-          sessionId,
-          userDetails,
+        // Add a placeholder for assistant's message
+        const assistantMessagePlaceholder: Message = {
+          sender: "support",
+          text: "",
+          type: "text",
+        };
+        setChatHistory([...updatedHistory, assistantMessagePlaceholder]);
+
+        const response = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: message,
+            assistantId,
+            sessionId,
+            userDetails,
+          }),
         });
 
-        setChatHistory([
-          ...updatedHistory,
-          { sender: "support", text: response.data.message, type: "text" },
-        ]);
+        if (!response.body) throw new Error("No response body");
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let accumulatedText = "";
+        let buffer = ""; // Add buffer for incomplete chunks
+
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            // Decode the chunk
+            const chunk = decoder.decode(value, { stream: true });
+            buffer += chunk;
+
+            // Process complete JSON objects
+            let startIndex = 0;
+            let endIndex = buffer.indexOf("}\n", startIndex);
+
+            while (endIndex > -1) {
+              const jsonString = buffer.slice(startIndex, endIndex + 1);
+              try {
+                const jsonChunk = JSON.parse(jsonString);
+                console.log("Received chunk:", jsonChunk);
+                accumulatedText += jsonChunk.text || jsonChunk.content || "";
+
+                // Update UI with each chunk
+                setChatHistory((prev) => {
+                  const newHistory = [...prev];
+                  if (newHistory.length > 0) {
+                    newHistory[newHistory.length - 1].text = accumulatedText;
+                  }
+                  return newHistory;
+                });
+              } catch (e) {
+                console.log("Raw chunk:", jsonString, e);
+              }
+
+              startIndex = endIndex + 2; // Move past "}\n"
+              endIndex = buffer.indexOf("}\n", startIndex);
+            }
+
+            // Keep remaining incomplete data in buffer
+            buffer = buffer.slice(startIndex);
+          }
+        } catch (error) {
+          console.error("Error reading stream:", error);
+        } finally {
+          reader.releaseLock();
+        }
       } catch (error) {
         console.error(error);
+        // Handle error appropriately
       } finally {
         setIsLoading(false);
       }

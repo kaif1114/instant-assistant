@@ -44,7 +44,9 @@ export async function POST(request: NextRequest) {
   const assistant = await prisma.assistants.findUnique({
     where: { assistantId: body.assistantId },
   });
-  const sessionDetails = await prisma.session_details.findUnique({ where: { session_id: body.sessionId } })
+  const sessionDetails = await prisma.session_details.findUnique({
+    where: { session_id: body.sessionId },
+  });
 
   const promptWithChatHistory = ChatPromptTemplate.fromMessages([
     [
@@ -102,20 +104,59 @@ export async function POST(request: NextRequest) {
       context: retrieverChain,
       input: ({ original_inputs }) => original_inputs.question,
     },
-
-    (values) => {
-      return chainWithHistory.invoke(
+    async (values) => {
+      const response = await chainWithHistory.stream(
         { input: values.input, context: values.context },
         { configurable: { sessionId: body.sessionId } }
       );
+      return response;
     },
   ]);
 
   try {
-    const response = await mainChain.invoke({ question: body.question });
-    return NextResponse.json({ message: response }, { status: 200 });
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const stream = await mainChain.stream({ question: body.question });
+
+          for await (const chunk of stream) {
+            // Check if controller is not closed before enqueueing
+            try {
+              const jsonChunk = JSON.stringify({ text: chunk }) + "\n";
+              controller.enqueue(encoder.encode(jsonChunk));
+            } catch (e) {
+              if (
+                e instanceof Error &&
+                "code" in e &&
+                e.code === "ERR_INVALID_STATE"
+              ) {
+                break;
+              }
+              throw e;
+            }
+          }
+        } catch (error) {
+          console.error("Streaming error:", error);
+          controller.error(error);
+        } finally {
+          try {
+            controller.close();
+          } catch (e) {
+            console.log(e);
+          }
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "application/json",
+        "Transfer-Encoding": "chunked",
+      },
+    });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return NextResponse.json({ error }, { status: 500 });
   }
 }

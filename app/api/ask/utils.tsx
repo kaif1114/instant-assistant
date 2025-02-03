@@ -1,12 +1,11 @@
-import {
-  PromptTemplate
-} from "@langchain/core/prompts";
+import { PromptTemplate } from "@langchain/core/prompts";
 import { ChatGroq } from "@langchain/groq";
 import { Document } from "langchain/document";
 
 export const llm = new ChatGroq({
   model: "llama-3.1-8b-instant",
   temperature: 1,
+  streaming: true,
 });
 
 export const standaloneQuestionPrompt = PromptTemplate.fromTemplate(
