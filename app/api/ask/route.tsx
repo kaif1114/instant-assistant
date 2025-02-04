@@ -121,38 +121,29 @@ export async function POST(request: NextRequest) {
           const stream = await mainChain.stream({ question: body.question });
 
           for await (const chunk of stream) {
-            // Check if controller is not closed before enqueueing
-            try {
-              const jsonChunk = JSON.stringify({ text: chunk }) + "\n";
+            const text = chunk.toString();
+
+            // Send each character individually for smoother streaming
+            for (const char of text) {
+              const jsonChunk = JSON.stringify({ text: char }) + "\n";
               controller.enqueue(encoder.encode(jsonChunk));
-            } catch (e) {
-              if (
-                e instanceof Error &&
-                "code" in e &&
-                e.code === "ERR_INVALID_STATE"
-              ) {
-                break;
-              }
-              throw e;
+
+              // Add a tiny delay between characters for more natural appearance
+              await new Promise((resolve) => setTimeout(resolve, 5));
             }
           }
         } catch (error) {
           console.error("Streaming error:", error);
           controller.error(error);
         } finally {
-          try {
-            controller.close();
-          } catch (e) {
-            console.log(e);
-          }
+          controller.close();
         }
       },
     });
 
     return new Response(stream, {
       headers: {
-        "Content-Type": "application/json",
-        "Transfer-Encoding": "chunked",
+        "Content-Type": "text/plain",
       },
     });
   } catch (error) {

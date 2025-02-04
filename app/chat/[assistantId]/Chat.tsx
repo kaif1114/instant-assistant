@@ -19,7 +19,7 @@ import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "./input";
 import { Input as Input2 } from "@/components/ui/input";
-import { TypingIndicator } from "./TypingIndicator";
+import TypingIndicator from "./TypingIndicator";
 
 interface Props {
   assistantId: string;
@@ -172,17 +172,24 @@ export default function Chat({
         setChatHistory(updatedHistory);
         setMessage("");
 
-        // Add a placeholder for assistant's message
-        const assistantMessagePlaceholder: Message = {
-          sender: "support",
-          text: "",
-          type: "text",
-        };
-        setChatHistory([...updatedHistory, assistantMessagePlaceholder]);
+        // Add assistant's message placeholder immediately
+        setChatHistory((prev) => [
+          ...prev,
+          {
+            sender: "support",
+            text: "",
+            type: "text",
+          },
+        ]);
 
         const response = await fetch("/api/ask", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            // Add these headers to prevent buffering
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+          },
           body: JSON.stringify({
             question: message,
             assistantId,
@@ -195,56 +202,40 @@ export default function Chat({
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        let accumulatedText = "";
-        let buffer = ""; // Add buffer for incomplete chunks
 
-        try {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
 
-            // Decode the chunk
-            const chunk = decoder.decode(value, { stream: true });
-            buffer += chunk;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
 
-            // Process complete JSON objects
-            let startIndex = 0;
-            let endIndex = buffer.indexOf("}\n", startIndex);
+          for (const line of lines) {
+            if (line.trim() === "") continue;
 
-            while (endIndex > -1) {
-              const jsonString = buffer.slice(startIndex, endIndex + 1);
-              try {
-                const jsonChunk = JSON.parse(jsonString);
-                console.log("Received chunk:", jsonChunk);
-                accumulatedText += jsonChunk.text || jsonChunk.content || "";
+            try {
+              const jsonChunk = JSON.parse(line);
 
-                // Update UI with each chunk
-                setChatHistory((prev) => {
-                  const newHistory = [...prev];
-                  if (newHistory.length > 0) {
-                    newHistory[newHistory.length - 1].text = accumulatedText;
-                  }
-                  return newHistory;
-                });
-              } catch (e) {
-                console.log("Raw chunk:", jsonString, e);
-              }
+              // Update UI immediately with each chunk
+              setChatHistory((prev) => {
+                const newHistory = [...prev];
+                const lastMessage = newHistory[newHistory.length - 1];
+                if (lastMessage && lastMessage.sender === "support") {
+                  lastMessage.text =
+                    (lastMessage.text || "") + (jsonChunk.text || "");
+                }
+                return newHistory;
+              });
 
-              startIndex = endIndex + 2; // Move past "}\n"
-              endIndex = buffer.indexOf("}\n", startIndex);
+              // Force a re-render
+              await new Promise((resolve) => setTimeout(resolve, 0));
+            } catch (e) {
+              console.error("Failed to parse chunk:", line, e);
             }
-
-            // Keep remaining incomplete data in buffer
-            buffer = buffer.slice(startIndex);
           }
-        } catch (error) {
-          console.error("Error reading stream:", error);
-        } finally {
-          reader.releaseLock();
         }
       } catch (error) {
         console.error(error);
-        // Handle error appropriately
       } finally {
         setIsLoading(false);
       }
@@ -408,14 +399,17 @@ export default function Chat({
                           <AvatarFallback>AI</AvatarFallback>
                         </Avatar>
                         <div
-                          className="max-w-[75%] py-2 px-3 rounded-2xl rounded-bl-sm"
+                          className="max-w-[50%] py-2 px-3 rounded-2xl rounded-bl-sm"
                           style={{
                             backgroundColor: "rgb(243, 243, 243)",
                             border: "1px solid rgb(229, 229, 229)",
                             fontSize: "15px",
                           }}
                         >
-                          <TypingIndicator />
+                          <div className="flex justify-center items-center gap-2">
+                            <TypingIndicator size={20} color="black" />
+                            <p>Thinking</p>
+                          </div>
                         </div>
                       </div>
                     )}
