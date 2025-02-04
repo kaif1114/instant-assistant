@@ -54,6 +54,8 @@ export default function Chat({
     "init" | "askName" | "askEmail" | "chat"
   >("init");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const chunkQueue = useRef<{ text: string }[]>([]);
+  const processingChunk = useRef(false);
 
   useEffect(() => {
     if (nextStep === "init") {
@@ -161,10 +163,42 @@ export default function Chat({
     }
   };
 
+  const processNextChunk = async () => {
+    if (processingChunk.current || chunkQueue.current.length === 0) return;
+
+    processingChunk.current = true;
+    const chunk = chunkQueue.current.shift();
+
+    if (chunk) {
+      setChatHistory((prev) => {
+        const newHistory = [...prev];
+        const lastMessage = newHistory[newHistory.length - 1];
+        if (lastMessage && lastMessage.sender === "support") {
+          lastMessage.text = (lastMessage.text || "") + chunk.text;
+        }
+        return newHistory;
+      });
+
+      // Small delay to ensure smooth rendering
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    processingChunk.current = false;
+    processNextChunk(); // Process next chunk if available
+  };
+
+  const handleChunkReceived = (text: string) => {
+    // Remove thinking indicator when first chunk arrives
+    setIsLoading(false);
+
+    chunkQueue.current.push({ text });
+    processNextChunk(); // Start processing the queue
+  };
+
   async function sendMessage() {
     if (message.trim() && nextStep === "chat") {
       try {
-        setIsLoading(true);
+        setIsLoading(true); // Show thinking indicator initially
         const updatedHistory: Message[] = [
           ...chatHistory,
           { sender: "user", text: message, type: "text" },
@@ -186,7 +220,6 @@ export default function Chat({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // Add these headers to prevent buffering
             "Cache-Control": "no-cache",
             Connection: "keep-alive",
           },
@@ -215,20 +248,7 @@ export default function Chat({
 
             try {
               const jsonChunk = JSON.parse(line);
-
-              // Update UI immediately with each chunk
-              setChatHistory((prev) => {
-                const newHistory = [...prev];
-                const lastMessage = newHistory[newHistory.length - 1];
-                if (lastMessage && lastMessage.sender === "support") {
-                  lastMessage.text =
-                    (lastMessage.text || "") + (jsonChunk.text || "");
-                }
-                return newHistory;
-              });
-
-              // Force a re-render
-              await new Promise((resolve) => setTimeout(resolve, 0));
+              handleChunkReceived(jsonChunk.text || "");
             } catch (e) {
               console.error("Failed to parse chunk:", line, e);
             }
@@ -236,8 +256,7 @@ export default function Chat({
         }
       } catch (error) {
         console.error(error);
-      } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Make sure to remove thinking indicator on error
       }
     }
   }
@@ -325,8 +344,7 @@ export default function Chat({
                           </Avatar>
                         )}
                         {msg.type === "text" && (
-                          <MarkdownPreview
-                            source={msg.text}
+                          <div
                             className={`max-w-[75%] py-2 px-3 rounded-2xl ${
                               msg.sender === "user"
                                 ? "rounded-br-sm"
@@ -336,24 +354,49 @@ export default function Chat({
                               backgroundColor:
                                 msg.sender === "user"
                                   ? assistant.primaryColor
-                                  : "rgb(243, 243, 243)",
-                              color: msg.sender === "user" ? "white" : "black",
+                                  : assistant.secondaryColor ||
+                                    "rgb(243, 243, 243)",
                               border:
                                 msg.sender === "user"
                                   ? "none"
                                   : "1px solid rgb(229, 229, 229)",
-                              lineHeight: "1.4",
-                              fontSize: "15px",
-                              wordBreak: "break-word",
-                              whiteSpace: "pre-wrap",
                             }}
-                          />
+                          >
+                            <MarkdownPreview
+                              source={msg.text}
+                              style={{
+                                backgroundColor: "transparent",
+                                color:
+                                  msg.sender === "user" ? "white" : "black",
+                                lineHeight: "1.4",
+                                fontSize: "15px",
+                                wordBreak: "break-word",
+                                whiteSpace: "pre-wrap",
+                              }}
+                            />
+                            {isLoading &&
+                              index === chatHistory.length - 1 &&
+                              msg.sender === "support" &&
+                              msg.text === "" && (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <TypingIndicator
+                                    size={20}
+                                    color={assistant.primaryColor || "black"}
+                                  />
+                                  <span className="text-sm text-gray-500">
+                                    Thinking
+                                  </span>
+                                </div>
+                              )}
+                          </div>
                         )}
                         {msg.type === "input" && msg.sender === "support" && (
                           <div
                             className={`max-w-[75%] py-2 px-3 rounded-2xl rounded-bl-sm`}
                             style={{
-                              backgroundColor: "rgb(243, 243, 243)",
+                              backgroundColor:
+                                assistant.secondaryColor ||
+                                "rgb(243, 243, 243)",
                               border: "1px solid rgb(229, 229, 229)",
                               fontSize: "15px",
                             }}
@@ -392,27 +435,6 @@ export default function Chat({
                         )}
                       </div>
                     ))}
-                    {isLoading && (
-                      <div className="flex justify-start mb-2 items-end">
-                        <Avatar className="h-8 w-8 mr-2">
-                          <AvatarImage src={assistant.avatarUrl} alt="Bot" />
-                          <AvatarFallback>AI</AvatarFallback>
-                        </Avatar>
-                        <div
-                          className="max-w-[50%] py-2 px-3 rounded-2xl rounded-bl-sm"
-                          style={{
-                            backgroundColor: "rgb(243, 243, 243)",
-                            border: "1px solid rgb(229, 229, 229)",
-                            fontSize: "15px",
-                          }}
-                        >
-                          <div className="flex justify-center items-center gap-2">
-                            <TypingIndicator size={20} color="black" />
-                            <p>Thinking</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </ScrollArea>
               </CardContent>

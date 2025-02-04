@@ -123,13 +123,15 @@ export async function POST(request: NextRequest) {
           for await (const chunk of stream) {
             const text = chunk.toString();
 
-            // Send each character individually for smoother streaming
-            for (const char of text) {
-              const jsonChunk = JSON.stringify({ text: char }) + "\n";
+            // Send characters in small groups for smoother streaming
+            const chunkSize = 3; // Adjust this value as needed
+            for (let i = 0; i < text.length; i += chunkSize) {
+              const textChunk = text.slice(
+                i,
+                Math.min(i + chunkSize, text.length)
+              );
+              const jsonChunk = JSON.stringify({ text: textChunk }) + "\n";
               controller.enqueue(encoder.encode(jsonChunk));
-
-              // Add a tiny delay between characters for more natural appearance
-              await new Promise((resolve) => setTimeout(resolve, 5));
             }
           }
         } catch (error) {

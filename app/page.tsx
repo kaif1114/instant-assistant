@@ -1,4 +1,3 @@
-import Benefits from "./components/Benefits/benefits";
 import CTASection from "./components/cta-section";
 import DashboardCards from "./components/dashboard-cards";
 import FAQ from "./components/faq";
