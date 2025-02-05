@@ -39,8 +39,8 @@
 
     // Create and append iframe
     const iframe = document.createElement("iframe");
-    const sessionId = Math.random().toString(36).substring(7);
-    iframe.src = `https://www.withinstantassistant.com/chat/${assistantId}?embedded=true&widgetOpen=false`;
+
+    iframe.src = `https://withinstantassistant.com/chat/${assistantId}?embedded=true&widgetOpen=false`;
     iframe.style.cssText = `
       position: fixed;
       bottom: 100px;
