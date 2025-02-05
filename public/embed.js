@@ -40,7 +40,7 @@
     // Create and append iframe
     const iframe = document.createElement("iframe");
     const sessionId = Math.random().toString(36).substring(7);
-    iframe.src = `${window.location.protocol}//instant-assistant.vercel.app/chat/${assistantId}?embedded=true&widgetOpen=false`;
+    iframe.src = `https://www.withinstantassistant.com/chat/${assistantId}?embedded=true&widgetOpen=false`;
     iframe.style.cssText = `
       position: fixed;
       bottom: 100px;
