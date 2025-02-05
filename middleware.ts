@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -15,9 +16,16 @@ export default clerkMiddleware(async (auth, request) => {
     request.headers.get("origin") &&
     request.headers.get("origin") !== request.headers.get("host");
 
-  // Allow external chat requests to pass through without protection
+  // For external chat requests, return immediately with CORS headers
   if (isChatRequest && isExternalRequest) {
-    return;
+    const response = NextResponse.next();
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    response.headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+    return response;
   }
 
   // For all other routes, apply the usual protection
