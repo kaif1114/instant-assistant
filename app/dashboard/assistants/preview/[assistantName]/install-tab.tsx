@@ -13,18 +13,16 @@ import { useState } from "react";
 import { useSelectedAssistantStore } from "../store";
 
 export function InstallTab() {
-  const { selectedAssistant } =
-    useSelectedAssistantStore();
-  const assistantId = selectedAssistant?.id;
+  const { selectedAssistant } = useSelectedAssistantStore();
   const [copied, setCopied] = useState(false);
 
   const scriptCode = `<script>
   (function () {
     var s = document.createElement("script");
-    s.src = "http://localhost:3000/embed.js";
+    s.src = "${process.env.NEXT_PUBLIC_DOMAIN}/embed.js";
     s.onload = function () {
       window.initAIChat({
-        assistantId: "${assistantId}",
+        assistantId: "${selectedAssistant?.assistantId}",
       });
     };
     document.body.appendChild(s);
@@ -48,7 +46,9 @@ export function InstallTab() {
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <h3 className="text-lg font-medium">Your Assistant ID</h3>
-          <p className="text-sm text-muted-foreground">{assistantId}</p>
+          <p className="text-sm text-muted-foreground">
+            {selectedAssistant?.assistantId}
+          </p>
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
