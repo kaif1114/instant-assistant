@@ -21,6 +21,7 @@ import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from "@langchain/core/prompts";
+import { auth } from "@clerk/nextjs/server";
 
 const pool = new pg.Pool(poolConfig);
 
@@ -31,6 +32,11 @@ const standaloneQuestionChain = RunnableSequence.from([
 ]);
 
 export async function POST(request: NextRequest) {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ message: "You are not authenticated" });
+  }
+  console.log("userId: ", userId);
   const body = await request.json();
   const validation = AskRequestSchema.safeParse(body);
 

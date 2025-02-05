@@ -1,9 +1,6 @@
 import { z } from "zod";
-import {
-  AssistantType,
-  DataFieldEntry,
-} from "./dashboard/assistants/create/AssistantTraining";
-import { Prisma } from "@prisma/client";
+import { DataFieldEntry } from "./dashboard/assistants/create/AssistantTraining";
+import { Prisma, Assistants } from "@prisma/client";
 
 const MetadataSchema = z
   .object({
@@ -23,7 +20,6 @@ const SelectedWebsiteSchema = z.object({
   type: z.string(),
   assistantId: z.string(),
   characterCount: z.number(),
-
 });
 
 export const SelectedWebsitesRequestSchema = z.object({
@@ -40,19 +36,6 @@ export const AskRequestSchema = z.object({
   sessionId: z.string(),
   assistantId: z.string(),
   question: z.string(),
-});
-
-export const CreateAssistantRequestSchema = z.object({
-  assistantId: z.string(),
-  name: z.string(),
-  assistantType: z.string(),
-  functionality: z.string(),
-  description: z.string(),
-  userId: z.string(),
-  primaryColor: z.string(),
-  secondaryColor: z.string(),
-  avatarUrl: z.string(),
-  charactersUsed: z.number().optional(),
 });
 
 export const AssistantUpdateSchema = z
@@ -77,18 +60,38 @@ export const AssistantUpdateSchema = z
     message: "At least one field must be provided for patch request",
   });
 
-export interface NewAssistantData {
-  name: string;
-  description: string;
-  functionality: string;
-  assistantType: AssistantType;
+//schema used for validation in api/assistants/create
+export const CreateAssistantRequestSchema = z.object({
+  assistantId: z.string(),
+  name: z.string(),
+  Type: z.string(),
+  functionality: z.string(),
+  description: z.string(),
+  userId: z.string(),
+  primaryColor: z.string(),
+  secondaryColor: z.string(),
+  avatarUrl: z.string(),
+  charactersUsed: z.number(),
+  fileLimitUsed: z.number(),
+  urlLimitUsed: z.number(),
+});
+
+export type AssistantType =
+  | "Support"
+  | "Sales"
+  | "Technical"
+  | "General"
+  | "Custom";
+
+//schema used for new assistant creation in NewAssistant zustand Store
+export interface NewAssistantData
+  extends Omit<
+    Assistants,
+    "id" | "userId" | "Status" | "assistantsCreated" | "Type"
+  > {
   customType: string;
   dataFields: DataFieldEntry[];
-  startingMessage: string;
-  primaryColor: string;
-  secondaryColor: string;
-  avatarUrl: string;
-  charactersUsed: number;
+  Type: AssistantType;
 }
 
 export interface pdfLoaderDocument {
@@ -119,11 +122,9 @@ export interface SelectedFile {
 export interface SelectedWebsite {
   url: string;
   characterCount?: number;
-
 }
 
 export interface Document {
-
   pageContent: string;
   metadata: {
     title: string;
@@ -132,11 +133,13 @@ export interface Document {
   };
 }
 
-const DocumentMetadataSchema = z.object({
-  url: z.string(),
-  title: z.string().optional(),
-  description: z.string().optional(),
-}).catchall(z.unknown());
+const DocumentMetadataSchema = z
+  .object({
+    url: z.string(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+  })
+  .catchall(z.unknown());
 
 export const DocumentSchema = z.object({
   pageContent: z.string(),
@@ -145,10 +148,12 @@ export const DocumentSchema = z.object({
 
 export const saveWebsiteContextRequestSchema = z.object({
   assistantId: z.string(),
-  documents: z.array(z.object({
-    pageContent: z.string(),
-    metadata: DocumentMetadataSchema,
-  }))
+  documents: z.array(
+    z.object({
+      pageContent: z.string(),
+      metadata: DocumentMetadataSchema,
+    })
+  ),
 });
 
 export interface IOtherSource {
@@ -156,7 +161,7 @@ export interface IOtherSource {
   type: "url" | "file";
   id: string;
   new?: boolean;
-  file?: globalThis.File
+  file?: globalThis.File;
 }
 export interface ITextFieldsData {
   id: string;
@@ -164,7 +169,6 @@ export interface ITextFieldsData {
   description: string;
   title: string;
   new?: boolean;
-
 }
 export interface Data {
   textFieldsData: ITextFieldsData[];
@@ -177,6 +181,5 @@ export interface Data {
 export const DeleteContextSchema = z.object({
   sourceType: z.enum(["files", "urls", "textfields"]),
   assistantId: z.string(),
-  source: z.array(z.string())
+  source: z.array(z.string()),
 });
-

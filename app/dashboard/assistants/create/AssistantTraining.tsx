@@ -47,13 +47,6 @@ export interface DataFieldEntry {
   };
 }
 
-export type AssistantType =
-  | "Support"
-  | "Sales"
-  | "Technical"
-  | "General"
-  | "Custom";
-
 const stepVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? "100%" : "-100%",
@@ -68,9 +61,9 @@ const stepVariants = {
     opacity: 0,
   }),
 };
-const assistantId = uuidv4();
 
 export default function AssistantTrainingPage() {
+  const assistantId = uuidv4();
   const { data, setData } = useNewAssistantStore();
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -160,23 +153,27 @@ export default function AssistantTrainingPage() {
 
     setError(null);
     setIsLoading(true);
-    console.log(data);
-    console.log(assistantId);
+
     try {
+      const charactersUsed = data.dataFields.reduce(
+        (total, field) => total + field.pageContent.length,
+        0
+      );
+      console.log(data);
       const response = await axios.post<Assistants>("/api/assistants/create", {
         assistantId,
         name: data.name,
         description: data.description,
-        assistantType:
-          data.assistantType === "Custom"
-            ? data.customType
-            : data.assistantType,
+        Type: data.Type === "Custom" ? data.customType : data.Type,
         userId: user?.id,
         functionality: data.functionality,
         primaryColor: data.primaryColor,
         secondaryColor: data.secondaryColor,
         startingMessage: data.secondaryColor,
         avatarUrl: data.avatarUrl,
+        charactersUsed,
+        urlLimitUsed: scrapedContent.length,
+        fileLimitUsed: selectedFiles.length,
       });
       if (
         data.dataFields.length > 0 &&
@@ -199,6 +196,24 @@ export default function AssistantTrainingPage() {
       console.log(response.data);
 
       queryClient.invalidateQueries({ queryKey: ["assistants", user?.id] });
+      setData({
+        name: "",
+        description: "",
+        functionality: "",
+        Type: "Support",
+        customType: "",
+        dataFields: [
+          { pageContent: "", metadata: { title: "", description: "", id: 0 } },
+        ],
+        startingMessage: "",
+        primaryColor: "#000000",
+        secondaryColor: "#f2f2f2",
+        charactersUsed: 0,
+        fileLimitUsed: 0,
+        urlLimitUsed: 0,
+        avatarUrl:
+          "https://res.cloudinary.com/dvr5vgvq0/image/upload/v1732721904/avatars/avatar3.jpg",
+      });
 
       setIsSuccess(true);
     } catch (error) {
@@ -313,7 +328,7 @@ export default function AssistantTrainingPage() {
                 name: "",
                 description: "",
                 functionality: "",
-                assistantType: "Support",
+                Type: "Support",
                 customType: "",
                 dataFields: [
                   { pageContent: "", metadata: { title: "", description: "" } },

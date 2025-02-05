@@ -59,7 +59,7 @@ model Assistants {
   avatarUrl       String
   charactersUsed  Int               @default(0)
   fileLimitUsed   Int     @default(0)
-  urlLimitused    Int @default(0)
+  urlLimitUsed    Int @default(0)
   startingMessage String            @default("Hello! How may I help you?")
   user            User              @relation(fields: [userId], references: [userId])
   session_details session_details[]

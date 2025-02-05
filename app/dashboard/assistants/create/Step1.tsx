@@ -11,12 +11,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import React from "react";
 import { useNewAssistantStore } from "./store";
-import { AssistantType } from "./AssistantTraining";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AssistantType } from "@/app/schemas";
 
 const zodSchema = z.object({
   name: z
@@ -27,12 +27,9 @@ const zodSchema = z.object({
     .string()
     .min(1, "Description is required")
     .max(100, "Description cannot exceed 100 characters"),
-  assistantType: z.enum(
-    ["Support", "Sales", "Technical", "General", "Custom"],
-    {
-      required_error: "Please select an assistant type",
-    }
-  ),
+  Type: z.enum(["Support", "Sales", "Technical", "General", "Custom"], {
+    required_error: "Please select an assistant type",
+  }),
   customType: z.string().optional(),
   functionality: z
     .string()
@@ -63,7 +60,7 @@ const Step1 = ({
     resolver: zodResolver(zodSchema),
     defaultValues: data,
   });
-  const assistantType = watch("assistantType");
+  const Type = watch("Type");
   return (
     <Card>
       <CardHeader>
@@ -97,11 +94,11 @@ const Step1 = ({
           <div className="space-y-2">
             <Label htmlFor="assistantType">Assistant Type</Label>
             <RadioGroup
-              defaultValue={data.assistantType}
+              defaultValue={data.Type}
               onValueChange={(value) => {
-                const assistantType = value as AssistantType;
-                register("assistantType").onChange({
-                  target: { value: assistantType, name: "assistantType" },
+                const Type = value as AssistantType;
+                register("Type").onChange({
+                  target: { value: Type, name: "Type" },
                 });
               }}
               className="flex flex-col space-y-1"
@@ -124,14 +121,14 @@ const Step1 = ({
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem
-                  onSelect={() => setValue("assistantType", "Custom")}
+                  onSelect={() => setValue("Type", "Custom")}
                   value="Custom"
                   id="custom"
                 />
                 <Label htmlFor="custom">Custom</Label>
               </div>
             </RadioGroup>
-            {assistantType === "Custom" && (
+            {Type === "Custom" && (
               <Input
                 {...register("customType")}
                 required={true}
@@ -142,8 +139,8 @@ const Step1 = ({
               />
             )}
 
-            {errors.assistantType && (
-              <p className="text-red-600">{errors.assistantType.message}</p>
+            {errors.Type && (
+              <p className="text-red-600">{errors.Type.message}</p>
             )}
             {errors.customType && (
               <p className="text-red-600">{errors.customType.message}</p>
