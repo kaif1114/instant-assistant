@@ -10,15 +10,13 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
-  // Check if it's a request to the chat endpoint from another origin
+  // Check if it's a request to the chat endpoint
   const isChatRequest = request.nextUrl.pathname.startsWith("/chat");
-  const isExternalRequest =
-    request.headers.get("origin") &&
-    request.headers.get("origin") !== request.headers.get("host");
 
-  // For external chat requests, return immediately with CORS headers
-  if (isChatRequest && isExternalRequest) {
+  // For chat requests, allow them through without authentication
+  if (isChatRequest) {
     const response = NextResponse.next();
+    // Add CORS headers to support both direct browser and cross-origin requests
     response.headers.set("Access-Control-Allow-Origin", "*");
     response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     response.headers.set(
