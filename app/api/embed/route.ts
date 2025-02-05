@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   const embedCode = `
 <!-- AI Chat Widget -->
-<script src="${process.env.NEXT_PUBLIC_APP_URL}/embed.js"></script>
+<script src="${process.env.NEXT_PUBLIC_DOMAIN}/embed.js"></script>
 <script>
   window.addEventListener('load', function() {
     window.initAIChat({
