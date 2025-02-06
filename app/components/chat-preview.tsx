@@ -64,21 +64,25 @@ export function ChatPreview() {
   const [message, setMessage] = useState("");
   const primaryColor = "#000000";
 
-  // Scroll to bottom function
+  // Update scroll function to only scroll chat area
   const scrollToBottom = () => {
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]"
-      );
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
+    const scrollContainer = document.querySelector(
+      '[data-radix-scroll-area-viewport]'
+    ) as HTMLDivElement;
+    
+    if (scrollContainer) {
+      scrollContainer.scrollTo({
+        top: scrollContainer.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   };
 
-  // Auto-scroll when messages change
+  // Only scroll chat area when messages change
   useEffect(() => {
-    scrollToBottom();
+    if (visibleMessages.length > 0) {
+      scrollToBottom();
+    }
   }, [visibleMessages]);
 
   // Auto-open chat after a delay
