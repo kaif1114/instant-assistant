@@ -1,7 +1,9 @@
+import { ChatPreview } from "./components/chat-preview";
 import CTASection from "./components/cta-section";
 import DashboardCards from "./components/dashboard-cards";
 import FAQ from "./components/faq";
 import Footer from "./components/footer";
+import ForBusiness from "./components/ForBusiness";
 import HeroSection from "./components/hero-section";
 import BenefitsSection from "./components/HowItWorks";
 import Navbar from "./components/navbar";
@@ -12,8 +14,8 @@ export default function LandingPage() {
       <Navbar />
       <main className="flex-1 -mt-16">
         <HeroSection />
-        {/* <HeroSection title="Instant Assistant" description="Instant Assistant" actions={[]} image={{ light: "./public/dashboard.png", dark: "", alt: "" }} /> */}
-
+        {/* <ChatPreview/> */}
+        <ForBusiness/>
         <BenefitsSection />
         <DashboardCards />
 
