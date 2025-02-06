@@ -1,4 +1,3 @@
-"use client";
 import { Button } from "@/components/ui/button";
 import { BarChart, Database, LineChart, PieChart, Zap } from "lucide-react";
 import Image from "next/image";
@@ -14,11 +13,11 @@ function HeroSection() {
           
 
           {/* Main content */}
-          <div className="flex max-w-[1200px] flex-col items-center space-y-8 mt-44">
-            <h1 className="text-center text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-              Customer
+          <div className="flex max-w-[1200px] flex-col items-center space-y-8 lg:mt-44 md:mt-36 mt-24">
+            <h1 className="text-center font-bold tracking-tight text-4xl lg:text-5xl">
+              Tired Of Answering Same Questions?
               <br />
-              relationship magic.
+              Let AI Do It For You.
             </h1>
 
             <p className="max-w-[600px] text-center text-lg text-muted-foreground">
@@ -60,8 +59,21 @@ function HeroSection() {
             </div>
 
             {/* Dashboard Image */}
-            <div className="relative mt-16 w-full overflow-hidden rounded-xl border bg-background shadow-xl">
-              <Image src="/dashboard.png" alt="Dashboard Preview" width={1920} height={1080} className="w-full" priority />
+            <div className="relative mt-16 2xl:w-[1400px] xl:w-[1200px] lg:w-[1000px] md:w-[700px] overflow-hidden rounded-xl border bg-background shadow-xl">
+              <picture>
+                <source
+                  media="(max-width: 768px)"
+                  srcSet="/dashboard_med.png"
+                />
+                <Image
+                  src="/dashboard.png"
+                  alt="Dashboard Preview"
+                  width={1920}
+                  height={1080}
+                  className="w-full"
+                  priority
+                />
+              </picture>
             </div>
           </div>
         </div>
@@ -71,5 +83,6 @@ function HeroSection() {
     </div>
   );
 }
+
 export default HeroSection;
 
