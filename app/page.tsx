@@ -1,3 +1,4 @@
+import { ChatPreview } from "./components/chat-preview";
 import CTASection from "./components/cta-section";
 import DashboardCards from "./components/dashboard-cards";
 import FAQ from "./components/faq";
@@ -13,7 +14,7 @@ export default function LandingPage() {
       <Navbar />
       <main className="flex-1 -mt-16">
         <HeroSection />
-        {/* <ChatPreview/> */}
+        <ChatPreview/>
         <ForBusiness/>
         <BenefitsSection />
         <DashboardCards />
