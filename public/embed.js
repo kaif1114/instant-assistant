@@ -40,7 +40,7 @@
     // Create and append iframe
     const iframe = document.createElement("iframe");
 
-    iframe.src = `http://localhost:3000/chat/${assistantId}?embedded=true&widgetOpen=false`;
+    iframe.src = `http://www.withinstantassistant.com/chat/${assistantId}?embedded=true&widgetOpen=false`;
     iframe.style.cssText = `
       position: fixed;
       bottom: 100px;
