@@ -12,8 +12,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import MarkdownPreview from "@uiw/react-markdown-preview";
 import { motion } from "framer-motion";
-import { Scroll, Send } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { Send } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const messages = [
   { id: 1, text: "Hello! How can I assist you today?", sender: "ai", delay: 0 },
@@ -215,7 +215,7 @@ export function ChatPreview() {
                           </p>
                         </div>
                         
-                        {visibleMessages.map((msg, index) => (
+                        {visibleMessages.map((msg) => (
                           <motion.div
                             key={msg.id}
                             initial={{ opacity: 0, y: 10 }}
