@@ -12,6 +12,7 @@ export default function LandingPage() {
       <Navbar />
       <main className="flex-1 -mt-16">
         <HeroSection />
+        {/* <HeroSection title="Instant Assistant" description="Instant Assistant" actions={[]} image={{ light: "./public/dashboard.png", dark: "", alt: "" }} /> */}
 
         <BenefitsSection />
         <DashboardCards />

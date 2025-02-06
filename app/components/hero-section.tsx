@@ -1,71 +1,75 @@
 "use client";
-
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import ProductHuntBadge from "./product-hunt-badge";
-import { Play } from "lucide-react";
+import { motion } from "framer-motion";
+import { BarChart, Database, LineChart, PieChart, Zap } from "lucide-react";
+import Image from "next/image";
 import { ChatPreview } from "./chat-preview";
 import ForBusiness from "./ForBusiness";
 
 function HeroSection() {
   return (
-    <div className="bg-gradient-to-br from-[#E97451]/10 via-white to-[#8B7FD3]/10">
-      <section className="relative w-full pt-32 pb-20 overflow-hidden">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center text-center space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <ProductHuntBadge />
-            </motion.div>
+    <div className="bg-white">
+      <div className="relative mt-20">
+      <div className="absolute inset-0 bg-dots"></div>
+      
+      <div className="flex min-h-[80vh] w-full flex-col items-center justify-center bg-transparent px-4">
+        <div className="relative z-10">
+          
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="max-w-6xl space-y-4"
-            >
-              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight">
-                Tired of Answering the{" "}
-                <span className="text-[#E97451]">Same Questions</span> ?{" "}
-                <p>
-                  Let <span className="text-[#8B7FD3]">AI</span> Do It for You!
-                </p>
-              </h1>
-              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                Instantly create an AI-powered assistant that answers questions,
-                provides support, and works 24/7—all without coding or manual
-                training.
-              </p>
-            </motion.div>
+          {/* Main content */}
+          <div className="flex max-w-[1200px] flex-col items-center space-y-8 mt-44">
+            <h1 className="text-center text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              Customer
+              <br />
+              relationship magic.
+            </h1>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-4 items-center"
-            >
-              <Button
-                size="lg"
-                className="rounded-full bg-black hover:bg-gray-900 text-white font-satoshi min-w-[200px]"
-              >
-                Start creating for free
+            <p className="max-w-[600px] text-center text-lg text-muted-foreground">
+              Attio is the AI-native CRM that builds, scales and grows your company to the next level.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <Button size="lg" className="min-w-[140px]">
+                Start for free
               </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 font-satoshi"
-              >
-                See how it works
-                <Play className="ml-2 h-4 w-4" />
+              <Button size="lg" variant="outline" className="min-w-[140px]">
+                Talk to sales
               </Button>
-            </motion.div>
+            </div>
+
+            {/* Features row */}
+            <div className="mt-12 flex flex-wrap justify-center gap-8 text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                <span>Data</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Zap className="h-5 w-5" />
+                <span>Automations</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <LineChart className="h-5 w-5" />
+                <span>Pipeline</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <BarChart className="h-5 w-5" />
+                <span>Productivity</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <PieChart className="h-5 w-5" />
+                <span>Reporting</span>
+              </div>
+            </div>
+
+            {/* Dashboard Image */}
+            <div className="relative mt-16 w-full overflow-hidden rounded-xl border bg-background shadow-xl">
+              <Image src="/dashboard.png" alt="Dashboard Preview" width={1920} height={1080} className="w-full" priority />
+            </div>
           </div>
         </div>
-      </section>
-
+      </div>
+    </div>
       <section className="w-full py-20">
         <div className="container px-4 md:px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -172,5 +176,5 @@ function HeroSection() {
     </div>
   );
 }
-
 export default HeroSection;
+

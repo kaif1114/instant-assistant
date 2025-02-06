@@ -13,6 +13,8 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import MarkdownPreview from "@uiw/react-markdown-preview";
+import { Input as ChatInput } from "@/app/chat/[assistantId]/input";
 
 const messages = [
   { id: 1, text: "Hello! How can I assist you today?", sender: "ai", delay: 0 },
@@ -60,6 +62,8 @@ export function ChatPreview() {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [message, setMessage] = useState("");
+  const primaryColor = "#000000";
 
   // Scroll to bottom function
   const scrollToBottom = () => {
@@ -124,8 +128,11 @@ export function ChatPreview() {
             transition={{ type: "spring", duration: 0.7 }}
             className="chat-preview rounded-[20px] overflow-hidden w-full max-w-md mx-auto lg:mx-0"
           >
-            <Card className="w-full h-[600px] flex flex-col rounded-[20px] overflow-hidden shadow-md">
-              <CardHeader className="flex flex-row items-center gap-4 p-4 bg-black text-white">
+            <Card className="w-full h-[700px] flex flex-col rounded-[20px] overflow-hidden shadow-md">
+              <CardHeader 
+                className="flex flex-row items-center gap-4 p-4"
+                style={{ backgroundColor: primaryColor }}
+              >
                 <Button
                   variant="ghost"
                   size="icon"
@@ -144,15 +151,11 @@ export function ChatPreview() {
                   <div className="p-4 space-y-4">
                     <div className="flex flex-col items-center text-center mb-6">
                       <Avatar className="w-16 h-16 bg-black rounded-full flex items-center justify-center mb-4">
-                        <AvatarImage
-                          src="/placeholder.svg"
-                          alt="AI Assistant"
-                        />
+                        <AvatarImage src="/placeholder.svg" alt="AI Assistant" />
                         <AvatarFallback>AI</AvatarFallback>
                       </Avatar>
                       <p className="text-sm text-gray-600 max-w-[250px]">
-                        I&apos;m here to help you with your questions and provide
-                        assistance.
+                        I&apos;m here to help you with your questions and provide assistance.
                       </p>
                     </div>
 
@@ -162,27 +165,39 @@ export function ChatPreview() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className={`flex ${message.sender === "user"
-                            ? "justify-end"
-                            : "justify-start"
-                          }`}
+                        className={`flex ${
+                          message.sender === "user" ? "justify-end" : "justify-start"
+                        } mb-2 items-end`}
                       >
                         {message.sender === "ai" && (
-                          <Avatar className="h-8 w-8 mr-2 mt-3">
-                            <AvatarImage
-                              src="/placeholder.svg"
-                              alt="AI Assistant"
-                            />
+                          <Avatar className="h-8 w-8 mr-2">
+                            <AvatarImage src="/placeholder.svg" alt="AI Assistant" />
                             <AvatarFallback>AI</AvatarFallback>
                           </Avatar>
                         )}
                         <div
-                          className={`max-w-[75%] p-3 rounded-lg ${message.sender === "user"
-                              ? "bg-black text-white"
-                              : "bg-gray-100 text-black"
-                            }`}
+                          className={`max-w-[75%] py-2 px-3 rounded-2xl ${
+                            message.sender === "user"
+                              ? "rounded-br-none bg-black text-white"
+                              : "rounded-bl-none bg-[#f2f2f2]"
+                          }`}
+                          style={{
+                            border: message.sender === "user"
+                              ? "none"
+                              : "1px solid rgb(229, 229, 229)"
+                          }}
                         >
-                          {message.text}
+                          <MarkdownPreview
+                            source={message.text}
+                            style={{
+                              backgroundColor: "transparent",
+                              color: message.sender === "user" ? "white" : "black",
+                              lineHeight: "1.4",
+                              fontSize: "15px",
+                              wordBreak: "break-word",
+                              whiteSpace: "pre-wrap",
+                            }}
+                          />
                         </div>
                       </motion.div>
                     ))}
@@ -193,14 +208,20 @@ export function ChatPreview() {
 
               <CardFooter className="p-4 border-t">
                 <form className="relative w-full flex items-center">
-                  <Input
+                  <ChatInput
+                    focusColor={primaryColor}
+                    autoFocus={true}
+                    type="text"
+                    value={message}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)}
                     placeholder="Type your message..."
-                    className="w-full rounded-full pr-12"
-                    style={{ paddingRight: "4rem" }}
+                    className="w-full rounded-full pr-12 pl-4 shadow-sm"
                   />
                   <Button
+                    type="submit"
                     size="icon"
-                    className="w-8 h-8 absolute right-1 top-1/2 transform -translate-y-1/2 text-white rounded-full bg-black"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 w-8 h-8 text-white rounded-full"
+                    style={{ backgroundColor: primaryColor }}
                   >
                     <Send className="h-4 w-4" />
                     <span className="sr-only">Send message</span>
