@@ -9,7 +9,7 @@ const page = () => {
       
       <h2 className="text-2xl font-semibold mt-8 mb-4">1. Introduction</h2>
       <p className="mb-4">
-        Welcome to Instant Assistant. Instant Assistant ("us", "we", or "our") is operated by Mind Squared LLC, located at 30 N Gould St Ste 29330, Sheridan, WY 82801, USA. Our platform provides various digital assistant services.
+        Welcome to Instant Assistant. Instant Assistant (&quot;us&quot;, &quot;we&quot;, or &quot;our&quot;) is operated by Mind Squared LLC, located at 30 N Gould St Ste 29330, Sheridan, WY 82801, USA. Our platform provides various digital assistant services.
       </p>
       <p className="mb-4">
         This Privacy Policy explains how we collect, use, safeguard, and disclose information obtained from your use of our platform.
@@ -106,7 +106,7 @@ const page = () => {
         <li>Provide methods to modify personal information</li>
       </ul>
       <p className="mb-4">
-        We honor "Do Not Track" browser signals.
+        We honor &quot;Do Not Track&quot; browser signals.
       </p>
 
       <h2 className="text-2xl font-semibold mt-8 mb-4">12. CCPA Data Protection Rights</h2>
