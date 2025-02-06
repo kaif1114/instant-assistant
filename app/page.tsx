@@ -1,4 +1,3 @@
-import { ChatPreview } from "./components/chat-preview";
 import CTASection from "./components/cta-section";
 import DashboardCards from "./components/dashboard-cards";
 import FAQ from "./components/faq";

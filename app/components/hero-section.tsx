@@ -1,10 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
 import { BarChart, Database, LineChart, PieChart, Zap } from "lucide-react";
 import Image from "next/image";
-import { ChatPreview } from "./chat-preview";
-import ForBusiness from "./ForBusiness";
 
 function HeroSection() {
   return (

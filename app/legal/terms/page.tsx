@@ -9,7 +9,7 @@ const page = () => {
 
       <h2 className="text-2xl font-semibold mt-8 mb-4">1. Introduction</h2>
       <p className="mb-4">
-        These Terms of Service ("Terms") govern your use of Instant Assistant ("Service") operated by Mind Squared LLC ("Company", "we", "our", "us"), located at 30 N Gould St Ste 29330, Sheridan, WY 82801, USA.
+        These Terms of Service (&quot;Terms&quot;) govern your use of Instant Assistant (&quot;Service&quot;) operated by Mind Squared LLC (&quot;Company&quot;, &quot;we&quot;, &quot;our&quot;, &quot;us&quot;), located at 30 N Gould St Ste 29330, Sheridan, WY 82801, USA.
       </p>
       <p className="mb-4">
         By accessing or using our Service, you agree to be bound by these Terms. If you disagree with any part of the Terms, you may not access the Service.
@@ -50,7 +50,7 @@ const page = () => {
       <ul className="list-disc list-inside mb-4">
         <li>You retain rights to your uploaded content</li>
         <li>You grant us license to use your data to provide the Service</li>
-        <li>You ensure your data doesn't violate any third-party rights</li>
+        <li>You ensure your data doesn&apos;t violate any third-party rights</li>
         <li>We may analyze usage patterns to improve the Service</li>
       </ul>
 
@@ -59,7 +59,7 @@ const page = () => {
         While we strive for high quality service:
       </p>
       <ul className="list-disc list-inside mb-4">
-        <li>We don't guarantee 100% accuracy in AI responses</li>
+        <li>We don&apos;t guarantee 100% accuracy in AI responses</li>
         <li>Service availability may vary</li>
         <li>We reserve the right to modify or discontinue features</li>
         <li>Performance may depend on various factors beyond our control</li>
