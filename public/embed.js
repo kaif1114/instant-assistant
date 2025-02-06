@@ -40,7 +40,7 @@
     // Create and append iframe
     const iframe = document.createElement("iframe");
 
-    iframe.src = `https://withinstantassistant.com/chat/${assistantId}?embedded=true&widgetOpen=false`;
+    iframe.src = `http://localhost:3000/chat/${assistantId}?embedded=true&widgetOpen=false`;
     iframe.style.cssText = `
       position: fixed;
       bottom: 100px;
@@ -56,6 +56,7 @@
       pointer-events: none;
       transition: all 0.3s ease;
       background-color: transparent;
+      visibility: hidden;
     `;
 
     // Add loading state
@@ -71,7 +72,8 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 999997;
       display: none;
-      background: white;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
       justify-content: center;
       align-items: center;
       font-family: system-ui, -apple-system, sans-serif;
@@ -83,36 +85,19 @@
         height: 100%;
         display: flex;
         flex-direction: column;
+        align-items: center;
+        justify-content: center;
       ">
         <div style="
-          background: #E8B4B8;
-          padding: 1rem;
-          color: white;
-          font-weight: bold;
-          font-size: 1.25rem;
-          text-align: center;
-        ">
-          AR Mahar's Assistant
-        </div>
-        <div style="
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 2rem;
-        ">
-          <div style="
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 3px solid #E8B4B8;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-          "></div>
-          <p style="color: #666;">Loading chat assistant...</p>
-        </div>
+          width: 40px;
+          height: 40px;
+          border: 3px solid #f3f3f3;
+          border-radius: 50%;
+          border-top: 3px solid #E8B4B8;
+          animation: spin 1s linear infinite;
+          margin-bottom: 1rem;
+        "></div>
+        <p style="color: #666;">Loading chat assistant...</p>
       </div>
     `;
 
@@ -158,11 +143,11 @@
       isOpen = !isOpen;
       if (isOpen) {
         loadingDiv.style.display = "block";
+        iframe.style.visibility = "visible";
         iframe.style.opacity = "1";
         iframe.style.transform = "translateY(0)";
         iframe.style.pointerEvents = "auto";
         widgetButton.style.transform = "rotate(90deg)";
-        // Send message to iframe to show chat
         iframe.contentWindow.postMessage(
           { type: "toggleChat", isOpen: true },
           "*"
@@ -172,8 +157,8 @@
         iframe.style.opacity = "0";
         iframe.style.transform = "translateY(100px)";
         iframe.style.pointerEvents = "none";
+        iframe.style.visibility = "hidden";
         widgetButton.style.transform = "rotate(0deg)";
-        // Send message to iframe to hide chat
         iframe.contentWindow.postMessage(
           { type: "toggleChat", isOpen: false },
           "*"
@@ -184,6 +169,12 @@
     // Handle iframe loading states
     iframe.onload = () => {
       loadingDiv.style.display = "none";
+      if (isOpen) {
+        iframe.style.visibility = "visible";
+        iframe.style.opacity = "1";
+        iframe.style.transform = "translateY(0)";
+        iframe.style.pointerEvents = "auto";
+      }
     };
 
     iframe.onerror = () => {

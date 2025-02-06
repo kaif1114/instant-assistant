@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Flame, Linkedin, Twitter, Youtube } from "lucide-react";
 
 function Footer() {
+ 
+
   return (
     <footer className="w-full border-t border-gray-100 bg-white pt-16 pb-12">
       <div className="container mx-auto px-4 md:px-6">
@@ -85,7 +87,7 @@ function Footer() {
                   href="mailto:hello@instantassistant.ai"
                   className="text-gray-600 hover:text-gray-900"
                 >
-                  Contact us: hello@instantassistant.ai
+                  Contact us: {process.env.NEXT_PUBLIC_SUPPORT_EMAIL}
                 </Link>
               </li>
             </ul>
@@ -121,8 +123,11 @@ function Footer() {
           <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4 text-sm text-gray-600">
             <span>© 2024 - Instant Assistant</span>
             <div className="flex items-center space-x-4">
-              <Link href="/privacy" className="hover:text-gray-900">
+              <Link href={`https://${process.env.NEXT_PUBLIC_DOMAIN}/privacy-policy`} className="hover:text-gray-900">
                 Privacy Policy
+              </Link>
+              <Link href={`https://${process.env.NEXT_PUBLIC_DOMAIN}/cookie-policy`} className="hover:text-gray-900">
+                Cookie Policy
               </Link>
               <Link href="/terms" className="hover:text-gray-900">
                 Terms & Conditions
