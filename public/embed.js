@@ -46,15 +46,14 @@
       bottom: 100px;
       right: 20px;
       width: 400px;
-      height: 650px;
+      height: 600px;
       border: none;
       border-radius: 20px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 999998;
       opacity: 0;
-      transform: translateY(100px);
       pointer-events: none;
-      transition: all 0.3s ease;
+      transition: opacity 0.3s ease;
       background-color: transparent;
       visibility: hidden;
     `;
@@ -145,7 +144,6 @@
         loadingDiv.style.display = "block";
         iframe.style.visibility = "visible";
         iframe.style.opacity = "1";
-        iframe.style.transform = "translateY(0)";
         iframe.style.pointerEvents = "auto";
         widgetButton.style.transform = "rotate(90deg)";
         iframe.contentWindow.postMessage(
@@ -155,7 +153,6 @@
       } else {
         loadingDiv.style.display = "none";
         iframe.style.opacity = "0";
-        iframe.style.transform = "translateY(100px)";
         iframe.style.pointerEvents = "none";
         iframe.style.visibility = "hidden";
         widgetButton.style.transform = "rotate(0deg)";
@@ -172,7 +169,6 @@
       if (isOpen) {
         iframe.style.visibility = "visible";
         iframe.style.opacity = "1";
-        iframe.style.transform = "translateY(0)";
         iframe.style.pointerEvents = "auto";
       }
     };
