@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 function CTASection() {
   return (
@@ -23,7 +24,7 @@ function CTASection() {
               size="lg"
               className="bg-white rounded-xl text-black hover:bg-gray-100 min-w-[150px] px-4"
             >
-              Start creating for free
+              <Link href="/dashboard/assistants">Start creating for free</Link>
             </Button>
           </div>
         </motion.div>

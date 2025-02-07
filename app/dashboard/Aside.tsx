@@ -36,6 +36,7 @@ import {
 import { UserButton, useUser } from "@clerk/nextjs";
 import { PropsWithChildren } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 const data = {
   user: {
@@ -143,10 +144,10 @@ export default function Aside({ children }: PropsWithChildren) {
                 >
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild tooltip={item.title}>
-                      <a href={item.url}>
+                      <Link href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                     {item.items?.length ? (
                       <>
@@ -161,9 +162,12 @@ export default function Aside({ children }: PropsWithChildren) {
                             {item.items?.map((subItem) => (
                               <SidebarMenuSubItem key={subItem.title}>
                                 <SidebarMenuSubButton asChild>
-                                  <a href={subItem.url} className="text-white">
+                                  <Link
+                                    href={subItem.url}
+                                    className="text-white"
+                                  >
                                     <span>{subItem.title}</span>
-                                  </a>
+                                  </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
                             ))}
@@ -183,10 +187,10 @@ export default function Aside({ children }: PropsWithChildren) {
                 {data.navSecondary.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild size="sm">
-                      <a href={item.url}>
+                      <Link href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

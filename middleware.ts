@@ -1,17 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api(.*)",
-  "/chat(.*)",
-  "/privacy-policy(.*)",
-  "/cookie-policy(.*)",
-  "/terms(.*)",
-  "/legal(.*)",
-]);
+const isPrivateRoute = createRouteMatcher(["/dashboard(.*)", "/api(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
   // Check if it's a request to the chat endpoint
@@ -29,10 +19,13 @@ export default clerkMiddleware(async (auth, request) => {
     );
     return response;
   }
+  if (request.nextUrl.pathname === "/dashboard") {
+    return NextResponse.redirect(new URL("/dashboard/assistants", request.url));
+  }
 
   // For all other routes, apply the usual protection
-  if (!isPublicRoute(request)) {
-    await auth.protect();
+  if (isPrivateRoute(request)) {
+    // await auth.protect();
   }
 });
 

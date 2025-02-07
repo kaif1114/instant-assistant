@@ -9,14 +9,13 @@ import {
 import { AssistantList } from "./List";
 
 export default async function page() {
-
   return (
     <>
       {" "}
       <Breadcrumb className="mb-6 p-4">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+            <p>Dashboard</p>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

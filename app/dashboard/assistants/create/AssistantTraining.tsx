@@ -196,6 +196,7 @@ export default function AssistantTrainingPage() {
       console.log(response.data);
 
       queryClient.invalidateQueries({ queryKey: ["assistants", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["assistants", user?.id] });
       setData({
         name: "",
         description: "",

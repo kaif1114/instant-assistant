@@ -93,7 +93,7 @@ function Navbar() {
           </SignedOut>
           <SignedIn>
             <Button
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push("/dashboard/assistants")}
               variant="default"
               className="btn-gradient text-white"
             >

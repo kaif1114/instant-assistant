@@ -2,17 +2,16 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useUser } from "@clerk/nextjs";
 import { User } from "lucide-react";
-
 
 export function DashboardHeader() {
   const { user } = useUser();
@@ -28,9 +27,7 @@ export function DashboardHeader() {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard" className="text-sm">
-                      Dashboard
-                    </BreadcrumbLink>
+                    <p className="text-sm">Dashboard</p>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
@@ -58,19 +55,15 @@ export function DashboardHeader() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard" className="text-sm">
-                Dashboard
-              </BreadcrumbLink>
+              <p className="text-sm">Dashboard</p>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-sm">
-                Assistants
-              </BreadcrumbPage>
+              <BreadcrumbPage className="text-sm">Assistants</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
     </>
   );
-} 
+}
