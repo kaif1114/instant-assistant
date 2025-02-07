@@ -3,10 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { SignUpButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 
 function Navbar() {
   const router = useRouter();
@@ -75,12 +75,12 @@ function Navbar() {
           >
             FAQs
           </Link>
-          <Link
+          {/* <Link
             href="#testimonials"
             className="text-sm font-medium hover:text-gray-600 transition-colors"
           >
             Testimonials
-          </Link>
+          </Link> */}
         </nav>
 
         <div className="flex items-center gap-4">

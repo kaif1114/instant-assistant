@@ -26,7 +26,7 @@ const zodSchema = z.object({
   description: z
     .string()
     .min(1, "Description is required")
-    .max(100, "Description cannot exceed 100 characters"),
+    .max(300, "Description cannot exceed 300 characters"),
   Type: z.enum(["Support", "Sales", "Technical", "General", "Custom"], {
     required_error: "Please select an assistant type",
   }),
@@ -34,7 +34,7 @@ const zodSchema = z.object({
   functionality: z
     .string()
     .min(10, "Functionality description must be at least 10 characters")
-    .max(500, "Functionality description cannot exceed 500 characters"),
+    .max(1000, "Functionality description cannot exceed 1000 characters"),
 });
 
 type FormData = z.infer<typeof zodSchema>;
