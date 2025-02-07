@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 
 import { cn } from "@/lib/utils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { BookText, FileText, Globe, Plus, Sparkles, X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
@@ -113,7 +113,6 @@ export function KnowledgeBaseTab() {
     enabled: !!selectedAssistant?.assistantId,
   });
 
-  const queryClient = useQueryClient();
   const [knowledgeBase, setKnowledgeBase] = useState<Data | undefined>(data);
 
   useEffect(() => {
