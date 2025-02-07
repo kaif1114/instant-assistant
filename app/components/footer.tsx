@@ -123,13 +123,13 @@ function Footer() {
           <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4 text-sm text-gray-600">
             <span>© 2024 - Instant Assistant</span>
             <div className="flex items-center space-x-4">
-              <Link href={`https://${process.env.NEXT_PUBLIC_DOMAIN}/privacy-policy`} className="hover:text-gray-900">
+              <Link href={`https://${process.env.NEXT_PUBLIC_DOMAIN}/legal/privacy-policy`} className="hover:text-gray-900">
                 Privacy Policy
               </Link>
-              <Link href={`https://${process.env.NEXT_PUBLIC_DOMAIN}/cookie-policy`} className="hover:text-gray-900">
+              <Link href={`https://${process.env.NEXT_PUBLIC_DOMAIN}/legal/cookie-policy`} className="hover:text-gray-900">
                 Cookie Policy
               </Link>
-              <Link href="/terms" className="hover:text-gray-900">
+              <Link href={`https://${process.env.NEXT_PUBLIC_DOMAIN}/legal/terms`} className="hover:text-gray-900">
                 Terms & Conditions
               </Link>
             </div>
