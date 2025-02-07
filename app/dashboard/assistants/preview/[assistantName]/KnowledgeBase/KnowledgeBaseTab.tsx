@@ -99,7 +99,7 @@ export function KnowledgeBaseTab() {
     isSuccess: isFileSuccess,
   } = FileMutation();
 
-  const { data, isLoading, isFetching } = useQuery<Data>({
+  const { data, isLoading, isFetching, refetch } = useQuery<Data>({
     queryKey: ["knowledgeBase", selectedAssistant?.assistantId],
     queryFn: async () => {
       if (!selectedAssistant?.assistantId) {
@@ -318,9 +318,7 @@ export function KnowledgeBaseTab() {
         })),
       }));
 
-      queryClient.invalidateQueries({
-        queryKey: ["knowledgeBase", selectedAssistant.assistantId],
-      });
+      await refetch();
       setContextToRemove({ textfields: [], urls: [], files: [] });
       setHasChanges(false);
     } catch (error) {

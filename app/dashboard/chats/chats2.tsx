@@ -1,8 +1,8 @@
 "use client";
 
 import { Loader2, MessageSquare, User, X } from "lucide-react";
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { AssistantWithSessionDetails } from "@/app/schemas";
 import {
@@ -32,25 +32,7 @@ import { useAssistants } from "@/hooks/useAssistants";
 import { useConversation } from "@/hooks/useConversation";
 import { useSessions } from "@/hooks/useSessions";
 import { useUser } from "@clerk/nextjs";
-import {
-  Assistants,
-  langchain_chat_histories,
-  session_details,
-} from "@prisma/client";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@radix-ui/react-separator";
-
-interface Props {
-  Assistants: AssistantWithSessionDetails[];
-}
+import { Assistants, session_details } from "@prisma/client";
 
 export default function AssistantChatsPage() {
   const { user } = useUser();
@@ -92,16 +74,6 @@ export default function AssistantChatsPage() {
       setSelectedAssistant(Assistants[0]);
     }
   }, [Assistants]);
-
-  useEffect(() => {
-    console.log("Conversation: ", conversation);
-    console.log("Selected Session: ", selectedSession?.session_id);
-    console.log("Selected Assistant: ", selectedAssistant?.assistantId);
-  }, [
-    conversation,
-    selectedSession?.session_id,
-    selectedAssistant?.assistantId,
-  ]);
 
   if (!Assistants || Assistants?.length < 1) {
     return (
@@ -216,36 +188,49 @@ export default function AssistantChatsPage() {
                     </div>
 
                     <Accordion type="single" collapsible className="w-full">
-                      {sessions?.map((session) => (
-                        <AccordionItem
-                          key={session.id}
-                          value={session.id.toString()}
-                          className="border-b"
-                        >
-                          <AccordionTrigger className="hover:no-underline">
-                            <div className="flex items-center space-x-2">
-                              <User className="h-4 w-4" />
-                              <span className="font-normal">
-                                {session.userName}
-                              </span>
-                              <span className="text-sm text-muted-foreground">
-                                ({session.userEmail})
-                              </span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <Button
-                              onClick={() => {
-                                setSelectedSession(session);
-                                refetchConversation();
-                              }}
-                              className="w-full"
-                            >
-                              View Chat
-                            </Button>
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
+                      {sessions && sessions.length > 0 ? (
+                        sessions.map((session) => (
+                          <AccordionItem
+                            key={session.id}
+                            value={session.id.toString()}
+                            className="border-b"
+                          >
+                            <AccordionTrigger className="hover:no-underline">
+                              <div className="flex items-center space-x-2">
+                                <User className="h-4 w-4" />
+                                <span className="font-normal">
+                                  {session.userName}
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                  ({session.userEmail})
+                                </span>
+                              </div>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <Button
+                                onClick={() => {
+                                  setSelectedSession(session);
+                                  refetchConversation();
+                                }}
+                                className="w-full"
+                              >
+                                View Chat
+                              </Button>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-center p-8">
+                          <h3 className="text-xl font-semibold mb-2">
+                            No Conversations Yet
+                          </h3>
+                          <p className="text-muted-foreground">
+                            There are no conversations with this assistant yet.
+                            Conversations will appear here as users start
+                            interacting.
+                          </p>
+                        </div>
+                      )}
                     </Accordion>
                   </div>
                 )
@@ -361,8 +346,8 @@ export default function AssistantChatsPage() {
                           No Messages Yet
                         </h3>
                         <p className="text-muted-foreground">
-                          This conversation doesn't have any messages yet. Start
-                          chatting to see messages here.
+                          This conversation doesn&apos;t have any messages yet.
+                          Start chatting to see messages here.
                         </p>
                       </div>
                     )}

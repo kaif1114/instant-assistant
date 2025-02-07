@@ -12,7 +12,7 @@ export function useSessions(assistantId: string | null) {
       );
       return response.data;
     },
-    staleTime: Infinity, // Never mark data as stale
+    staleTime: 1000 * 60 * 60 * 1, // 1 hour
     refetchOnMount: false, // Don't refetch on mount
     refetchOnWindowFocus: false,
   });
