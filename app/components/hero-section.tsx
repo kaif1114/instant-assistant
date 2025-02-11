@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Blocks, Database, LineChart, Palette, Zap } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 function HeroSection() {
   return (
@@ -27,10 +28,10 @@ function HeroSection() {
               {/* CTA Buttons */}
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button size="lg" className="min-w-[140px]">
-                  Create Instantly
+                  <Link href={"/dashboard/assistants"}>Create Instantly</Link>
                 </Button>
                 <Button size="lg" variant="outline" className="min-w-[140px]">
-                  Watch Demo
+                  <Link href={"/demo"}>Watch Demo</Link>
                 </Button>
               </div>
 

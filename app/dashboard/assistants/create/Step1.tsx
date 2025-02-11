@@ -146,12 +146,13 @@ const Step1 = ({
               <p className="text-red-600">{errors.customType.message}</p>
             )}
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 mt-4">
             <Label htmlFor="functionality">Functionality</Label>
             <Textarea {...register("functionality")} />
             {errors.functionality && (
               <p className="text-red-600">{errors.functionality.message}</p>
             )}
+
           </div>
           <div className="flex justify-between items-center mt-6 space-x-4">
             <Button

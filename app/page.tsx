@@ -8,7 +8,7 @@ import HeroSection from "./components/hero-section";
 import BenefitsSection from "./components/HowItWorks";
 import Navbar from "./components/navbar";
 
-export default function LandingPage() {
+export default function page() {
   return (
     <div className="flex min-h-screen flex-col relative">
       <Navbar />
