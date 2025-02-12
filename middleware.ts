@@ -19,14 +19,21 @@ export default clerkMiddleware(async (auth, request) => {
     );
     return response;
   }
-  if (request.nextUrl.pathname === "/dashboard") {
-    return NextResponse.redirect(new URL("/dashboard/assistants", request.url));
+
+  // Handle dashboard routes authentication
+  if (isPrivateRoute(request)) {
+    // Ensure user is authenticated
+    await auth.protect();
+
+    // Handle the specific /dashboard redirect after authentication
+    if (request.nextUrl.pathname === "/dashboard") {
+      return NextResponse.redirect(
+        new URL("/dashboard/assistants", request.url)
+      );
+    }
   }
 
-  // For all other routes, apply the usual protection
-  if (isPrivateRoute(request)) {
-    // await auth.protect();
-  }
+  return NextResponse.next();
 });
 
 export const config = {
