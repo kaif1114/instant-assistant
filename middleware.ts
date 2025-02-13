@@ -1,14 +1,21 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isPrivateRoute = createRouteMatcher(["/dashboard(.*)", "/api(.*)"]);
+// Updated to exclude webhooks from private routes
+const isPrivateRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/api/(.*)", // match all API routes
+]);
 
 export default clerkMiddleware(async (auth, request) => {
   // Check if it's a request to the chat endpoint
   const isChatRequest = request.nextUrl.pathname.startsWith("/chat");
+  // Check if it's a webhooks request
+  const isWebhooksRequest =
+    request.nextUrl.pathname.startsWith("/api/webhooks");
 
-  // For chat requests, allow them through without authentication
-  if (isChatRequest) {
+  // For chat or webhooks requests, allow them through without authentication
+  if (isChatRequest || isWebhooksRequest) {
     const response = NextResponse.next();
     // Add CORS headers to support both direct browser and cross-origin requests
     response.headers.set("Access-Control-Allow-Origin", "*");
@@ -20,10 +27,14 @@ export default clerkMiddleware(async (auth, request) => {
     return response;
   }
 
-  // Handle dashboard routes authentication
+  // Handle protected routes authentication
   if (isPrivateRoute(request)) {
-    // Ensure user is authenticated
-    await auth.protect();
+    // Skip authentication for webhook routes even though they match the API pattern
+
+    if (!isWebhooksRequest) {
+      // Ensure user is authenticated
+      await auth.protect();
+    }
 
     // Handle the specific /dashboard redirect after authentication
     if (request.nextUrl.pathname === "/dashboard") {
@@ -40,7 +51,9 @@ export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)|chat).*|^/chat.*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
+    // Match API routes except webhooks
+    "/(api/(?!webhooks).*)",
+    // Match trpc routes
+    "/trpc/(.*)",
   ],
 };

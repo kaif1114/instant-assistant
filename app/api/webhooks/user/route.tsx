@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Webhook } from "svix";
 
 export async function POST(request: NextRequest) {
+  console.log("Webhook event received");
   const body = await request.json();
   const payload = JSON.stringify(body);
   const headersPayload = await headers();
@@ -44,13 +45,13 @@ export async function POST(request: NextRequest) {
 
   //   }
 
-
-
   if (event.type === "user.created") {
-    if (!event.data.email_addresses?.[0]?.email_address ||
+    if (
+      !event.data.email_addresses?.[0]?.email_address ||
       !event.data.first_name ||
       !event.data.last_name ||
-      !event.data.id) {
+      !event.data.id
+    ) {
       return NextResponse.json(
         { error: "Missing required user data" },
         { status: 400 }
@@ -62,7 +63,8 @@ export async function POST(request: NextRequest) {
           email: event.data.email_addresses[0].email_address,
           firstName: event.data.first_name,
           lastName: event.data.last_name,
-          emailVerification: event.data.email_addresses[0].verification?.status || "unverified",
+          emailVerification:
+            event.data.email_addresses[0].verification?.status || "unverified",
           imageUrl: event.data.image_url,
           userId: event.data.id,
         },
@@ -79,10 +81,12 @@ export async function POST(request: NextRequest) {
       );
     }
   } else if (event.type === "user.updated") {
-    if (!event.data.email_addresses?.[0]?.email_address ||
+    if (
+      !event.data.email_addresses?.[0]?.email_address ||
       !event.data.first_name ||
       !event.data.last_name ||
-      !event.data.id) {
+      !event.data.id
+    ) {
       return NextResponse.json(
         { error: "Missing required user data" },
         { status: 400 }
@@ -95,7 +99,8 @@ export async function POST(request: NextRequest) {
           email: event.data.email_addresses[0].email_address,
           firstName: event.data.first_name,
           lastName: event.data.last_name,
-          emailVerification: event.data.email_addresses[0].verification?.status || "unverified",
+          emailVerification:
+            event.data.email_addresses[0].verification?.status || "unverified",
           imageUrl: event.data.image_url,
           userId: event.data.id,
         },
