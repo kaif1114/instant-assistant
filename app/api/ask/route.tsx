@@ -21,7 +21,6 @@ import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from "@langchain/core/prompts";
-import { auth } from "@clerk/nextjs/server";
 
 const pool = new pg.Pool(poolConfig);
 
