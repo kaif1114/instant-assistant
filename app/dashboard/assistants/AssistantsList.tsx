@@ -56,12 +56,31 @@ const AssistantsList = () => {
     );
   };
 
-  if (isLoading || !user) {
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center p-8 text-red-600">
+        Error: User authentication required. Please sign in to view assistants.
+      </div>
+    );
+  }
+
+  if (isLoading) {
     return <Loading />;
   }
+
   if (isError) {
-    return <div>{error.message}</div>;
+    return <div className="text-red-600">{error.message}</div>;
   }
+
+  if (!assistants || assistants.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-gray-600">
+        <p>No assistants found.</p>
+        <p className="mt-2">Create your first assistant to get started!</p>
+      </div>
+    );
+  }
+
   const handleDelete = async (assistantId: string) => {
     try {
       updateLoadingState(assistantId, true);
