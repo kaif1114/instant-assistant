@@ -1,21 +1,22 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// Updated to exclude webhooks from private routes
+// Define public and private routes
+const isPublicRoute = createRouteMatcher([
+  "/chat(.*)",
+  "/api/webhooks(.*)",
+  "/api/ask(.*)",
+  "/api/session/create(.*)",
+]);
+
 const isPrivateRoute = createRouteMatcher([
   "/dashboard(.*)",
   "/api/(.*)", // match all API routes
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
-  // Check if it's a request to the chat endpoint
-  const isChatRequest = request.nextUrl.pathname.startsWith("/chat");
-  // Check if it's a webhooks request or ask request
-  const isWebhooksRequest = request.nextUrl.pathname.startsWith("/api/webhooks");
-  const isAskRequest = request.nextUrl.pathname.startsWith("/api/ask");
-
-  // For chat, webhooks, or ask requests, allow them through without authentication
-  if (isChatRequest || isWebhooksRequest || isAskRequest) {
+  // Check if it's a public route
+  if (isPublicRoute(request)) {
     const response = NextResponse.next();
     // Add CORS headers to support both direct browser and cross-origin requests
     response.headers.set("Access-Control-Allow-Origin", "*");
@@ -29,8 +30,8 @@ export default clerkMiddleware(async (auth, request) => {
 
   // Handle protected routes authentication
   if (isPrivateRoute(request)) {
-    // Skip authentication for webhook and ask routes even though they match the API pattern
-    if (!isWebhooksRequest && !isAskRequest) {
+    // Skip authentication for public routes even though they match the API pattern
+    if (!isPublicRoute(request)) {
       // Ensure user is authenticated
       await auth.protect();
     }
@@ -50,8 +51,8 @@ export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)|chat).*|^/chat.*)",
-    // Match API routes except webhooks and ask endpoints
-    "/(api/(?!webhooks|ask).*)",
+    // Match API routes except webhooks, ask, and session/create endpoints
+    "/(api/(?!webhooks|ask|session/create).*)",
     // Match trpc routes
     "/trpc/(.*)",
   ],
